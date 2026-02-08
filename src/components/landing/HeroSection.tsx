@@ -40,13 +40,74 @@ export function HeroSection() {
         how much &quot;alignment tax&quot; your organization pays every week.
       </p>
 
-      <Button
-        asChild
-        size="lg"
-        className="bg-accent text-accent-foreground hover:bg-accent/90 text-base font-medium px-8 py-6"
+      {/* Mode Selection */}
+      <div
+        role="group"
+        aria-label="Choose your diagnostic path"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+        }}
       >
-        <Link href="/calculator">Start Diagnostic</Link>
-      </Button>
+        <p
+          style={{
+            fontSize: '0.875rem',
+            color: 'var(--muted-foreground)',
+            marginBottom: '0.5rem',
+          }}
+        >
+          Choose your path:
+        </p>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            width: '100%',
+            maxWidth: '20rem',
+          }}
+        >
+          {/* Primary CTA - Guided Path */}
+          <Button
+            asChild
+            size="lg"
+            className="bg-accent text-accent-foreground hover:bg-accent/90 text-base font-medium px-8 py-6 w-full"
+          >
+            <Link href="/calculator" aria-label="Let Us Guide You - Recommended option for step-by-step analysis">
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                <span>Let Us Guide You</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>(Recommended)</span>
+              </span>
+            </Link>
+          </Button>
+
+          {/* Secondary CTA - Download Path */}
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="text-base font-medium px-8 py-6 w-full border-2"
+          >
+            <Link href="/templates" aria-label="Run It Yourself - Download templates for offline work">
+              Run It Yourself
+            </Link>
+          </Button>
+        </div>
+
+        <p
+          style={{
+            fontSize: '0.8125rem',
+            color: 'var(--muted-foreground)',
+            marginTop: '0.5rem',
+            maxWidth: '24rem',
+          }}
+        >
+          Choose guided for step-by-step analysis, or download a template for offline work.
+        </p>
+      </div>
     </section>
   );
 }
