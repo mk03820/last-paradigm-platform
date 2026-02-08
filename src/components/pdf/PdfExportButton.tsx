@@ -17,9 +17,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { pdf } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
-import { PdfDocument } from './PdfDocument';
 import type { CalculationResult } from '@/types/calculator.types';
 
 interface PdfExportButtonProps {
@@ -63,6 +61,12 @@ export function PdfExportButton({
     setIsGenerating(true);
 
     try {
+      // Dynamic import for client-side PDF generation
+      const [{ pdf }, { PdfDocument }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('./PdfDocument'),
+      ]);
+
       // Generate PDF blob
       const blob = await pdf(<PdfDocument results={results} />).toBlob();
 

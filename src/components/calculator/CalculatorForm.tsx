@@ -138,7 +138,15 @@ export function CalculatorForm() {
       const result = await response.json();
 
       if (result.success) {
-        setResults(result.data as CalculationResult);
+        // Construct full CalculationResult with inputs
+        const calculationResult: CalculationResult = {
+          meetingWaste: result.data.meetingWaste,
+          estimatedAlignmentTaxMin: result.data.meetingWaste * 2,
+          estimatedAlignmentTaxMax: result.data.meetingWaste * 5,
+          inputs: meetingData,
+          calculatedAt: new Date().toISOString(),
+        };
+        setResults(calculationResult);
         router.push('/results');
       } else {
         setApiError(result.error || 'Calculation failed. Please try again.');

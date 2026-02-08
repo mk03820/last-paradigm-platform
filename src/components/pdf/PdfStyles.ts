@@ -75,12 +75,10 @@ export const pdfTypography = {
  */
 export const pdfSpacing = {
   page: {
-    marginTop: 72, // 1 inch
-    marginBottom: 72,
-    marginLeft: 72,
-    marginRight: 72,
-    paddingTop: 0,
-    paddingBottom: 30,
+    paddingTop: 72, // 1 inch
+    paddingBottom: 72,
+    paddingLeft: 72,
+    paddingRight: 72,
   },
   section: {
     marginBottom: 24,
@@ -101,6 +99,7 @@ export const pdfStyles = StyleSheet.create({
     ...pdfSpacing.page,
     backgroundColor: pdfColors.background,
     fontFamily: 'Helvetica',
+    flexDirection: 'column',
   },
 
   // Header styles
@@ -112,6 +111,7 @@ export const pdfStyles = StyleSheet.create({
     borderBottomColor: pdfColors.border,
     paddingBottom: 16,
     marginBottom: 24,
+    width: '100%',
   },
   headerBrand: {
     fontSize: 14,
@@ -147,22 +147,26 @@ export const pdfStyles = StyleSheet.create({
   // Section containers
   section: {
     marginBottom: pdfSpacing.section.marginBottom,
+    maxWidth: 468,
   },
   sectionWithBackground: {
     marginBottom: pdfSpacing.section.marginBottom,
     backgroundColor: pdfColors.cardBackground,
     padding: 20,
     borderRadius: 4,
+    maxWidth: 468,
   },
 
   // Typography styles
   pageTitle: {
     ...pdfTypography.pageTitle,
     marginBottom: 16,
+    width: '100%',
   },
   sectionHeader: {
     ...pdfTypography.sectionHeader,
     marginBottom: 12,
+    width: '100%',
   },
   subHeader: {
     ...pdfTypography.subHeader,
@@ -172,6 +176,7 @@ export const pdfStyles = StyleSheet.create({
     ...pdfTypography.body,
     lineHeight: 1.5,
     marginBottom: pdfSpacing.paragraph.marginBottom,
+    maxWidth: 468,
   },
   label: {
     ...pdfTypography.label,
