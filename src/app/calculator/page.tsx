@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { StepIndicator } from '@/components/layout/StepIndicator';
 import { CalculatorForm } from '@/components/calculator/CalculatorForm';
+import { CalculatorHeader } from '@/components/calculator/CalculatorHeader';
 
 export default function CalculatorPage() {
   return (
@@ -28,14 +29,8 @@ export default function CalculatorPage() {
           <StepIndicator currentStep={1} totalSteps={7} stepLabel="Meeting Audit Calculator" />
         </div>
 
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: '1rem' }}>
-            Meeting Audit Calculator
-          </h1>
-          <p style={{ fontSize: '1rem', color: 'var(--muted-foreground)' }}>
-            Calculate the alignment tax on your organization&apos;s meetings.
-          </p>
-        </div>
+        {/* Calculator Header with Import/Export Options */}
+        <CalculatorHeader />
 
         {/* Calculator Form with Validation */}
         <CalculatorForm />
