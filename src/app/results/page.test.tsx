@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     back: vi.fn(),
   }),
+  usePathname: () => '/results',
   redirect: (path: string) => {
     redirectCalled = true;
     redirectTarget = path;

@@ -1,14 +1,16 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { StepIndicator } from '@/components/layout/StepIndicator';
+import { Header, StepIndicator } from '@/components/layout';
 import { CalculatorForm } from '@/components/calculator/CalculatorForm';
 import { CalculatorHeader } from '@/components/calculator/CalculatorHeader';
 import { SessionLoader } from '@/components/calculator/SessionLoader';
 
 export default function CalculatorPage() {
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      <div style={{ maxWidth: '768px', marginLeft: 'auto', marginRight: 'auto', padding: '2rem 1rem' }}>
+    <>
+      <Header />
+      <main style={{ minHeight: 'calc(100vh - 56px)', backgroundColor: 'var(--background)' }}>
+        <div style={{ maxWidth: '768px', marginLeft: 'auto', marginRight: 'auto', padding: '2rem 1rem' }}>
         {/* Back Navigation */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: '2rem' }}>
           <Link
@@ -41,7 +43,8 @@ export default function CalculatorPage() {
 
         {/* Calculator Form with Validation */}
         <CalculatorForm />
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

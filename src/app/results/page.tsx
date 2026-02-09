@@ -12,7 +12,7 @@ import { EmailCaptureForm } from '@/components/email/EmailCaptureForm';
 import { PdfExportButton } from '@/components/pdf/PdfExportButton';
 import { SaveProgressPrompt } from '@/components/results/SaveProgressPrompt';
 import { Button } from '@/components/ui/button';
-import { StepIndicator } from '@/components/layout/StepIndicator';
+import { Header, StepIndicator } from '@/components/layout';
 import {
   Accordion,
   AccordionContent,
@@ -32,8 +32,10 @@ export default function ResultsPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      <div style={{ maxWidth: '768px', marginLeft: 'auto', marginRight: 'auto', padding: '2rem 1rem' }}>
+    <>
+      <Header />
+      <main style={{ minHeight: 'calc(100vh - 56px)', backgroundColor: 'var(--background)' }}>
+        <div style={{ maxWidth: '768px', marginLeft: 'auto', marginRight: 'auto', padding: '2rem 1rem' }}>
         {/* Back Navigation */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: '2rem' }}>
           <Link
@@ -140,7 +142,8 @@ export default function ResultsPage() {
             <Link href="/calculator">Recalculate</Link>
           </Button>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

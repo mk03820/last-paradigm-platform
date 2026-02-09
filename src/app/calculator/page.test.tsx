@@ -14,6 +14,7 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     back: vi.fn(),
   }),
+  usePathname: () => '/calculator',
   useSearchParams: () => new URLSearchParams(),
 }));
 
