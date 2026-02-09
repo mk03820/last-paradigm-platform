@@ -21,7 +21,10 @@ export async function GET() {
     const date = new Date().toISOString().split('T')[0];
     const filename = `meeting-audit-calculator-${date}.xlsx`;
 
-    return new NextResponse(buffer, {
+    // Convert Buffer to Uint8Array for NextResponse compatibility
+    const uint8Array = new Uint8Array(buffer);
+
+    return new NextResponse(uint8Array, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
