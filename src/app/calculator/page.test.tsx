@@ -14,6 +14,13 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     back: vi.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+// Mock next-auth (needed by SessionLoader)
+vi.mock('next-auth/react', () => ({
+  useSession: () => ({ data: null, status: 'unauthenticated' }),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock store values
@@ -124,7 +131,16 @@ describe('CalculatorPage', () => {
         body: JSON.stringify(mockMeetingData()),
       });
 
-      expect(mockSetResults).toHaveBeenCalledWith(mockResult.data);
+      // Verify setResults was called with data containing the meeting waste
+      expect(mockSetResults).toHaveBeenCalledWith(
+        expect.objectContaining({
+          meetingWaste: 250000,
+          inputs: expect.objectContaining({
+            meetingCount: 10,
+            averageAttendees: 5,
+          }),
+        })
+      );
       expect(navigatedTo).toBe('/results');
     });
 

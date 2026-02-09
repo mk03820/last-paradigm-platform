@@ -19,6 +19,12 @@ vi.mock('next/navigation', () => ({
   },
 }));
 
+// Mock next-auth (needed by SaveProgressPrompt)
+vi.mock('next-auth/react', () => ({
+  useSession: () => ({ data: null, status: 'unauthenticated' }),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock the calculator store
 const mockResults = vi.fn();
 vi.mock('@/lib/store/calculator-store', () => ({

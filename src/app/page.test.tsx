@@ -16,7 +16,8 @@ describe('Home Page', () => {
     render(<Home />);
 
     expect(screen.getByText(/Your CEO handed you a book/)).toBeInTheDocument();
-    expect(screen.getByText(/Start Diagnostic/)).toBeInTheDocument();
+    // Story 5.1 changed CTA to dual-mode selection
+    expect(screen.getByText(/Let Us Guide You/)).toBeInTheDocument();
   });
 
   it('renders the journey context', () => {
@@ -38,8 +39,10 @@ describe('Home Page', () => {
     render(<Home />);
 
     const main = screen.getByRole('main');
-    expect(main).toHaveClass('min-h-screen');
-    expect(main).toHaveClass('bg-background');
+    // Component uses inline styles - verify style attribute
+    const style = main.getAttribute('style') || '';
+    expect(style).toContain('100vh');
+    expect(style).toContain('--background');
   });
 
   it('renders step indicator before hero section in visual order', () => {

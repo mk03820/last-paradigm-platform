@@ -35,8 +35,10 @@ describe('SessionDisclaimer', () => {
     render(<SessionDisclaimer />);
 
     const disclaimer = screen.getByRole('status');
-    expect(disclaimer).toHaveClass('text-muted-foreground');
-    expect(disclaimer).toHaveClass('bg-muted');
+    // Component uses inline styles - verify style attribute contains muted variables
+    const style = disclaimer.getAttribute('style') || '';
+    expect(style).toContain('muted-foreground');
+    expect(style).toContain('--muted');
   });
 
   it('is non-blocking (does not require user action)', () => {

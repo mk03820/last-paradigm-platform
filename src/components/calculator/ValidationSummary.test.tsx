@@ -41,8 +41,11 @@ describe('ValidationSummary', () => {
       // Create a mock element
       const mockElement = document.createElement('input');
       mockElement.id = 'meetingCount';
-      mockElement.scrollIntoView = vi.fn();
-      mockElement.focus = vi.fn();
+
+      // Use spyOn for methods that may have getter-only properties
+      const scrollSpy = vi.spyOn(mockElement, 'scrollIntoView').mockImplementation(() => {});
+      const focusSpy = vi.spyOn(mockElement, 'focus').mockImplementation(() => {});
+
       document.body.appendChild(mockElement);
 
       render(<ValidationSummary errors={mockErrors} />);
@@ -50,11 +53,11 @@ describe('ValidationSummary', () => {
       const firstErrorButton = screen.getAllByRole('button')[0];
       fireEvent.click(firstErrorButton);
 
-      expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
+      expect(scrollSpy).toHaveBeenCalledWith({
         behavior: 'smooth',
         block: 'center',
       });
-      expect(mockElement.focus).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
 
       document.body.removeChild(mockElement);
     });

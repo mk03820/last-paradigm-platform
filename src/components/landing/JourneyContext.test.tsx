@@ -33,6 +33,7 @@ describe('JourneyContext', () => {
     render(<JourneyContext />);
 
     const region = screen.getByRole('region');
-    expect(region).toHaveClass('text-muted-foreground');
+    // Component uses inline styles - verify style attribute contains muted-foreground
+    expect(region.getAttribute('style')).toContain('muted-foreground');
   });
 });
