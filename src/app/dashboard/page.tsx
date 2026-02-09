@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { LogOut, User } from 'lucide-react';
-import { SessionList, NewSessionButton } from '@/components/dashboard';
+import { SessionList, NewSessionButton, SessionMigrator } from '@/components/dashboard';
 import { toSessionSummary } from '@/types/session.types';
 
 export default async function DashboardPage() {
@@ -73,6 +73,9 @@ export default async function DashboardPage() {
             </form>
           </div>
         </header>
+
+        {/* Session migration for anonymous data */}
+        <SessionMigrator />
 
         {/* Welcome and new session */}
         <div className="flex items-start justify-between mb-8">

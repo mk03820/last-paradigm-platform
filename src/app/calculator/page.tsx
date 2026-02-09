@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { StepIndicator } from '@/components/layout/StepIndicator';
 import { CalculatorForm } from '@/components/calculator/CalculatorForm';
 import { CalculatorHeader } from '@/components/calculator/CalculatorHeader';
+import { SessionLoader } from '@/components/calculator/SessionLoader';
 
 export default function CalculatorPage() {
   return (
@@ -28,6 +30,11 @@ export default function CalculatorPage() {
         <div style={{ marginBottom: '2rem' }}>
           <StepIndicator currentStep={1} totalSteps={7} stepLabel="Meeting Audit Calculator" />
         </div>
+
+        {/* Session Loader for authenticated users */}
+        <Suspense fallback={null}>
+          <SessionLoader />
+        </Suspense>
 
         {/* Calculator Header with Import/Export Options */}
         <CalculatorHeader />

@@ -10,6 +10,7 @@ import { FormulaDisplay } from '@/components/results/FormulaDisplay';
 import { AssumptionsPanel } from '@/components/results/AssumptionsPanel';
 import { EmailCaptureForm } from '@/components/email/EmailCaptureForm';
 import { PdfExportButton } from '@/components/pdf/PdfExportButton';
+import { SaveProgressPrompt } from '@/components/results/SaveProgressPrompt';
 import { Button } from '@/components/ui/button';
 import { StepIndicator } from '@/components/layout/StepIndicator';
 import {
@@ -84,6 +85,11 @@ export default function ResultsPage() {
           </h2>
           <CostBreakdown amount={results.meetingWaste} />
         </section>
+
+        {/* Save Progress Prompt - For Anonymous Users */}
+        <div style={{ marginBottom: '2rem' }}>
+          <SaveProgressPrompt />
+        </div>
 
         {/* Alignment Tax Estimate Section */}
         <div style={{ marginBottom: '2rem' }}>
