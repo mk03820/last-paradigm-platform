@@ -12,12 +12,12 @@
 import { useCalculatorStore } from '@/lib/store/calculator-store';
 import { ExcelImportButton } from '@/components/import/ExcelImportButton';
 import { SessionManager } from '@/components/session/SessionManager';
-import type { MeetingData } from '@/types/calculator.types';
+import type { MeetingAuditInput } from '@/types/calculator.types';
 
 export function CalculatorHeader() {
   const { setMeetingData } = useCalculatorStore();
 
-  const handleImport = (data: MeetingData) => {
+  const handleImport = (data: MeetingAuditInput) => {
     setMeetingData(data);
   };
 

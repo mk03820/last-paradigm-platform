@@ -8,11 +8,11 @@
  */
 
 import ExcelJS from 'exceljs';
-import type { MeetingData } from '@/types/calculator.types';
+import type { MeetingAuditInput } from '@/types/calculator.types';
 
 export interface ParseResult {
   success: true;
-  data: MeetingData;
+  data: MeetingAuditInput;
 }
 
 export interface ParseError {
@@ -194,7 +194,7 @@ export async function parseExcelTemplate(buffer: ArrayBuffer): Promise<ExcelPars
     }
 
     // Build the meeting data object
-    const meetingData: MeetingData = {
+    const meetingData: MeetingAuditInput = {
       meetingCount: meetingCountResult.value!,
       averageAttendees: attendeesResult.value!,
       averageDuration: durationResult.value!,

@@ -13,17 +13,17 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { parseExcelTemplate, isValidExcelFile, type ExcelParseResult } from '@/lib/templates/excel-parser';
-import type { MeetingData } from '@/types/calculator.types';
+import type { MeetingAuditInput } from '@/types/calculator.types';
 
 interface ExcelImportButtonProps {
-  onImport: (data: MeetingData) => void;
+  onImport: (data: MeetingAuditInput) => void;
 }
 
 type ImportState = 'idle' | 'parsing' | 'preview' | 'error';
 
 export function ExcelImportButton({ onImport }: ExcelImportButtonProps) {
   const [state, setState] = useState<ImportState>('idle');
-  const [previewData, setPreviewData] = useState<MeetingData | null>(null);
+  const [previewData, setPreviewData] = useState<MeetingAuditInput | null>(null);
   const [error, setError] = useState<{ message: string; details?: string[] } | null>(null);
   const [showModal, setShowModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
