@@ -9,8 +9,10 @@ import {
   LatencyMetricsCard,
   VelocityResultsSummary,
   BenchmarkComparisonTable,
+  BottleneckInsights,
   calculateAllMetrics,
   findSlowestArchetype,
+  detectBottleneckPatterns,
 } from '@/components/tools/decision-velocity';
 import { useTool3Store } from '@/lib/store/tool3-store';
 
@@ -31,6 +33,10 @@ export default function DecisionVelocityResultsPage() {
   // Calculate metrics from store data
   const metrics = calculateAllMetrics(archetypes);
   const slowest = findSlowestArchetype(metrics);
+  const bottleneckDetections = detectBottleneckPatterns(
+    metrics,
+    archetypes.budget.budgetThreshold
+  );
 
   // Redirect if no valid data
   useEffect(() => {
@@ -114,6 +120,11 @@ export default function DecisionVelocityResultsPage() {
               metrics={metrics}
               budgetThreshold={archetypes.budget.budgetThreshold}
             />
+          </section>
+
+          {/* Bottleneck Analysis */}
+          <section className="mb-8">
+            <BottleneckInsights initialDetections={bottleneckDetections} />
           </section>
 
           {/* Actions */}

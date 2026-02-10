@@ -171,6 +171,12 @@ describe('Decision Velocity Results Page', () => {
       expect(screen.getAllByText('Crisis').length).toBeGreaterThanOrEqual(2);
     });
 
+    it('renders bottleneck analysis section', () => {
+      render(<DecisionVelocityResultsPage />);
+
+      expect(screen.getByText('Bottleneck Analysis')).toBeInTheDocument();
+    });
+
     it('marks tool as complete on render', () => {
       render(<DecisionVelocityResultsPage />);
 

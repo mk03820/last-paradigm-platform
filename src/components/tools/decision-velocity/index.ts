@@ -1,5 +1,8 @@
 export { BenchmarkComparisonRow } from './BenchmarkComparisonRow';
 export { BenchmarkComparisonTable } from './BenchmarkComparisonTable';
+export { BottleneckDiagnostic } from './BottleneckDiagnostic';
+export { BottleneckInsights } from './BottleneckInsights';
+export { BottleneckPatternCard } from './BottleneckPatternCard';
 export { BudgetThresholdSelector } from './BudgetThresholdSelector';
 export { DecisionArchetypeCard } from './DecisionArchetypeCard';
 export { DecisionSampleForm } from './DecisionSampleForm';
@@ -62,3 +65,20 @@ export type {
   BenchmarkThreshold,
   ArchetypeBenchmarks,
 } from './benchmarks';
+export {
+  BOTTLENECK_PATTERNS,
+  SEVERITY_LABELS,
+  calculatePatternSeverity,
+  getSeverityColor,
+  detectBottleneckPatterns,
+  getOverallVelocityScore,
+  getTopInterventions,
+} from './bottleneck-patterns';
+export type {
+  BottleneckPatternId,
+  PatternSeverity,
+  BottleneckPattern,
+  PatternDetection,
+  DiagnosticQuestion,
+  Intervention,
+} from './bottleneck-patterns';
