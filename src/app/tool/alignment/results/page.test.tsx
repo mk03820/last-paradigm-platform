@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
  * Tests the Tool 1 results page.
  *
  * Story 9.2: Weighted Composite Score Calculation
+ * Story 9.4: Score Interpretation and Next Steps
  */
 
 // Mock navigation
@@ -122,14 +123,16 @@ describe('Alignment Results Page', () => {
       expect(screen.getByText('Dimension Breakdown')).toBeInTheDocument();
     });
 
-    it('displays all 5 dimensions', () => {
+    it('displays all 5 dimensions in breakdown', () => {
       render(<AlignmentResultsPage />);
 
-      expect(screen.getByText('Strategic Alignment')).toBeInTheDocument();
-      expect(screen.getByText('Execution Alignment')).toBeInTheDocument();
-      expect(screen.getByText('Technology Alignment')).toBeInTheDocument();
-      expect(screen.getByText('People Alignment')).toBeInTheDocument();
-      expect(screen.getByText('Governance Alignment')).toBeInTheDocument();
+      // Dimension breakdown section shows all 5 dimensions
+      // Some may appear twice if they're also in weak dimension guidance
+      expect(screen.getAllByText('Strategic Alignment').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Execution Alignment').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Technology Alignment').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('People Alignment').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Governance Alignment').length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders navigation links', () => {
@@ -139,9 +142,9 @@ describe('Alignment Results Page', () => {
         'href',
         '/tool/alignment'
       );
-      expect(screen.getByRole('link', { name: 'Continue to Dashboard' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'Continue to Total Cost Calculator' })).toHaveAttribute(
         'href',
-        '/dashboard'
+        '/tool/total-cost'
       );
     });
 
@@ -166,6 +169,36 @@ describe('Alignment Results Page', () => {
 
       expect(screen.getByText('Dimensional View')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
+    });
+
+    it('renders score interpretation section', () => {
+      render(<AlignmentResultsPage />);
+
+      expect(screen.getByText('What This Means')).toBeInTheDocument();
+      // Score of 3.2 = Coordinated
+      expect(screen.getByText('Good Foundation with Room to Improve')).toBeInTheDocument();
+    });
+
+    it('renders weak dimension guidance section', () => {
+      render(<AlignmentResultsPage />);
+
+      expect(screen.getByText('Priority Focus Areas')).toBeInTheDocument();
+    });
+
+    it('renders next tools recommendation section', () => {
+      render(<AlignmentResultsPage />);
+
+      expect(screen.getByText('Recommended Next Steps')).toBeInTheDocument();
+      expect(screen.getByText('Total Cost Calculator')).toBeInTheDocument();
+    });
+
+    it('marks tool as complete on render', () => {
+      render(<AlignmentResultsPage />);
+
+      const store = useTool1Store.getState();
+      expect(store.completion).not.toBeNull();
+      expect(store.completion?.compositeScore).toBeCloseTo(3.2, 1);
+      expect(store.completion?.completedAt).toBeDefined();
     });
   });
 });

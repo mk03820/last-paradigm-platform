@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,9 @@ import {
   AlignmentRadarChart,
   CompositeScoreDisplay,
   DimensionScoresSummary,
+  NextToolsRecommendation,
+  ScoreInterpretation,
+  WeakDimensionGuidance,
   calculateCompositeScore,
 } from '@/components/tools/alignment';
 import { useTool1Store } from '@/lib/store/tool1-store';
@@ -17,16 +20,19 @@ import type { DimensionId } from '@/components/tools/alignment';
 /**
  * Tool 1: Alignment Assessment Results Page
  *
- * Displays the weighted composite score, radar chart, and dimension breakdown.
+ * Displays the weighted composite score, radar chart, dimension breakdown,
+ * interpretation, guidance, and next steps.
  * Redirects to scoring page if assessment is incomplete.
  *
  * Story 9.2: Weighted Composite Score Calculation
  * Story 9.3: Radar Chart Visualization
- * Covers: FR2-7 (weighted composite calculation), FR2-8 (radar chart)
+ * Story 9.4: Score Interpretation and Next Steps
+ * Covers: FR2-7 (weighted composite calculation), FR2-8 (radar chart), FR2-9 (interpretation)
  */
 export default function AlignmentResultsPage() {
   const router = useRouter();
-  const { scores, isComplete } = useTool1Store();
+  const { scores, isComplete, completion, markComplete } = useTool1Store();
+  const hasMarkedComplete = useRef(false);
 
   // Redirect if not complete
   useEffect(() => {
@@ -35,12 +41,20 @@ export default function AlignmentResultsPage() {
     }
   }, [isComplete, router]);
 
+  const compositeScore = calculateCompositeScore(scores);
+
+  // Mark tool as complete on first view
+  useEffect(() => {
+    if (isComplete() && !completion && !hasMarkedComplete.current) {
+      hasMarkedComplete.current = true;
+      markComplete(compositeScore);
+    }
+  }, [isComplete, completion, markComplete, compositeScore]);
+
   // Don't render if incomplete (will redirect)
   if (!isComplete()) {
     return null;
   }
-
-  const compositeScore = calculateCompositeScore(scores);
 
   return (
     <>
@@ -93,6 +107,12 @@ export default function AlignmentResultsPage() {
             </div>
           </section>
 
+          {/* Score Interpretation */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">What This Means</h2>
+            <ScoreInterpretation score={compositeScore} />
+          </section>
+
           {/* Dimension Breakdown */}
           <section className="mb-8">
             <h2 className="text-lg font-semibold mb-4">Dimension Breakdown</h2>
@@ -102,13 +122,27 @@ export default function AlignmentResultsPage() {
             />
           </section>
 
+          {/* Weak Dimension Guidance */}
+          <section className="mb-8">
+            <WeakDimensionGuidance
+              scores={scores as Record<DimensionId, number>}
+            />
+          </section>
+
+          {/* Next Tools Recommendation */}
+          <section className="mb-8">
+            <NextToolsRecommendation
+              scores={scores as Record<DimensionId, number>}
+            />
+          </section>
+
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button variant="outline" asChild>
               <Link href="/tool/alignment">Revise Scores</Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard">Continue to Dashboard</Link>
+              <Link href="/tool/total-cost">Continue to Total Cost Calculator</Link>
             </Button>
           </div>
 
