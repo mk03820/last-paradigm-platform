@@ -31,6 +31,8 @@ export interface DiagnosticTool {
   storeKey: string;
   anonymousAccess: boolean;
   estimatedMinutes: number;
+  /** Tool numbers this tool depends on (for aggregation) */
+  dependencies?: number[];
 }
 
 /**
@@ -120,6 +122,7 @@ export const DIAGNOSTIC_TOOLS: DiagnosticTool[] = [
     storeKey: 'tool7',
     anonymousAccess: false,
     estimatedMinutes: 10,
+    dependencies: [1, 2, 3, 4, 5, 6], // Aggregates results from all other tools
   },
 ];
 

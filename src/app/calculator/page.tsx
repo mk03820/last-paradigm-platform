@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout';
-import { ProgressStepper } from '@/components/diagnostic';
+import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
 import { CalculatorForm } from '@/components/calculator/CalculatorForm';
 import { CalculatorHeader } from '@/components/calculator/CalculatorHeader';
 import { SessionLoader } from '@/components/calculator/SessionLoader';
@@ -10,7 +10,8 @@ import { SessionLoader } from '@/components/calculator/SessionLoader';
  * Tool 2: Meeting Audit Calculator Page
  *
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-38 (Progress stepper)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function CalculatorPage() {
   return (
@@ -39,6 +40,11 @@ export default function CalculatorPage() {
         {/* Progress Stepper */}
         <div style={{ marginBottom: '2rem' }}>
           <ProgressStepper currentToolId="meeting-audit" />
+        </div>
+
+        {/* Tool Guidance */}
+        <div style={{ marginBottom: '2rem' }}>
+          <ToolGuidance toolId="meeting-audit" />
         </div>
 
         {/* Session Loader for authenticated users */}

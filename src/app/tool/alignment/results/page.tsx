@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout';
-import { ProgressStepper, ToolNavigation } from '@/components/diagnostic';
+import { ProgressStepper, ToolNavigation, ContinueToNextTool } from '@/components/diagnostic';
 import {
   AlignmentRadarChart,
   CompositeScoreDisplay,
@@ -29,7 +29,8 @@ import type { DimensionId } from '@/components/tools/alignment';
  * Story 9.3: Radar Chart Visualization
  * Story 9.4: Score Interpretation and Next Steps
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-7, FR2-8, FR2-9, FR2-38 (Progress stepper)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-7, FR2-8, FR2-9, FR2-38 (Progress stepper), FR2-39 (Continue to next tool)
  */
 export default function AlignmentResultsPage() {
   const router = useRouter();
@@ -141,8 +142,11 @@ export default function AlignmentResultsPage() {
             </Button>
           </div>
 
+          {/* Continue to Next Tool */}
+          <ContinueToNextTool currentToolNumber={1} className="mt-8" />
+
           {/* Tool Navigation */}
-          <ToolNavigation currentToolNumber={1} className="mt-8" />
+          <ToolNavigation currentToolNumber={1} className="mt-4" />
 
           {/* Methodology Note */}
           <div className="mt-8 p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">

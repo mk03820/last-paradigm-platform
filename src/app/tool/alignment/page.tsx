@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Header } from '@/components/layout';
-import { ProgressStepper } from '@/components/diagnostic';
+import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
 import { AlignmentScorer } from '@/components/tools/alignment';
 
 /**
@@ -10,7 +10,8 @@ import { AlignmentScorer } from '@/components/tools/alignment';
  *
  * Story 9.1: Alignment Dimension Scoring Interface
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-6 (Score 5 alignment dimensions), FR2-38 (Progress stepper)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-6 (Score 5 alignment dimensions), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function AlignmentAssessmentPage() {
   return (
@@ -33,6 +34,9 @@ export default function AlignmentAssessmentPage() {
           <div className="mb-6">
             <ProgressStepper currentToolId="alignment" />
           </div>
+
+          {/* Tool Guidance */}
+          <ToolGuidance toolId="alignment" className="mb-6" />
 
           {/* Page Header */}
           <header className="mb-8">

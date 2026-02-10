@@ -13,7 +13,7 @@ import { PdfExportButton } from '@/components/pdf/PdfExportButton';
 import { SaveProgressPrompt } from '@/components/results/SaveProgressPrompt';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout';
-import { ProgressStepper, ToolNavigation } from '@/components/diagnostic';
+import { ProgressStepper, ToolNavigation, ContinueToNextTool } from '@/components/diagnostic';
 import {
   Accordion,
   AccordionContent,
@@ -25,7 +25,8 @@ import {
  * Results Page
  *
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-38 (Progress stepper, tool navigation)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-38 (Progress stepper, tool navigation), FR2-39 (Continue to next tool)
  */
 export default function ResultsPage() {
   const { results } = useCalculatorStore();
@@ -144,8 +145,13 @@ export default function ResultsPage() {
           </Button>
         </div>
 
-        {/* Tool Navigation */}
+        {/* Continue to Next Tool */}
         <div style={{ marginTop: '2rem' }}>
+          <ContinueToNextTool currentToolNumber={2} />
+        </div>
+
+        {/* Tool Navigation */}
+        <div style={{ marginTop: '1rem' }}>
           <ToolNavigation currentToolNumber={2} />
         </div>
         </div>

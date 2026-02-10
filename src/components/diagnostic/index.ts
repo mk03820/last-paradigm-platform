@@ -3,11 +3,14 @@
  *
  * Story 8.5: Diagnostic Tool Hub
  * Story 8.6: Progress Stepper Navigation
+ * Story 8.7: Guided Diagnostic Flow
  */
 
 export * from './diagnostic-constants';
 export * from './useToolStatus';
 export * from './useToolAccess';
+export * from './guidance-content';
+export * from './useGuidancePreference';
 export { ToolCard } from './ToolCard';
 export type { ToolCardProps } from './ToolCard';
 export { DiagnosticProgress } from './DiagnosticProgress';
@@ -18,3 +21,7 @@ export { ProgressStepper } from './ProgressStepper';
 export type { ProgressStepperProps } from './ProgressStepper';
 export { ToolNavigation } from './ToolNavigation';
 export type { ToolNavigationProps } from './ToolNavigation';
+export { ToolGuidance } from './ToolGuidance';
+export type { ToolGuidanceProps } from './ToolGuidance';
+export { ContinueToNextTool } from './ContinueToNextTool';
+export type { ContinueToNextToolProps } from './ContinueToNextTool';

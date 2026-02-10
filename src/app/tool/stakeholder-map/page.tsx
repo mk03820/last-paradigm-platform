@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
-import { ProgressStepper } from '@/components/diagnostic';
+import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
 import { StakeholderInput } from '@/components/tools/stakeholder-map';
 
 /**
@@ -14,7 +14,8 @@ import { StakeholderInput } from '@/components/tools/stakeholder-map';
  *
  * Story 11.1: Stakeholder Input Interface
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-16 (Add stakeholders with power and interest scores), FR2-38 (Progress stepper)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-16 (Add stakeholders with power and interest scores), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function StakeholderMapPage() {
   const router = useRouter();
@@ -43,6 +44,9 @@ export default function StakeholderMapPage() {
           <div className="mb-6">
             <ProgressStepper currentToolId="stakeholder-map" />
           </div>
+
+          {/* Tool Guidance */}
+          <ToolGuidance toolId="stakeholder-map" className="mb-6" />
 
           {/* Page Header */}
           <header className="mb-8">

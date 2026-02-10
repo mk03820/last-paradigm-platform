@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Header } from '@/components/layout';
-import { ProgressStepper } from '@/components/diagnostic';
+import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
 import { DecisionVelocityScorer } from '@/components/tools/decision-velocity';
 
 /**
@@ -10,7 +10,8 @@ import { DecisionVelocityScorer } from '@/components/tools/decision-velocity';
  *
  * Story 10.1: Decision Sample Input Interface
  * Story 8.6: Progress Stepper Navigation
- * Covers: FR2-11 (Decision sample input), FR2-38 (Progress stepper)
+ * Story 8.7: Guided Diagnostic Flow
+ * Covers: FR2-11 (Decision sample input), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function DecisionVelocityPage() {
   return (
@@ -33,6 +34,9 @@ export default function DecisionVelocityPage() {
           <div className="mb-6">
             <ProgressStepper currentToolId="decision-velocity" />
           </div>
+
+          {/* Tool Guidance */}
+          <ToolGuidance toolId="decision-velocity" className="mb-6" />
 
           {/* Page Header */}
           <header className="mb-8">
