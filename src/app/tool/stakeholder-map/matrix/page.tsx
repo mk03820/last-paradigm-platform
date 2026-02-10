@@ -194,7 +194,9 @@ export default function StakeholderMatrixPage() {
               <Link href="/tool/stakeholder-map">Edit Stakeholders</Link>
             </Button>
             <Button asChild>
-              <Link href="/diagnostic">Back to Diagnostic Hub</Link>
+              <Link href="/tool/stakeholder-map/strategies">
+                View Engagement Strategies
+              </Link>
             </Button>
           </div>
         </div>

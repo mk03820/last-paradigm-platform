@@ -25,3 +25,10 @@ export type { QuadrantSummaryProps } from './QuadrantSummary';
 export * from './stakeholder-risks';
 export { RiskSummary } from './RiskSummary';
 export type { RiskSummaryProps } from './RiskSummary';
+
+// Story 11.4: Engagement Strategy Components
+export * from './engagement-strategies';
+export { QuadrantStrategy } from './QuadrantStrategy';
+export type { QuadrantStrategyProps } from './QuadrantStrategy';
+export { EngagementActionTable } from './EngagementActionTable';
+export type { EngagementActionTableProps } from './EngagementActionTable';

@@ -24,11 +24,14 @@ export interface Tool4CompletionData {
   completedAt: string;
   stakeholderCount: number;
   quadrantCounts: Record<StakeholderQuadrant, number>;
+  hasEngagementStrategies: boolean;
 }
 
 export interface Tool4State {
   // Stakeholder list
   stakeholders: Stakeholder[];
+  // Owner assignments for engagement tracking (stakeholder id -> owner name)
+  ownerAssignments: Record<string, string>;
   // Server session ID for sync (if authenticated)
   sessionId: string | null;
   // Track if data needs server sync
@@ -40,6 +43,7 @@ export interface Tool4State {
   addStakeholder: (stakeholder: Omit<Stakeholder, 'id'>) => string;
   updateStakeholder: (id: string, updates: Partial<Omit<Stakeholder, 'id'>>) => void;
   removeStakeholder: (id: string) => void;
+  setOwner: (stakeholderId: string, owner: string) => void;
   resetTool4: () => void;
   setSessionId: (id: string | null) => void;
   markComplete: () => void;
@@ -55,6 +59,7 @@ export const useTool4Store = create<Tool4State>()(
     (set, get) => ({
       // Initial state
       stakeholders: [],
+      ownerAssignments: {},
       sessionId: null,
       isDirty: false,
       completion: null,
@@ -83,10 +88,26 @@ export const useTool4Store = create<Tool4State>()(
 
       // Remove a stakeholder
       removeStakeholder: (id: string) => {
+        set((state) => {
+          // Also remove owner assignment
+          const { [id]: _, ...remainingOwners } = state.ownerAssignments;
+          return {
+            stakeholders: state.stakeholders.filter((s) => s.id !== id),
+            ownerAssignments: remainingOwners,
+            isDirty: true,
+            completion: null,
+          };
+        });
+      },
+
+      // Set owner for a stakeholder
+      setOwner: (stakeholderId: string, owner: string) => {
         set((state) => ({
-          stakeholders: state.stakeholders.filter((s) => s.id !== id),
+          ownerAssignments: {
+            ...state.ownerAssignments,
+            [stakeholderId]: owner,
+          },
           isDirty: true,
-          completion: null,
         }));
       },
 
@@ -94,6 +115,7 @@ export const useTool4Store = create<Tool4State>()(
       resetTool4: () => {
         set({
           stakeholders: [],
+          ownerAssignments: {},
           isDirty: false,
           completion: null,
         });
@@ -112,6 +134,7 @@ export const useTool4Store = create<Tool4State>()(
             completedAt: new Date().toISOString(),
             stakeholderCount: stakeholders.length,
             quadrantCounts: getQuadrantCounts(stakeholders),
+            hasEngagementStrategies: true,
           },
           isDirty: true,
         });
@@ -137,6 +160,7 @@ export const useTool4Store = create<Tool4State>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         stakeholders: state.stakeholders,
+        ownerAssignments: state.ownerAssignments,
         sessionId: state.sessionId,
         completion: state.completion,
       }),
