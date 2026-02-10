@@ -16,11 +16,14 @@ import {
   ROLE_SUGGESTIONS,
   POWER_CALIBRATION,
   INTEREST_CALIBRATION,
+  SENTIMENTS,
+  SENTIMENT_STYLES,
   getQuadrant,
   getQuadrantInfo,
   validateStakeholder,
   type Stakeholder,
   type CalibrationLevel,
+  type StakeholderSentiment,
 } from './stakeholder-constants';
 
 interface StakeholderFormProps {
@@ -53,6 +56,9 @@ export function StakeholderForm({
   const [role, setRole] = React.useState(stakeholder?.role || '');
   const [power, setPower] = React.useState(stakeholder?.power || 5);
   const [interest, setInterest] = React.useState(stakeholder?.interest || 5);
+  const [sentiment, setSentiment] = React.useState<StakeholderSentiment | undefined>(
+    stakeholder?.sentiment
+  );
   const [showRoleSuggestions, setShowRoleSuggestions] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
@@ -78,7 +84,7 @@ export function StakeholderForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = { name: name.trim(), role: role.trim(), power, interest };
+    const data = { name: name.trim(), role: role.trim(), power, interest, sentiment };
     const validation = validateStakeholder(data);
 
     if (!validation.valid) {
@@ -263,6 +269,44 @@ export function StakeholderForm({
             <p className="text-xs text-muted-foreground">
               {getInterestDescription(interest)}
             </p>
+          </div>
+
+          {/* Sentiment Selector */}
+          <div className="space-y-2">
+            <Label>Sentiment (Optional)</Label>
+            <div className="flex gap-2" role="radiogroup" aria-label="Stakeholder sentiment">
+              {SENTIMENTS.map((s) => {
+                const styles = SENTIMENT_STYLES[s.id];
+                const isSelected = sentiment === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => setSentiment(isSelected ? undefined : s.id)}
+                    className={cn(
+                      'flex-1 px-3 py-2 text-sm font-medium rounded-md border-2 transition-colors',
+                      'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                      isSelected
+                        ? cn(styles.border, styles.text, 'bg-opacity-10',
+                            s.id === 'supporter' && 'bg-green-50 dark:bg-green-900/20',
+                            s.id === 'neutral' && 'bg-yellow-50 dark:bg-yellow-900/20',
+                            s.id === 'blocker' && 'bg-red-50 dark:bg-red-900/20'
+                          )
+                        : 'border-muted text-muted-foreground hover:border-border hover:text-foreground'
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+            {sentiment && (
+              <p className="text-xs text-muted-foreground">
+                {SENTIMENTS.find((s) => s.id === sentiment)?.description}
+              </p>
+            )}
           </div>
 
           {/* Quadrant Preview */}

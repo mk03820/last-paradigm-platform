@@ -10,8 +10,11 @@ import {
   getQuadrant,
   getQuadrantInfo,
   MAX_STAKEHOLDERS,
+  SENTIMENT_STYLES,
+  SENTIMENTS,
   type Stakeholder,
   type StakeholderQuadrant,
+  type StakeholderSentiment,
 } from './stakeholder-constants';
 
 type SortField = 'name' | 'power' | 'interest' | 'quadrant';
@@ -162,6 +165,9 @@ export function StakeholderList({
                   direction={sortDirection}
                   onSort={toggleSort}
                 />
+                <th className="py-2 px-2 text-sm font-medium text-muted-foreground">
+                  Sentiment
+                </th>
                 <th className="text-right py-2 px-2 text-sm font-medium text-muted-foreground">
                   Actions
                 </th>
@@ -190,6 +196,9 @@ export function StakeholderList({
                     </td>
                     <td className="py-3 px-2">
                       <QuadrantBadge quadrant={quadrant} label={quadrantInfo.label} />
+                    </td>
+                    <td className="py-3 px-2">
+                      <SentimentBadge sentiment={stakeholder.sentiment} />
                     </td>
                     <td className="py-3 px-2 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -241,7 +250,10 @@ export function StakeholderList({
                       {stakeholder.role}
                     </p>
                   </div>
-                  <QuadrantBadge quadrant={quadrant} label={quadrantInfo.label} />
+                  <div className="flex items-center gap-2">
+                    <SentimentBadge sentiment={stakeholder.sentiment} />
+                    <QuadrantBadge quadrant={quadrant} label={quadrantInfo.label} />
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex gap-3 text-sm">
@@ -387,5 +399,39 @@ function QuadrantBadge({ quadrant, label }: QuadrantBadgeProps) {
     <Badge variant={getVariant()} className="text-xs whitespace-nowrap">
       {label}
     </Badge>
+  );
+}
+
+/**
+ * Sentiment badge
+ */
+interface SentimentBadgeProps {
+  sentiment: StakeholderSentiment | undefined;
+}
+
+function SentimentBadge({ sentiment }: SentimentBadgeProps) {
+  if (!sentiment) {
+    return (
+      <span className="text-xs text-muted-foreground">-</span>
+    );
+  }
+
+  const styles = SENTIMENT_STYLES[sentiment];
+  const info = SENTIMENTS.find((s) => s.id === sentiment);
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 text-xs font-medium',
+        styles.text
+      )}
+      aria-label={`Sentiment: ${info?.label}`}
+    >
+      <span
+        className={cn('w-2 h-2 rounded-full', styles.bg)}
+        aria-hidden="true"
+      />
+      {info?.label}
+    </span>
   );
 }

@@ -16,8 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { Stakeholder, StakeholderQuadrant } from './stakeholder-constants';
-import { getQuadrant, QUADRANTS } from './stakeholder-constants';
+import type { Stakeholder, StakeholderQuadrant, StakeholderSentiment } from './stakeholder-constants';
+import { getQuadrant, QUADRANTS, SENTIMENT_STYLES } from './stakeholder-constants';
 import { cn } from '@/lib/utils';
 
 export interface StakeholderMatrixProps {
@@ -103,6 +103,15 @@ interface StakeholderPointProps {
   onClick: () => void;
 }
 
+/**
+ * Get sentiment ring class for a stakeholder
+ */
+function getSentimentRingClass(sentiment: StakeholderSentiment | undefined): string {
+  if (!sentiment) return '';
+  const styles = SENTIMENT_STYLES[sentiment];
+  return `ring-2 ${styles.ring} ring-offset-1`;
+}
+
 const StakeholderPoint = memo(function StakeholderPoint({
   stakeholder,
   isSelected,
@@ -113,6 +122,7 @@ const StakeholderPoint = memo(function StakeholderPoint({
   const quadrant = getQuadrant(stakeholder.power, stakeholder.interest);
   const styles = QUADRANT_STYLES[quadrant];
   const initials = getInitials(stakeholder.name);
+  const sentimentRing = getSentimentRingClass(stakeholder.sentiment);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -127,13 +137,14 @@ const StakeholderPoint = memo(function StakeholderPoint({
               'transition-all duration-150 cursor-pointer',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
               styles.point,
+              sentimentRing,
               isSelected && 'ring-2 ring-primary ring-offset-2 scale-110 z-10'
             )}
             style={{
               left: `calc(${pos.x + offset.x}% - 1rem)`,
               top: `calc(${pos.y + offset.y}% - 1rem)`,
             }}
-            aria-label={`${stakeholder.name}, Power: ${stakeholder.power}, Interest: ${stakeholder.interest}`}
+            aria-label={`${stakeholder.name}, Power: ${stakeholder.power}, Interest: ${stakeholder.interest}${stakeholder.sentiment ? `, Sentiment: ${stakeholder.sentiment}` : ''}`}
           >
             {initials}
           </button>
@@ -145,6 +156,11 @@ const StakeholderPoint = memo(function StakeholderPoint({
             <p className="mt-1 text-xs">
               Power: {stakeholder.power}/10 · Interest: {stakeholder.interest}/10
             </p>
+            {stakeholder.sentiment && (
+              <p className={cn('mt-1 text-xs font-medium', SENTIMENT_STYLES[stakeholder.sentiment].text)}>
+                {stakeholder.sentiment.charAt(0).toUpperCase() + stakeholder.sentiment.slice(1)}
+              </p>
+            )}
           </div>
         </TooltipContent>
       </Tooltip>

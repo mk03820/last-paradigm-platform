@@ -171,6 +171,7 @@ describe('StakeholderForm', () => {
         role: 'CEO',
         power: 5, // default
         interest: 5, // default
+        sentiment: undefined, // default
       });
     });
 
@@ -197,12 +198,13 @@ describe('StakeholderForm', () => {
       await user.type(screen.getByLabelText(/role/i), '  CEO  ');
       await user.click(screen.getByRole('button', { name: 'Add Stakeholder' }));
 
-      expect(mockOnSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'John Doe',
-          role: 'CEO',
-        })
-      );
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        name: 'John Doe',
+        role: 'CEO',
+        power: 5,
+        interest: 5,
+        sentiment: undefined,
+      });
     });
   });
 
@@ -294,6 +296,96 @@ describe('StakeholderForm', () => {
 
       expect(screen.getByLabelText('Power Level Guide')).toBeInTheDocument();
       expect(screen.getByLabelText('Interest Level Guide')).toBeInTheDocument();
+    });
+  });
+
+  describe('sentiment selector', () => {
+    it('renders sentiment selector with all options', () => {
+      render(
+        <StakeholderForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
+
+      expect(screen.getByText('Sentiment (Optional)')).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /supporter/i })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /neutral/i })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /blocker/i })).toBeInTheDocument();
+    });
+
+    it('allows selecting a sentiment', async () => {
+      const user = userEvent.setup();
+      render(
+        <StakeholderForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
+
+      await user.click(screen.getByRole('radio', { name: /supporter/i }));
+
+      expect(screen.getByRole('radio', { name: /supporter/i })).toHaveAttribute('aria-checked', 'true');
+    });
+
+    it('allows toggling sentiment off', async () => {
+      const user = userEvent.setup();
+      render(
+        <StakeholderForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
+
+      // Select supporter
+      await user.click(screen.getByRole('radio', { name: /supporter/i }));
+      expect(screen.getByRole('radio', { name: /supporter/i })).toHaveAttribute('aria-checked', 'true');
+
+      // Click again to deselect
+      await user.click(screen.getByRole('radio', { name: /supporter/i }));
+      expect(screen.getByRole('radio', { name: /supporter/i })).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('shows sentiment description when selected', async () => {
+      const user = userEvent.setup();
+      render(
+        <StakeholderForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
+
+      await user.click(screen.getByRole('radio', { name: /blocker/i }));
+
+      expect(screen.getByText(/actively resists or opposes/i)).toBeInTheDocument();
+    });
+
+    it('includes sentiment in form submission', async () => {
+      const user = userEvent.setup();
+      render(
+        <StakeholderForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
+
+      await user.type(screen.getByLabelText(/name/i), 'John Doe');
+      await user.type(screen.getByLabelText(/role/i), 'CEO');
+      await user.click(screen.getByRole('radio', { name: /blocker/i }));
+      await user.click(screen.getByRole('button', { name: 'Add Stakeholder' }));
+
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        name: 'John Doe',
+        role: 'CEO',
+        power: 5,
+        interest: 5,
+        sentiment: 'blocker',
+      });
+    });
+
+    it('pre-selects sentiment when editing', () => {
+      render(
+        <StakeholderForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+          isEditing
+          stakeholder={{
+            id: '1',
+            name: 'Test',
+            role: 'CEO',
+            power: 8,
+            interest: 7,
+            sentiment: 'supporter',
+          }}
+        />
+      );
+
+      expect(screen.getByRole('radio', { name: /supporter/i })).toHaveAttribute('aria-checked', 'true');
     });
   });
 });

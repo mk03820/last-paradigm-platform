@@ -20,3 +20,8 @@ export { StakeholderDetailPanel } from './StakeholderDetailPanel';
 export type { StakeholderDetailPanelProps } from './StakeholderDetailPanel';
 export { QuadrantSummary } from './QuadrantSummary';
 export type { QuadrantSummaryProps } from './QuadrantSummary';
+
+// Story 11.3: Sentiment and Risk Components
+export * from './stakeholder-risks';
+export { RiskSummary } from './RiskSummary';
+export type { RiskSummaryProps } from './RiskSummary';

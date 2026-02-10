@@ -14,12 +14,14 @@ import { X, Edit2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Stakeholder, StakeholderQuadrant } from './stakeholder-constants';
+import type { Stakeholder, StakeholderQuadrant, StakeholderSentiment } from './stakeholder-constants';
 import {
   getQuadrant,
   getQuadrantInfo,
   getPowerLevel,
   getInterestLevel,
+  SENTIMENTS,
+  SENTIMENT_STYLES,
 } from './stakeholder-constants';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +29,7 @@ export interface StakeholderDetailPanelProps {
   stakeholder: Stakeholder;
   onEdit?: () => void;
   onClose?: () => void;
+  onSentimentChange?: (sentiment: StakeholderSentiment | undefined) => void;
   className?: string;
 }
 
@@ -41,12 +44,14 @@ export const StakeholderDetailPanel = memo(function StakeholderDetailPanel({
   stakeholder,
   onEdit,
   onClose,
+  onSentimentChange,
   className,
 }: StakeholderDetailPanelProps) {
   const quadrant = getQuadrant(stakeholder.power, stakeholder.interest);
   const quadrantInfo = getQuadrantInfo(quadrant);
   const powerLevel = getPowerLevel(stakeholder.power);
   const interestLevel = getInterestLevel(stakeholder.interest);
+  const currentSentiment = stakeholder.sentiment;
 
   return (
     <Card className={cn('w-full', className)}>
@@ -75,15 +80,62 @@ export const StakeholderDetailPanel = memo(function StakeholderDetailPanel({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Quadrant Badge */}
-        <div>
+        {/* Quadrant and Sentiment */}
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge className={cn('text-xs', QUADRANT_BADGE_STYLES[quadrant])}>
             {quadrantInfo.label}
           </Badge>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {quadrantInfo.description}
-          </p>
+          {currentSentiment && (
+            <Badge
+              className={cn(
+                'text-xs',
+                currentSentiment === 'supporter' && 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
+                currentSentiment === 'neutral' && 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
+                currentSentiment === 'blocker' && 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
+              )}
+            >
+              {currentSentiment.charAt(0).toUpperCase() + currentSentiment.slice(1)}
+            </Badge>
+          )}
         </div>
+        <p className="text-sm text-muted-foreground">
+          {quadrantInfo.description}
+        </p>
+
+        {/* Sentiment Selector */}
+        {onSentimentChange && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Sentiment</p>
+            <div className="flex gap-1" role="radiogroup" aria-label="Stakeholder sentiment">
+              {SENTIMENTS.map((s) => {
+                const styles = SENTIMENT_STYLES[s.id];
+                const isSelected = currentSentiment === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => onSentimentChange(isSelected ? undefined : s.id)}
+                    className={cn(
+                      'flex-1 px-2 py-1.5 text-xs font-medium rounded-md border transition-colors',
+                      'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
+                      isSelected
+                        ? cn(styles.border, styles.text,
+                            s.id === 'supporter' && 'bg-green-50 dark:bg-green-900/20',
+                            s.id === 'neutral' && 'bg-yellow-50 dark:bg-yellow-900/20',
+                            s.id === 'blocker' && 'bg-red-50 dark:bg-red-900/20'
+                          )
+                        : 'border-muted text-muted-foreground hover:border-border hover:text-foreground'
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Scores */}
         <div className="grid grid-cols-2 gap-4">

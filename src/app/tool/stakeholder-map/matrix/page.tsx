@@ -20,14 +20,17 @@ import {
   StakeholderMatrix,
   StakeholderDetailPanel,
   QuadrantSummary,
+  RiskSummary,
   canProceedToMatrix,
+  SENTIMENT_STYLES,
   type Stakeholder,
+  type StakeholderSentiment,
 } from '@/components/tools/stakeholder-map';
 import { useTool4Store } from '@/lib/store/tool4-store';
 
 export default function StakeholderMatrixPage() {
   const router = useRouter();
-  const { stakeholders, getQuadrantCounts } = useTool4Store();
+  const { stakeholders, getQuadrantCounts, updateStakeholder } = useTool4Store();
   const [selectedStakeholder, setSelectedStakeholder] = useState<Stakeholder | null>(null);
 
   // Redirect if not enough stakeholders
@@ -49,6 +52,19 @@ export default function StakeholderMatrixPage() {
     // Navigate back to input page with edit mode
     router.push('/tool/stakeholder-map');
   }, [router]);
+
+  const handleSentimentChange = useCallback(
+    (sentiment: StakeholderSentiment | undefined) => {
+      if (selectedStakeholder) {
+        updateStakeholder(selectedStakeholder.id, { sentiment });
+        // Update local selected stakeholder to reflect change immediately
+        setSelectedStakeholder((prev) =>
+          prev ? { ...prev, sentiment } : null
+        );
+      }
+    },
+    [selectedStakeholder, updateStakeholder]
+  );
 
   // Don't render if not enough stakeholders (will redirect)
   if (!canProceedToMatrix(stakeholders)) {
@@ -103,23 +119,45 @@ export default function StakeholderMatrixPage() {
                 className="mb-6"
               />
 
-              {/* Legend */}
-              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500" />
-                  <span>Key Players (High Power, High Interest)</span>
+              {/* Quadrant Legend */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Quadrants</p>
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500" />
+                      <span>Key Players</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-500" />
+                      <span>Keep Satisfied</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-teal-500" />
+                      <span>Keep Informed</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-gray-500" />
+                      <span>Monitor</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-purple-500" />
-                  <span>Keep Satisfied (High Power, Low Interest)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-teal-500" />
-                  <span>Keep Informed (Low Power, High Interest)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-gray-500" />
-                  <span>Monitor (Low Power, Low Interest)</span>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Sentiment (Ring Color)</p>
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border-2 border-green-500 bg-transparent" />
+                      <span>Supporter</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border-2 border-yellow-500 bg-transparent" />
+                      <span>Neutral</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border-2 border-red-500 bg-transparent" />
+                      <span>Blocker</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -132,6 +170,7 @@ export default function StakeholderMatrixPage() {
                   stakeholder={selectedStakeholder}
                   onEdit={handleEditStakeholder}
                   onClose={handleCloseDetail}
+                  onSentimentChange={handleSentimentChange}
                 />
               ) : (
                 <div className="rounded-lg border border-dashed p-6 text-center">
@@ -140,6 +179,9 @@ export default function StakeholderMatrixPage() {
                   </p>
                 </div>
               )}
+
+              {/* Risk Summary */}
+              <RiskSummary stakeholders={stakeholders} />
 
               {/* Quadrant Summary */}
               <QuadrantSummary counts={quadrantCounts} />

@@ -212,4 +212,71 @@ describe('StakeholderMatrix', () => {
       expect(screen.getAllByRole('button').length).toBe(50);
     });
   });
+
+  describe('sentiment display', () => {
+    it('shows sentiment ring for supporter', () => {
+      const stakeholder = createStakeholder({
+        name: 'Supporter Sam',
+        sentiment: 'supporter',
+      });
+
+      render(<StakeholderMatrix stakeholders={[stakeholder]} />);
+
+      const point = screen.getByText('SS');
+      expect(point).toHaveClass('ring-green-500');
+    });
+
+    it('shows sentiment ring for neutral', () => {
+      const stakeholder = createStakeholder({
+        name: 'Neutral Nancy',
+        sentiment: 'neutral',
+      });
+
+      render(<StakeholderMatrix stakeholders={[stakeholder]} />);
+
+      const point = screen.getByText('NN');
+      expect(point).toHaveClass('ring-yellow-500');
+    });
+
+    it('shows sentiment ring for blocker', () => {
+      const stakeholder = createStakeholder({
+        name: 'Blocker Bob',
+        sentiment: 'blocker',
+      });
+
+      render(<StakeholderMatrix stakeholders={[stakeholder]} />);
+
+      const point = screen.getByText('BB');
+      expect(point).toHaveClass('ring-red-500');
+    });
+
+    it('includes sentiment in aria label', () => {
+      const stakeholder = createStakeholder({
+        name: 'Jane Doe',
+        power: 8,
+        interest: 7,
+        sentiment: 'blocker',
+      });
+
+      render(<StakeholderMatrix stakeholders={[stakeholder]} />);
+
+      const point = screen.getByLabelText(
+        'Jane Doe, Power: 8, Interest: 7, Sentiment: blocker'
+      );
+      expect(point).toBeInTheDocument();
+    });
+
+    it('does not show sentiment ring when no sentiment assigned', () => {
+      const stakeholder = createStakeholder({
+        name: 'Unknown Ursula',
+      });
+
+      render(<StakeholderMatrix stakeholders={[stakeholder]} />);
+
+      const point = screen.getByText('UU');
+      expect(point).not.toHaveClass('ring-green-500');
+      expect(point).not.toHaveClass('ring-yellow-500');
+      expect(point).not.toHaveClass('ring-red-500');
+    });
+  });
 });

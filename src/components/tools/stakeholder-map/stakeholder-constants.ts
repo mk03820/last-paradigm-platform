@@ -20,6 +20,60 @@ export const MIN_STAKEHOLDERS = 3;
 export type StakeholderSentiment = 'supporter' | 'neutral' | 'blocker';
 
 /**
+ * Sentiment display information for Story 11.3
+ */
+export interface SentimentInfo {
+  id: StakeholderSentiment;
+  label: string;
+  description: string;
+}
+
+export const SENTIMENTS: SentimentInfo[] = [
+  {
+    id: 'supporter',
+    label: 'Supporter',
+    description: 'Actively advocates for the initiative',
+  },
+  {
+    id: 'neutral',
+    label: 'Neutral',
+    description: 'Neither for nor against the initiative',
+  },
+  {
+    id: 'blocker',
+    label: 'Blocker',
+    description: 'Actively resists or opposes the initiative',
+  },
+];
+
+/**
+ * Sentiment color styles for Story 11.3
+ */
+export const SENTIMENT_STYLES: Record<
+  StakeholderSentiment,
+  { bg: string; text: string; border: string; ring: string }
+> = {
+  supporter: {
+    bg: 'bg-green-500',
+    text: 'text-green-700 dark:text-green-300',
+    border: 'border-green-500',
+    ring: 'ring-green-500',
+  },
+  neutral: {
+    bg: 'bg-yellow-500',
+    text: 'text-yellow-700 dark:text-yellow-300',
+    border: 'border-yellow-500',
+    ring: 'ring-yellow-500',
+  },
+  blocker: {
+    bg: 'bg-red-500',
+    text: 'text-red-700 dark:text-red-300',
+    border: 'border-red-500',
+    ring: 'ring-red-500',
+  },
+};
+
+/**
  * Core stakeholder data structure
  */
 export interface Stakeholder {
