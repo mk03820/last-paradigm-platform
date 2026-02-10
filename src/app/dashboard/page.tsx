@@ -1,10 +1,11 @@
 /**
  * User Dashboard Page
  *
- * Shows user's diagnostic sessions with ability to continue, create, or delete.
+ * Shows user's diagnostic sessions and all 7 diagnostic tools with progress.
  *
- * Covers: FR2-3 (View saved sessions), FR2-4 (Cross-device continuity)
+ * Covers: FR2-3 (View saved sessions), FR2-4 (Cross-device continuity), FR2-37 (Tool Hub)
  * Story 8.2: User Dashboard and Session Management
+ * Story 8.5: Diagnostic Tool Hub
  */
 
 import { redirect } from 'next/navigation';
@@ -14,16 +15,10 @@ import { db } from '@/lib/db';
 import { diagnosticSessions } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { LogOut, User } from 'lucide-react';
 import { SessionList, NewSessionButton, SessionMigrator } from '@/components/dashboard';
 import { toSessionSummary } from '@/types/session.types';
+import { DiagnosticProgress, ToolGrid } from '@/components/diagnostic';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -90,42 +85,31 @@ export default async function DashboardPage() {
           <NewSessionButton />
         </div>
 
+        {/* Diagnostic Progress */}
+        <section className="mb-8 p-4 rounded-lg border bg-card" aria-labelledby="progress-heading">
+          <h3 id="progress-heading" className="text-lg font-semibold mb-4">Diagnostic Progress</h3>
+          <DiagnosticProgress />
+        </section>
+
+        {/* Diagnostic Tools */}
+        <section className="mb-8" aria-labelledby="tools-heading">
+          <h3 id="tools-heading" className="text-lg font-semibold mb-4">Diagnostic Tools</h3>
+          <ToolGrid />
+        </section>
+
         {/* Sessions list */}
         <section className="mb-8">
           <h3 className="text-lg font-semibold mb-4">Your Diagnostic Sessions</h3>
           <SessionList initialSessions={sessionSummaries} />
         </section>
 
-        {/* Quick actions */}
+        {/* Quick links */}
         <section>
-          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Meeting Audit Calculator</CardTitle>
-                <CardDescription>
-                  Tool 2: Quantify the cost of unproductive meetings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/calculator">Open Calculator</Link>
-                </Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Download Templates</CardTitle>
-                <CardDescription>
-                  Work offline with Excel or Google Sheets
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href="/templates">View Templates</Link>
-                </Button>
-              </CardContent>
-            </Card>
+          <h3 className="text-lg font-semibold mb-4">Resources</h3>
+          <div className="flex gap-4">
+            <Button variant="outline" asChild>
+              <Link href="/templates">Download Templates</Link>
+            </Button>
           </div>
         </section>
       </div>

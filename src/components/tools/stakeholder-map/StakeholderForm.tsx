@@ -94,7 +94,10 @@ export function StakeholderForm({
   const selectRole = (selectedRole: string) => {
     setRole(selectedRole);
     setShowRoleSuggestions(false);
-    setErrors((prev) => ({ ...prev, role: undefined }));
+    setErrors((prev) => {
+      const { role: _, ...rest } = prev;
+      return rest;
+    });
   };
 
   // Close suggestions when clicking outside
@@ -142,7 +145,10 @@ export function StakeholderForm({
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                setErrors((prev) => ({ ...prev, name: undefined }));
+                setErrors((prev) => {
+                  const { name: _, ...rest } = prev;
+                  return rest;
+                });
               }}
               placeholder="Enter stakeholder name"
               aria-invalid={!!errors.name}
@@ -168,7 +174,10 @@ export function StakeholderForm({
               onChange={(e) => {
                 setRole(e.target.value);
                 setShowRoleSuggestions(true);
-                setErrors((prev) => ({ ...prev, role: undefined }));
+                setErrors((prev) => {
+                  const { role: _, ...rest } = prev;
+                  return rest;
+                });
               }}
               onFocus={() => setShowRoleSuggestions(true)}
               placeholder="e.g., VP Engineering, CFO"
