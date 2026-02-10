@@ -1,10 +1,17 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Header, StepIndicator } from '@/components/layout';
+import { Header } from '@/components/layout';
+import { ProgressStepper } from '@/components/diagnostic';
 import { CalculatorForm } from '@/components/calculator/CalculatorForm';
 import { CalculatorHeader } from '@/components/calculator/CalculatorHeader';
 import { SessionLoader } from '@/components/calculator/SessionLoader';
 
+/**
+ * Tool 2: Meeting Audit Calculator Page
+ *
+ * Story 8.6: Progress Stepper Navigation
+ * Covers: FR2-38 (Progress stepper)
+ */
 export default function CalculatorPage() {
   return (
     <>
@@ -14,7 +21,7 @@ export default function CalculatorPage() {
         {/* Back Navigation */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: '2rem' }}>
           <Link
-            href="/"
+            href="/diagnostic"
             style={{
               fontSize: '0.875rem',
               color: 'var(--muted-foreground)',
@@ -25,12 +32,13 @@ export default function CalculatorPage() {
             }}
           >
             <span aria-hidden="true">&larr;</span>
-            Back to Home
+            Back to Diagnostic Hub
           </Link>
         </nav>
 
+        {/* Progress Stepper */}
         <div style={{ marginBottom: '2rem' }}>
-          <StepIndicator currentStep={1} totalSteps={7} stepLabel="Meeting Audit Calculator" />
+          <ProgressStepper currentToolId="meeting-audit" />
         </div>
 
         {/* Session Loader for authenticated users */}

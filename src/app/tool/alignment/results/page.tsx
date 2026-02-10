@@ -4,7 +4,8 @@ import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Header, StepIndicator } from '@/components/layout';
+import { Header } from '@/components/layout';
+import { ProgressStepper, ToolNavigation } from '@/components/diagnostic';
 import {
   AlignmentRadarChart,
   CompositeScoreDisplay,
@@ -27,7 +28,8 @@ import type { DimensionId } from '@/components/tools/alignment';
  * Story 9.2: Weighted Composite Score Calculation
  * Story 9.3: Radar Chart Visualization
  * Story 9.4: Score Interpretation and Next Steps
- * Covers: FR2-7 (weighted composite calculation), FR2-8 (radar chart), FR2-9 (interpretation)
+ * Story 8.6: Progress Stepper Navigation
+ * Covers: FR2-7, FR2-8, FR2-9, FR2-38 (Progress stepper)
  */
 export default function AlignmentResultsPage() {
   const router = useRouter();
@@ -72,13 +74,9 @@ export default function AlignmentResultsPage() {
             </Link>
           </nav>
 
-          {/* Step Indicator */}
+          {/* Progress Stepper */}
           <div className="mb-6">
-            <StepIndicator
-              currentStep={1}
-              totalSteps={7}
-              stepLabel="Organizational Alignment Assessment - Results"
-            />
+            <ProgressStepper currentToolId="alignment" />
           </div>
 
           {/* Page Header */}
@@ -141,10 +139,10 @@ export default function AlignmentResultsPage() {
             <Button variant="outline" asChild>
               <Link href="/tool/alignment">Revise Scores</Link>
             </Button>
-            <Button asChild>
-              <Link href="/tool/total-cost">Continue to Total Cost Calculator</Link>
-            </Button>
           </div>
+
+          {/* Tool Navigation */}
+          <ToolNavigation currentToolNumber={1} className="mt-8" />
 
           {/* Methodology Note */}
           <div className="mt-8 p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">

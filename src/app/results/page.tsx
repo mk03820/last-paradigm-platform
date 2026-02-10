@@ -12,7 +12,8 @@ import { EmailCaptureForm } from '@/components/email/EmailCaptureForm';
 import { PdfExportButton } from '@/components/pdf/PdfExportButton';
 import { SaveProgressPrompt } from '@/components/results/SaveProgressPrompt';
 import { Button } from '@/components/ui/button';
-import { Header, StepIndicator } from '@/components/layout';
+import { Header } from '@/components/layout';
+import { ProgressStepper, ToolNavigation } from '@/components/diagnostic';
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +23,9 @@ import {
 
 /**
  * Results Page
+ *
+ * Story 8.6: Progress Stepper Navigation
+ * Covers: FR2-38 (Progress stepper, tool navigation)
  */
 export default function ResultsPage() {
   const { results } = useCalculatorStore();
@@ -54,12 +58,9 @@ export default function ResultsPage() {
           </Link>
         </nav>
 
+        {/* Progress Stepper */}
         <div style={{ marginBottom: '2rem' }}>
-          <StepIndicator
-            currentStep={2}
-            totalSteps={7}
-            stepLabel="Meeting Waste Analysis"
-          />
+          <ProgressStepper currentToolId="meeting-audit" />
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -141,6 +142,11 @@ export default function ResultsPage() {
           <Button asChild variant="outline" size="lg">
             <Link href="/calculator">Recalculate</Link>
           </Button>
+        </div>
+
+        {/* Tool Navigation */}
+        <div style={{ marginTop: '2rem' }}>
+          <ToolNavigation currentToolNumber={2} />
         </div>
         </div>
       </main>

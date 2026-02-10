@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Header, StepIndicator } from '@/components/layout';
+import { Header } from '@/components/layout';
+import { ProgressStepper } from '@/components/diagnostic';
 import { StakeholderInput } from '@/components/tools/stakeholder-map';
 
 /**
@@ -12,7 +13,8 @@ import { StakeholderInput } from '@/components/tools/stakeholder-map';
  * for mapping on a 2x2 matrix.
  *
  * Story 11.1: Stakeholder Input Interface
- * Covers: FR2-16 (Add stakeholders with power and interest scores)
+ * Story 8.6: Progress Stepper Navigation
+ * Covers: FR2-16 (Add stakeholders with power and interest scores), FR2-38 (Progress stepper)
  */
 export default function StakeholderMapPage() {
   const router = useRouter();
@@ -29,21 +31,17 @@ export default function StakeholderMapPage() {
           {/* Back Navigation */}
           <nav aria-label="Breadcrumb" className="mb-6">
             <Link
-              href="/dashboard"
+              href="/diagnostic"
               className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
             >
               <span aria-hidden="true">&larr;</span>
-              Back to Dashboard
+              Back to Diagnostic Hub
             </Link>
           </nav>
 
-          {/* Step Indicator */}
+          {/* Progress Stepper */}
           <div className="mb-6">
-            <StepIndicator
-              currentStep={4}
-              totalSteps={7}
-              stepLabel="Stakeholder Power/Interest Mapping"
-            />
+            <ProgressStepper currentToolId="stakeholder-map" />
           </div>
 
           {/* Page Header */}

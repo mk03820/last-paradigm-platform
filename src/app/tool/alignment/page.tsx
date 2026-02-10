@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Header, StepIndicator } from '@/components/layout';
+import { Header } from '@/components/layout';
+import { ProgressStepper } from '@/components/diagnostic';
 import { AlignmentScorer } from '@/components/tools/alignment';
 
 /**
@@ -8,7 +9,8 @@ import { AlignmentScorer } from '@/components/tools/alignment';
  * Allows users to score their organization across 5 alignment dimensions.
  *
  * Story 9.1: Alignment Dimension Scoring Interface
- * Covers: FR2-6 (Score 5 alignment dimensions)
+ * Story 8.6: Progress Stepper Navigation
+ * Covers: FR2-6 (Score 5 alignment dimensions), FR2-38 (Progress stepper)
  */
 export default function AlignmentAssessmentPage() {
   return (
@@ -19,21 +21,17 @@ export default function AlignmentAssessmentPage() {
           {/* Back Navigation */}
           <nav aria-label="Breadcrumb" className="mb-6">
             <Link
-              href="/dashboard"
+              href="/diagnostic"
               className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
             >
               <span aria-hidden="true">&larr;</span>
-              Back to Dashboard
+              Back to Diagnostic Hub
             </Link>
           </nav>
 
-          {/* Step Indicator */}
+          {/* Progress Stepper */}
           <div className="mb-6">
-            <StepIndicator
-              currentStep={1}
-              totalSteps={7}
-              stepLabel="Organizational Alignment Assessment"
-            />
+            <ProgressStepper currentToolId="alignment" />
           </div>
 
           {/* Page Header */}
