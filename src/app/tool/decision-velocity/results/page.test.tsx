@@ -155,6 +155,22 @@ describe('Decision Velocity Results Page', () => {
       expect(screen.getByText('How metrics are calculated')).toBeInTheDocument();
     });
 
+    it('renders benchmark comparison section', () => {
+      render(<DecisionVelocityResultsPage />);
+
+      expect(screen.getByText('Industry Benchmark Comparison')).toBeInTheDocument();
+    });
+
+    it('renders benchmark comparison table', () => {
+      render(<DecisionVelocityResultsPage />);
+
+      // Should see benchmark column headers (appear in legend and headers)
+      expect(screen.getAllByText('Fast').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Average').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Slow').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Crisis').length).toBeGreaterThanOrEqual(2);
+    });
+
     it('marks tool as complete on render', () => {
       render(<DecisionVelocityResultsPage />);
 

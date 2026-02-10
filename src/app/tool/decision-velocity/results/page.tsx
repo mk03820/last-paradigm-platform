@@ -8,6 +8,7 @@ import { Header, StepIndicator } from '@/components/layout';
 import {
   LatencyMetricsCard,
   VelocityResultsSummary,
+  BenchmarkComparisonTable,
   calculateAllMetrics,
   findSlowestArchetype,
 } from '@/components/tools/decision-velocity';
@@ -104,6 +105,15 @@ export default function DecisionVelocityResultsPage() {
                 />
               ))}
             </div>
+          </section>
+
+          {/* Benchmark Comparison Table */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Industry Benchmark Comparison</h2>
+            <BenchmarkComparisonTable
+              metrics={metrics}
+              budgetThreshold={archetypes.budget.budgetThreshold}
+            />
           </section>
 
           {/* Actions */}

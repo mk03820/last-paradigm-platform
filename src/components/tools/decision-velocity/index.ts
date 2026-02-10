@@ -1,3 +1,5 @@
+export { BenchmarkComparisonRow } from './BenchmarkComparisonRow';
+export { BenchmarkComparisonTable } from './BenchmarkComparisonTable';
 export { BudgetThresholdSelector } from './BudgetThresholdSelector';
 export { DecisionArchetypeCard } from './DecisionArchetypeCard';
 export { DecisionSampleForm } from './DecisionSampleForm';
@@ -45,3 +47,18 @@ export type {
   ArchetypeMetrics,
   PerformanceLevel,
 } from './calculations';
+export {
+  BENCHMARKS,
+  BUDGET_BENCHMARKS,
+  BENCHMARK_LABELS,
+  getBenchmarksForArchetype,
+  getBenchmarkLevel,
+  calculateGapToFast,
+  getBenchmarkLevelColor,
+  getBenchmarkColumnStyle,
+} from './benchmarks';
+export type {
+  BenchmarkLevel,
+  BenchmarkThreshold,
+  ArchetypeBenchmarks,
+} from './benchmarks';
