@@ -11,6 +11,8 @@ import {
   getJourneyTemplate,
   calculateTotalLatency,
 } from '@/components/tools/data-flow/journey-constants';
+import type { FrictionPoint } from '@/components/tools/data-flow/friction-constants';
+import { generateFrictionId } from '@/components/tools/data-flow/friction-constants';
 
 /**
  * Tool 5 Data Flow Friction Analysis Store
@@ -20,6 +22,9 @@ import {
  *
  * Story 12.1: Data Journey Mapping Interface
  * Covers: AC1-AC5 (journey CRUD, stages, templates)
+ *
+ * Story 12.2: Friction Point Identification
+ * Covers: FR2-22 (friction CRUD, severity scoring)
  */
 
 export interface Tool5CompletionData {
@@ -40,6 +45,8 @@ export interface Tool5State {
   isDirty: boolean;
   // Completion tracking
   completion: Tool5CompletionData | null;
+  // Friction points for all journeys
+  frictionPoints: FrictionPoint[];
 
   // Journey CRUD
   addJourney: (journey: Omit<DataJourney, 'id' | 'createdAt' | 'updatedAt'>) => string;
@@ -52,6 +59,11 @@ export interface Tool5State {
   updateStage: (journeyId: string, stageId: string, updates: Partial<Omit<DataStage, 'id'>>) => void;
   removeStage: (journeyId: string, stageId: string) => void;
   reorderStages: (journeyId: string, stageIds: string[]) => void;
+
+  // Friction CRUD
+  addFrictionPoint: (point: Omit<FrictionPoint, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateFrictionPoint: (id: string, updates: Partial<Omit<FrictionPoint, 'id' | 'createdAt'>>) => void;
+  removeFrictionPoint: (id: string) => void;
 
   // Template
   applyTemplate: (templateId: string, journeyName?: string) => string | null;
@@ -67,6 +79,9 @@ export interface Tool5State {
   getJourneyCount: () => number;
   getActiveJourney: () => DataJourney | undefined;
   getTotalLatency: () => number;
+  getFrictionPointsByJourney: (journeyId: string) => FrictionPoint[];
+  getFrictionPointsByStage: (stageId: string) => FrictionPoint[];
+  getTotalFrictionCount: () => number;
 }
 
 export const useTool5Store = create<Tool5State>()(
@@ -78,6 +93,7 @@ export const useTool5Store = create<Tool5State>()(
       sessionId: null,
       isDirty: false,
       completion: null,
+      frictionPoints: [],
 
       // Add a new journey
       addJourney: (journey) => {
@@ -120,10 +136,11 @@ export const useTool5Store = create<Tool5State>()(
         }));
       },
 
-      // Remove a journey
+      // Remove a journey (also removes associated friction points)
       removeJourney: (id) => {
         set((state) => ({
           journeys: state.journeys.filter((j) => j.id !== id),
+          frictionPoints: state.frictionPoints.filter((fp) => fp.journeyId !== id),
           activeJourneyId:
             state.activeJourneyId === id ? null : state.activeJourneyId,
           isDirty: true,
@@ -176,7 +193,7 @@ export const useTool5Store = create<Tool5State>()(
         }));
       },
 
-      // Remove a stage
+      // Remove a stage (also removes associated friction points)
       removeStage: (journeyId, stageId) => {
         set((state) => ({
           journeys: state.journeys.map((j) =>
@@ -188,6 +205,7 @@ export const useTool5Store = create<Tool5State>()(
                 }
               : j
           ),
+          frictionPoints: state.frictionPoints.filter((fp) => fp.stageId !== stageId),
           isDirty: true,
           completion: null,
         }));
@@ -213,6 +231,50 @@ export const useTool5Store = create<Tool5State>()(
               updatedAt: new Date().toISOString(),
             };
           }),
+          isDirty: true,
+          completion: null,
+        }));
+      },
+
+      // Add a friction point
+      addFrictionPoint: (point) => {
+        const id = generateFrictionId();
+        const now = new Date().toISOString();
+
+        set((state) => ({
+          frictionPoints: [
+            ...state.frictionPoints,
+            {
+              ...point,
+              id,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+          isDirty: true,
+          completion: null,
+        }));
+
+        return id;
+      },
+
+      // Update a friction point
+      updateFrictionPoint: (id, updates) => {
+        set((state) => ({
+          frictionPoints: state.frictionPoints.map((fp) =>
+            fp.id === id
+              ? { ...fp, ...updates, updatedAt: new Date().toISOString() }
+              : fp
+          ),
+          isDirty: true,
+          completion: null,
+        }));
+      },
+
+      // Remove a friction point
+      removeFrictionPoint: (id) => {
+        set((state) => ({
+          frictionPoints: state.frictionPoints.filter((fp) => fp.id !== id),
           isDirty: true,
           completion: null,
         }));
@@ -280,6 +342,7 @@ export const useTool5Store = create<Tool5State>()(
         set({
           journeys: [],
           activeJourneyId: null,
+          frictionPoints: [],
           isDirty: false,
           completion: null,
         });
@@ -304,6 +367,23 @@ export const useTool5Store = create<Tool5State>()(
           0
         );
       },
+
+      // Get friction points for a specific journey
+      getFrictionPointsByJourney: (journeyId) => {
+        const { frictionPoints } = get();
+        return frictionPoints.filter((fp) => fp.journeyId === journeyId);
+      },
+
+      // Get friction points for a specific stage
+      getFrictionPointsByStage: (stageId) => {
+        const { frictionPoints } = get();
+        return frictionPoints.filter((fp) => fp.stageId === stageId);
+      },
+
+      // Get total friction point count
+      getTotalFrictionCount: () => {
+        return get().frictionPoints.length;
+      },
     }),
     {
       name: 'tool5-data-flow-session',
@@ -313,6 +393,7 @@ export const useTool5Store = create<Tool5State>()(
         activeJourneyId: state.activeJourneyId,
         sessionId: state.sessionId,
         completion: state.completion,
+        frictionPoints: state.frictionPoints,
       }),
     }
   )

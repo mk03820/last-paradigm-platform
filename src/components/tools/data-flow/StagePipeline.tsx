@@ -6,6 +6,9 @@
  *
  * Story 12.1: Data Journey Mapping Interface
  * Covers: AC2, AC3 (stage visualization)
+ *
+ * Story 12.2: Friction Point Identification
+ * Covers: Task 7 (friction count badges on stages)
  */
 
 'use client';
@@ -24,6 +27,10 @@ export interface StagePipelineProps {
   onStageClick?: (stageId: string) => void;
   /** Currently selected stage ID */
   selectedStageId?: string;
+  /** Friction counts by stage ID for displaying badges */
+  frictionCounts?: Record<string, number>;
+  /** Whether stages are clickable (enables hover states) */
+  clickable?: boolean;
   /** Additional CSS classes */
   className?: string;
 }
@@ -36,57 +43,74 @@ function PipelineStage({
   compact,
   isSelected,
   onClick,
+  frictionCount,
 }: {
   stage: DataStage;
   compact?: boolean;
   isSelected?: boolean;
   onClick?: () => void;
+  frictionCount?: number;
 }) {
   const typeInfo = getStageTypeInfo(stage.type);
   const latencyHours =
     stage.latencyUnit === 'days' ? stage.latency * 24 : stage.latency;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!onClick}
-      className={cn(
-        'flex flex-col items-center text-center transition-all',
-        'rounded-lg border-2 p-2',
-        compact ? 'min-w-[60px] max-w-[80px]' : 'min-w-[100px] max-w-[140px]',
-        typeInfo.bgColor,
-        isSelected ? 'ring-2 ring-primary ring-offset-2' : typeInfo.borderColor,
-        onClick && 'cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring',
-        !onClick && 'cursor-default'
-      )}
-      aria-label={`${typeInfo.label}: ${stage.systemName || 'Not configured'}${
-        !compact ? `, latency: ${formatLatency(latencyHours)}` : ''
-      }`}
-    >
-      <span
-        className={cn(
-          'text-[10px] font-semibold uppercase tracking-wide',
-          typeInfo.color
-        )}
-      >
-        {typeInfo.shortLabel}
-      </span>
-      <span
-        className={cn(
-          'text-xs font-medium truncate w-full mt-0.5',
-          stage.systemName ? 'text-foreground' : 'text-muted-foreground italic'
-        )}
-        title={stage.systemName || 'Not configured'}
-      >
-        {stage.systemName || '...'}
-      </span>
-      {!compact && (
-        <span className="text-[10px] text-muted-foreground mt-0.5">
-          {formatLatency(latencyHours)}
+    <div className="relative">
+      {/* Friction count badge */}
+      {frictionCount !== undefined && frictionCount > 0 && (
+        <span
+          className={cn(
+            'absolute -top-2 -right-2 z-10',
+            'flex h-5 w-5 items-center justify-center',
+            'rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground'
+          )}
+          aria-label={`${frictionCount} friction point${frictionCount !== 1 ? 's' : ''}`}
+        >
+          {frictionCount}
         </span>
       )}
-    </button>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={!onClick}
+        className={cn(
+          'flex flex-col items-center text-center transition-all',
+          'rounded-lg border-2 p-2',
+          compact ? 'min-w-[60px] max-w-[80px]' : 'min-w-[100px] max-w-[140px]',
+          typeInfo.bgColor,
+          isSelected ? 'ring-2 ring-primary ring-offset-2' : typeInfo.borderColor,
+          onClick && 'cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring',
+          !onClick && 'cursor-default'
+        )}
+        aria-label={`${typeInfo.label}: ${stage.systemName || 'Not configured'}${
+          !compact ? `, latency: ${formatLatency(latencyHours)}` : ''
+        }${frictionCount ? `, ${frictionCount} friction points` : ''}`}
+      >
+        <span
+          className={cn(
+            'text-[10px] font-semibold uppercase tracking-wide',
+            typeInfo.color
+          )}
+        >
+          {typeInfo.shortLabel}
+        </span>
+        <span
+          className={cn(
+            'text-xs font-medium truncate w-full mt-0.5',
+            stage.systemName ? 'text-foreground' : 'text-muted-foreground italic'
+          )}
+          title={stage.systemName || 'Not configured'}
+        >
+          {stage.systemName || '...'}
+        </span>
+        {!compact && (
+          <span className="text-[10px] text-muted-foreground mt-0.5">
+            {formatLatency(latencyHours)}
+          </span>
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -112,6 +136,8 @@ export const StagePipeline = React.memo(function StagePipeline({
   compact = false,
   onStageClick,
   selectedStageId,
+  frictionCounts,
+  clickable = false,
   className,
 }: StagePipelineProps) {
   // Sort stages by order
@@ -133,6 +159,9 @@ export const StagePipeline = React.memo(function StagePipeline({
     );
   }
 
+  // Determine if stages should be clickable
+  const isClickable = clickable || !!onStageClick;
+
   return (
     <div
       className={cn(
@@ -149,7 +178,8 @@ export const StagePipeline = React.memo(function StagePipeline({
             stage={stage}
             compact={compact}
             isSelected={stage.id === selectedStageId}
-            onClick={onStageClick ? () => onStageClick(stage.id) : undefined}
+            onClick={isClickable && onStageClick ? () => onStageClick(stage.id) : undefined}
+            frictionCount={frictionCounts?.[stage.id]}
           />
         </React.Fragment>
       ))}
