@@ -25,3 +25,9 @@ export * from './cost-constants';
 export { CostForm } from './CostForm';
 export { CostCard } from './CostCard';
 export { CostSummary } from './CostSummary';
+
+// Results components (Story 12.4)
+export { CategoryChart } from './CategoryChart';
+export { FrictionInterpretation } from './FrictionInterpretation';
+export { CriticalFriction } from './CriticalFriction';
+export { ResultsSummary } from './ResultsSummary';

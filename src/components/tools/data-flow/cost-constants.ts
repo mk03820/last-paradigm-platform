@@ -8,7 +8,11 @@
  * Covers: FR2-23 (Calculate friction costs)
  */
 
-import type { FrictionPoint, FrictionCategory } from './friction-constants';
+import type { FrictionPoint, FrictionCategory, SeverityScore } from './friction-constants';
+import {
+  isOrganizationalFriction,
+  calculateTotalSeverity,
+} from './friction-constants';
 
 /**
  * Cost data associated with a friction point
@@ -273,4 +277,152 @@ export function calculateCostCompletion(points: FrictionPointWithCost[]): number
  */
 export function generateCostId(): string {
   return `cost_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Friction interpretation types and constants
+ * Story 12.4: Friction Category Breakdown and Recommendations
+ */
+
+export type DominantFrictionType = 'organizational' | 'technical' | 'balanced';
+
+export interface FrictionInterpretation {
+  dominantType: DominantFrictionType;
+  ratio: number; // organizational / total (0-1)
+  percentage: number; // organizational percentage (0-100)
+  headline: string;
+  description: string;
+  recommendations: string[];
+}
+
+/**
+ * Critical severity threshold (AC4: severity 7-9 highlighted as critical)
+ */
+export const CRITICAL_SEVERITY_THRESHOLD = 7;
+
+/**
+ * Interpretation text constants for dominant friction types
+ */
+export const INTERPRETATION_TEXT: Record<
+  DominantFrictionType,
+  { headline: string; description: string; recommendations: string[] }
+> = {
+  organizational: {
+    headline: 'Friction is primarily organizational',
+    description:
+      "Most data friction comes from process and governance issues, not technical limitations. Technology investment alone won't solve these problems.",
+    recommendations: [
+      'Review data access policies and approval workflows',
+      'Establish single sources of truth with clear ownership',
+      'Implement data quality standards and monitoring',
+      'Consider organizational change before platform changes',
+    ],
+  },
+  technical: {
+    headline: 'Friction is primarily technical',
+    description:
+      'Most data friction stems from technical debt and infrastructure limitations. Technology modernization may provide significant returns.',
+    recommendations: [
+      'Prioritize technical debt reduction in data pipelines',
+      'Evaluate modern data platform options',
+      'Invest in automation and self-service capabilities',
+      'Consider incremental platform modernization',
+    ],
+  },
+  balanced: {
+    headline: 'Friction is balanced across organizational and technical factors',
+    description:
+      'Data friction comes from both process and technology issues. A holistic approach addressing both is needed.',
+    recommendations: [
+      'Address quick-win organizational improvements first',
+      'Create roadmap for technical modernization',
+      'Ensure governance keeps pace with technology changes',
+      'Consider phased transformation approach',
+    ],
+  },
+};
+
+/**
+ * Calculate organizational vs technical cost breakdown
+ */
+export function calculateOrganizationalVsTechnicalCost(
+  costByCategory: Record<FrictionCategory, number>
+): { organizationalCost: number; technicalCost: number; total: number } {
+  let organizationalCost = 0;
+  let technicalCost = 0;
+
+  for (const [category, cost] of Object.entries(costByCategory)) {
+    if (isOrganizationalFriction(category as FrictionCategory)) {
+      organizationalCost += cost;
+    } else {
+      technicalCost += cost;
+    }
+  }
+
+  return {
+    organizationalCost,
+    technicalCost,
+    total: organizationalCost + technicalCost,
+  };
+}
+
+/**
+ * Interpret friction breakdown based on cost distribution
+ * - >= 70% organizational: "organizational" dominant
+ * - <= 30% organizational: "technical" dominant
+ * - Between: "balanced"
+ */
+export function interpretFrictionBreakdown(
+  costByCategory: Record<FrictionCategory, number>
+): FrictionInterpretation {
+  const { organizationalCost, technicalCost, total } =
+    calculateOrganizationalVsTechnicalCost(costByCategory);
+
+  // Handle edge case of no costs
+  if (total === 0) {
+    return {
+      dominantType: 'balanced',
+      ratio: 0.5,
+      percentage: 50,
+      ...INTERPRETATION_TEXT.balanced,
+    };
+  }
+
+  const ratio = organizationalCost / total;
+  const percentage = Math.round(ratio * 100);
+
+  let dominantType: DominantFrictionType;
+  if (ratio >= 0.7) {
+    dominantType = 'organizational';
+  } else if (ratio <= 0.3) {
+    dominantType = 'technical';
+  } else {
+    dominantType = 'balanced';
+  }
+
+  return {
+    dominantType,
+    ratio,
+    percentage,
+    ...INTERPRETATION_TEXT[dominantType],
+  };
+}
+
+/**
+ * Get critical friction points (severity 7-9)
+ * AC4: Highlight severity 7-9 friction points as critical
+ */
+export function getCriticalFrictionPoints(
+  points: FrictionPointWithCost[]
+): FrictionPointWithCost[] {
+  return points
+    .filter((p) => calculateTotalSeverity(p.severity) >= CRITICAL_SEVERITY_THRESHOLD)
+    .sort((a, b) => calculateTotalSeverity(b.severity) - calculateTotalSeverity(a.severity));
+}
+
+/**
+ * Check if a severity score is critical
+ */
+export function isCriticalSeverity(severity: SeverityScore): boolean {
+  return calculateTotalSeverity(severity) >= CRITICAL_SEVERITY_THRESHOLD;
 }
