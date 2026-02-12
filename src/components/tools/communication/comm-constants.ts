@@ -823,3 +823,242 @@ export const HEALTH_SCORE_INTERPRETATIONS = {
     description: 'Multiple communication patterns are in crisis. Immediate intervention is recommended to prevent organizational drag.',
   },
 };
+
+// ============================================================================
+// Intervention Types and Constants (Story 13.4)
+// ============================================================================
+
+/**
+ * Impact level for interventions
+ */
+export type ImpactLevel = 'high' | 'medium' | 'low';
+
+/**
+ * Effort level for interventions
+ */
+export type EffortLevel = 'high' | 'medium' | 'low';
+
+/**
+ * Intervention definition
+ */
+export interface Intervention {
+  id: string;
+  patternId: string;
+  title: string;
+  description: string;
+  impact: ImpactLevel;
+  effort: EffortLevel;
+  playbook2Tool?: string;
+  playbook2Link?: string;
+}
+
+/**
+ * Recommended intervention with priority calculation
+ */
+export interface RecommendedIntervention extends Intervention {
+  priority: number;
+  severity: SeverityLevel;
+}
+
+/**
+ * Tool 6 summary for Tool 7 aggregation
+ */
+export interface Tool6Summary {
+  healthScore: number;
+  healthStatus: HealthStatus;
+  patternsDetected: number;
+  patternsSeverity: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  interventionsRecommended: number;
+  topInterventions: string[];
+  completedAt: string;
+}
+
+/**
+ * Interventions for each anti-pattern
+ */
+export const INTERVENTIONS: Intervention[] = [
+  // Broadcast Overload Interventions
+  {
+    id: 'collapse-distribution-lists',
+    patternId: 'broadcast-overload',
+    title: 'Consolidate Distribution Lists',
+    description: 'Audit and merge overlapping DLs. Create tiered lists separating need-to-know from nice-to-know information.',
+    impact: 'high',
+    effort: 'medium',
+    playbook2Tool: 'Communication Audit Template',
+  },
+  {
+    id: 'implement-channel-guidelines',
+    patternId: 'broadcast-overload',
+    title: 'Establish Channel Guidelines',
+    description: 'Define when to use @here/@channel. Create escalation tiers for different urgency levels.',
+    impact: 'medium',
+    effort: 'low',
+  },
+  {
+    id: 'implement-digest-system',
+    patternId: 'broadcast-overload',
+    title: 'Implement Digest System',
+    description: 'Replace constant broadcasts with daily/weekly digests. Let people pull info rather than push to everyone.',
+    impact: 'medium',
+    effort: 'medium',
+  },
+
+  // Telephone Game Interventions
+  {
+    id: 'direct-communication-paths',
+    patternId: 'telephone-game',
+    title: 'Create Direct Communication Paths',
+    description: 'Identify info that cascades through 3+ levels. Create direct channels to skip intermediaries.',
+    impact: 'high',
+    effort: 'medium',
+  },
+  {
+    id: 'decision-documentation',
+    patternId: 'telephone-game',
+    title: 'Implement Decision Logs',
+    description: 'Require written decisions within 24 hours of meetings. Use standard template with context, decision, and rationale.',
+    impact: 'high',
+    effort: 'low',
+    playbook2Tool: 'Decision Log Template',
+  },
+  {
+    id: 'single-source-of-truth',
+    patternId: 'telephone-game',
+    title: 'Establish Single Source of Truth',
+    description: 'For each major initiative, designate one canonical location for status and decisions. No verbal-only updates.',
+    impact: 'high',
+    effort: 'medium',
+  },
+
+  // Tribal Knowledge Interventions
+  {
+    id: 'knowledge-externalization',
+    patternId: 'tribal-knowledge',
+    title: 'Externalize Critical Knowledge',
+    description: 'Identify top 10 "ask Sarah" topics. Document in searchable wiki/knowledge base with regular updates.',
+    impact: 'high',
+    effort: 'high',
+    playbook2Tool: 'Knowledge Audit Framework',
+  },
+  {
+    id: 'public-channel-default',
+    patternId: 'tribal-knowledge',
+    title: 'Default to Public Channels',
+    description: 'Policy: Work discussions start in public channels. DMs only for sensitive/personal topics.',
+    impact: 'medium',
+    effort: 'low',
+  },
+  {
+    id: 'onboarding-documentation',
+    patternId: 'tribal-knowledge',
+    title: 'Create Onboarding Documentation',
+    description: 'Document what new team members need to know. If it is not written down, it does not exist.',
+    impact: 'medium',
+    effort: 'medium',
+  },
+
+  // Tool Sprawl Interventions
+  {
+    id: 'channel-consolidation',
+    patternId: 'tool-sprawl',
+    title: 'Consolidate Redundant Channels',
+    description: 'Audit channels with similar purposes. Archive duplicates, redirect to canonical channels.',
+    impact: 'medium',
+    effort: 'medium',
+  },
+  {
+    id: 'tool-purpose-matrix',
+    patternId: 'tool-sprawl',
+    title: 'Define Tool-Purpose Matrix',
+    description: 'Create clear guidance: Email for X, Slack for Y, Meetings for Z. Enforce boundaries consistently.',
+    impact: 'high',
+    effort: 'low',
+    playbook2Tool: 'Communication Channel Matrix',
+  },
+  {
+    id: 'channel-naming-convention',
+    patternId: 'tool-sprawl',
+    title: 'Implement Channel Naming Convention',
+    description: 'Standard prefixes (proj-, team-, topic-) make channels discoverable and reduce duplication.',
+    impact: 'low',
+    effort: 'low',
+  },
+
+  // CYA Culture Interventions
+  {
+    id: 'psychological-safety',
+    patternId: 'cya-culture',
+    title: 'Build Psychological Safety',
+    description: 'Address root cause: fear of blame. Implement blameless postmortems, celebrate learning from failures.',
+    impact: 'high',
+    effort: 'high',
+  },
+  {
+    id: 'reduce-email-cc',
+    patternId: 'cya-culture',
+    title: 'Implement CC Reduction Policy',
+    description: 'Guideline: CC only those who need to act. Move FYI info to weekly digests or shared dashboards.',
+    impact: 'medium',
+    effort: 'low',
+  },
+  {
+    id: 'decision-authority-clarity',
+    patternId: 'cya-culture',
+    title: 'Clarify Decision Authority',
+    description: 'Document who can decide what. Clear authority reduces need to "cover" with excessive documentation.',
+    impact: 'high',
+    effort: 'medium',
+    playbook2Tool: 'RACI Matrix Template',
+  },
+];
+
+/**
+ * Get interventions for a specific anti-pattern
+ */
+export function getInterventionsForPattern(patternId: string): Intervention[] {
+  return INTERVENTIONS.filter((i) => i.patternId === patternId);
+}
+
+/**
+ * Impact and effort styles for badges
+ */
+export const IMPACT_STYLES: Record<ImpactLevel, { color: string; bgColor: string; label: string }> = {
+  high: {
+    color: 'text-green-700 dark:text-green-300',
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
+    label: 'High Impact',
+  },
+  medium: {
+    color: 'text-blue-700 dark:text-blue-300',
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    label: 'Medium Impact',
+  },
+  low: {
+    color: 'text-gray-700 dark:text-gray-300',
+    bgColor: 'bg-gray-100 dark:bg-gray-900/30',
+    label: 'Low Impact',
+  },
+};
+
+export const EFFORT_STYLES: Record<EffortLevel, { color: string; bgColor: string; label: string }> = {
+  low: {
+    color: 'text-green-700 dark:text-green-300',
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
+    label: 'Low Effort',
+  },
+  medium: {
+    color: 'text-yellow-700 dark:text-yellow-300',
+    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+    label: 'Medium Effort',
+  },
+  high: {
+    color: 'text-red-700 dark:text-red-300',
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    label: 'High Effort',
+  },
+};

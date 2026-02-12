@@ -6,6 +6,7 @@
  * Story 13.1: Communication Metrics Input
  * Story 13.2: Anti-Pattern Detection
  * Story 13.3: Health Indicators Dashboard
+ * Story 13.4: Intervention Recommendations
  */
 
 // Story 13.1 Components
@@ -22,6 +23,11 @@ export { AntiPatternSummary } from './AntiPatternSummary';
 export { HealthIndicatorRow, HealthIndicatorCard } from './HealthIndicatorRow';
 export { HealthIndicatorsTable, IndicatorStatusSummary } from './HealthIndicatorsTable';
 export { OverallHealthScore, HealthScoreBadge } from './OverallHealthScore';
+
+// Story 13.4 Components
+export { InterventionCard, InterventionListItem } from './InterventionCard';
+export { PrioritizedActionList } from './PrioritizedActionList';
+export { Tool6Summary, Tool6CompleteBadge } from './Tool6Summary';
 
 // Story 13.2 Detection Engine
 export {
@@ -46,6 +52,20 @@ export {
   formatThreshold,
 } from './health-engine';
 
+// Story 13.4 Intervention Engine
+export {
+  calculatePriority,
+  getRecommendedInterventionsForPattern,
+  getAllRecommendedInterventions,
+  getPrioritizedInterventions,
+  getTopInterventions,
+  groupInterventionsByPattern,
+  getInterventionsByPatternWithMetadata,
+  countPlaybook2Interventions,
+  generateTool6Summary,
+  getQuickWins,
+} from './intervention-engine';
+
 // Re-export types and constants for convenience
 export type {
   // Story 13.1 types
@@ -68,6 +88,12 @@ export type {
   HealthIndicator,
   HealthIndicatorResult,
   HealthEvaluationResult,
+  // Story 13.4 types
+  ImpactLevel,
+  EffortLevel,
+  Intervention,
+  RecommendedIntervention,
+  Tool6Summary as Tool6SummaryType,
 } from './comm-constants';
 
 export {
@@ -102,4 +128,9 @@ export {
   getHealthIndicatorById,
   getHealthIndicatorsByCategory,
   getHealthStatusStyle,
+  // Story 13.4 constants and helpers
+  INTERVENTIONS,
+  IMPACT_STYLES,
+  EFFORT_STYLES,
+  getInterventionsForPattern,
 } from './comm-constants';
