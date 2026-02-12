@@ -365,6 +365,10 @@ describe('formatThreshold', () => {
       expect(formatThreshold(4, 'hours', 'lower-is-better', 'healthy')).toBe('<4');
     });
 
+    it('should format warning threshold with less-than', () => {
+      expect(formatThreshold(12, 'hours', 'lower-is-better', 'warning')).toBe('<12');
+    });
+
     it('should format crisis threshold with greater-than', () => {
       expect(formatThreshold(24, 'hours', 'lower-is-better', 'crisis')).toBe('>24');
     });
@@ -379,8 +383,68 @@ describe('formatThreshold', () => {
       expect(formatThreshold(70, '%', 'higher-is-better', 'healthy')).toBe('>70%');
     });
 
+    it('should format warning threshold with greater-than', () => {
+      expect(formatThreshold(40, '%', 'higher-is-better', 'warning')).toBe('>40%');
+    });
+
     it('should format crisis threshold with less-than', () => {
       expect(formatThreshold(25, '%', 'higher-is-better', 'crisis')).toBe('<25%');
     });
+  });
+});
+
+describe('evaluateHealthIndicator edge cases', () => {
+  it('should handle invalid indicator with missing thresholds', () => {
+    const invalidIndicator = {
+      id: 'test',
+      name: 'Test',
+      description: 'Test',
+      category: 'email' as const,
+      unit: 'hours',
+      direction: 'lower-is-better' as const,
+      thresholds: undefined as unknown as { healthy: number; warning: number; crisis: number },
+      getValue: () => 10,
+    };
+    const metrics = createCompleteMetrics();
+    const result = evaluateHealthIndicator(invalidIndicator, metrics);
+
+    expect(result.status).toBe('warning');
+    expect(result.evidence).toBe('Invalid indicator configuration');
+  });
+
+  it('should handle invalid indicator with missing direction', () => {
+    const invalidIndicator = {
+      id: 'test',
+      name: 'Test',
+      description: 'Test',
+      category: 'email' as const,
+      unit: 'hours',
+      direction: undefined as unknown as 'lower-is-better',
+      thresholds: { healthy: 4, warning: 12, crisis: 24 },
+      getValue: () => 10,
+    };
+    const metrics = createCompleteMetrics();
+    const result = evaluateHealthIndicator(invalidIndicator, metrics);
+
+    expect(result.status).toBe('warning');
+    expect(result.evidence).toBe('Invalid indicator configuration');
+  });
+
+  it('should handle invalid indicator with missing id', () => {
+    const invalidIndicator = {
+      id: undefined as unknown as string,
+      name: 'Test',
+      description: 'Test',
+      category: 'email' as const,
+      unit: 'hours',
+      direction: 'lower-is-better' as const,
+      thresholds: { healthy: 4, warning: 12, crisis: 24 },
+      getValue: () => 10,
+    };
+    const metrics = createCompleteMetrics();
+    const result = evaluateHealthIndicator(invalidIndicator, metrics);
+
+    expect(result.indicatorId).toBe('unknown');
+    expect(result.status).toBe('warning');
   });
 });

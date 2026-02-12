@@ -13,7 +13,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
-import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
+import { ProgressStepper } from '@/components/diagnostic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -151,7 +151,7 @@ export default function HealthDashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {detectedPatterns.length} of 5 anti-patterns detected in your
+                  {detectedPatterns.length} of {ANTI_PATTERNS.length} anti-patterns detected in your
                   communication analysis.
                 </p>
 

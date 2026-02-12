@@ -24,6 +24,16 @@ export function evaluateHealthIndicator(
   indicator: HealthIndicator,
   metrics: CommunicationMetrics
 ): HealthIndicatorResult {
+  // Validate indicator has required fields
+  if (!indicator.thresholds || !indicator.direction || !indicator.id) {
+    return {
+      indicatorId: indicator?.id || 'unknown',
+      value: null,
+      status: 'warning',
+      evidence: 'Invalid indicator configuration',
+    };
+  }
+
   const value = indicator.getValue(metrics);
 
   if (value === null) {
@@ -187,11 +197,15 @@ export function formatThreshold(
   const formattedValue = unit === '%' ? `${value}%` : value.toString();
 
   if (direction === 'lower-is-better') {
+    // Lower is better: healthy < warning < crisis
     if (type === 'healthy') return `<${formattedValue}`;
+    if (type === 'warning') return `<${formattedValue}`;
     if (type === 'crisis') return `>${formattedValue}`;
     return `<${formattedValue}`;
   } else {
+    // Higher is better: crisis < warning < healthy
     if (type === 'healthy') return `>${formattedValue}`;
+    if (type === 'warning') return `>${formattedValue}`;
     if (type === 'crisis') return `<${formattedValue}`;
     return `>${formattedValue}`;
   }

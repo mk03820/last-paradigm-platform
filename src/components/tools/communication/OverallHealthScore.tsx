@@ -39,7 +39,7 @@ export function OverallHealthScore({ result }: OverallHealthScoreProps) {
       <CardContent>
         <div className="flex flex-col md:flex-row items-center gap-6">
           {/* Score Display with Gauge */}
-          <div className="relative flex-shrink-0">
+          <div className="relative flex-shrink-0" aria-live="polite" aria-atomic="true">
             {/* Semi-circular gauge background */}
             <div className="relative w-40 h-20 overflow-hidden">
               {/* Background arc */}
