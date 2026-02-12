@@ -6,6 +6,9 @@
  *
  * Story 12.2: Friction Point Identification
  * Task 8.2: Unit tests for store friction actions
+ *
+ * Story 12.3: Friction Cost Calculation
+ * Task 7.2: Unit tests for store cost actions
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -970,6 +973,427 @@ describe('useTool5Store', () => {
         });
 
         expect(result.current.frictionPoints).toHaveLength(0);
+      });
+    });
+  });
+
+  // Story 12.3: Friction Cost tests
+  describe('friction cost', () => {
+    describe('updateFrictionCost', () => {
+      it('adds cost data to a friction point', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+        });
+
+        expect(result.current.frictionPoints[0].cost).toBeUndefined();
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 5000,
+          });
+        });
+
+        expect(result.current.frictionPoints[0].cost).toEqual({
+          hoursPerWeek: 10,
+          hourlyRate: 75,
+          opportunityCost: 5000,
+        });
+      });
+
+      it('updates existing cost data', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 5,
+            hourlyRate: 50,
+            opportunityCost: 1000,
+          });
+        });
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 20,
+            hourlyRate: 100,
+            opportunityCost: 10000,
+          });
+        });
+
+        expect(result.current.frictionPoints[0].cost).toEqual({
+          hoursPerWeek: 20,
+          hourlyRate: 100,
+          opportunityCost: 10000,
+        });
+      });
+
+      it('removes cost data when null is passed', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 5000,
+          });
+        });
+
+        expect(result.current.frictionPoints[0].cost).toBeDefined();
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, null);
+        });
+
+        expect(result.current.frictionPoints[0].cost).toBeNull();
+      });
+
+      it('updates timestamp', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+        });
+
+        const originalUpdatedAt = result.current.frictionPoints[0].updatedAt;
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+        });
+
+        expect(result.current.frictionPoints[0].updatedAt).toBeDefined();
+      });
+
+      it('marks store as dirty', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          // Reset dirty flag
+          result.current.resetTool5();
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+        });
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+        });
+
+        expect(result.current.isDirty).toBe(true);
+      });
+
+      it('clears completion', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          result.current.addJourney({
+            name: 'Test',
+            stages: [
+              { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+              { type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
+            ],
+          });
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          result.current.markComplete();
+        });
+
+        expect(result.current.completion).not.toBeNull();
+
+        act(() => {
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+        });
+
+        expect(result.current.completion).toBeNull();
+      });
+    });
+
+    describe('getFrictionPointCost', () => {
+      it('returns cost for friction point with cost data', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          result.current.updateFrictionCost(frictionId!, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 5000,
+          });
+        });
+
+        // 10 × 75 × 48 + 5000 = 41000
+        expect(result.current.getFrictionPointCost(frictionId!)).toBe(41000);
+      });
+
+      it('returns 0 for friction point without cost', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let frictionId: string;
+        act(() => {
+          frictionId = result.current.addFrictionPoint({
+            journeyId: 'journey_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+        });
+
+        expect(result.current.getFrictionPointCost(frictionId!)).toBe(0);
+      });
+
+      it('returns 0 for nonexistent friction point', () => {
+        const { result } = renderHook(() => useTool5Store());
+        expect(result.current.getFrictionPointCost('nonexistent')).toBe(0);
+      });
+    });
+
+    describe('getJourneyCost', () => {
+      it('returns total cost for all friction points in journey', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let journeyId: string;
+        act(() => {
+          journeyId = result.current.addJourney({
+            name: 'Test Journey',
+            stages: [],
+          });
+          const fp1 = result.current.addFrictionPoint({
+            journeyId: journeyId!,
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test 1',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          const fp2 = result.current.addFrictionPoint({
+            journeyId: journeyId!,
+            stageId: 'stage_2',
+            category: 'technical_debt',
+            description: 'Test 2',
+            severity: { frequency: 2, effort: 2, impact: 2 },
+          });
+          result.current.updateFrictionCost(fp1, {
+            hoursPerWeek: 5,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+          result.current.updateFrictionCost(fp2, {
+            hoursPerWeek: 10,
+            hourlyRate: 100,
+            opportunityCost: 10000,
+          });
+        });
+
+        // fp1: 5 × 75 × 48 = 18,000
+        // fp2: 10 × 100 × 48 + 10,000 = 58,000
+        // Total: 76,000
+        expect(result.current.getJourneyCost(journeyId!)).toBe(76000);
+      });
+
+      it('returns 0 for journey with no costed friction points', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        let journeyId: string;
+        act(() => {
+          journeyId = result.current.addJourney({
+            name: 'Test Journey',
+            stages: [],
+          });
+          result.current.addFrictionPoint({
+            journeyId: journeyId!,
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test - no cost',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+        });
+
+        expect(result.current.getJourneyCost(journeyId!)).toBe(0);
+      });
+    });
+
+    describe('getEnterpriseTotalCost', () => {
+      it('returns total cost across all journeys', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        act(() => {
+          const j1 = result.current.addJourney({
+            name: 'Journey 1',
+            stages: [],
+          });
+          const j2 = result.current.addJourney({
+            name: 'Journey 2',
+            stages: [],
+          });
+          const fp1 = result.current.addFrictionPoint({
+            journeyId: j1,
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'J1 Friction',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          const fp2 = result.current.addFrictionPoint({
+            journeyId: j2,
+            stageId: 'stage_2',
+            category: 'technical_debt',
+            description: 'J2 Friction',
+            severity: { frequency: 2, effort: 2, impact: 2 },
+          });
+          result.current.updateFrictionCost(fp1, {
+            hoursPerWeek: 5,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+          result.current.updateFrictionCost(fp2, {
+            hoursPerWeek: 10,
+            hourlyRate: 50,
+            opportunityCost: 5000,
+          });
+        });
+
+        // fp1: 5 × 75 × 48 = 18,000
+        // fp2: 10 × 50 × 48 + 5,000 = 29,000
+        // Total: 47,000
+        expect(result.current.getEnterpriseTotalCost()).toBe(47000);
+      });
+
+      it('returns 0 when no friction points have costs', () => {
+        const { result } = renderHook(() => useTool5Store());
+        expect(result.current.getEnterpriseTotalCost()).toBe(0);
+      });
+    });
+
+    describe('getCostByCategory', () => {
+      it('returns costs grouped by friction category', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        act(() => {
+          const fp1 = result.current.addFrictionPoint({
+            journeyId: 'j_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test 1',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          const fp2 = result.current.addFrictionPoint({
+            journeyId: 'j_1',
+            stageId: 'stage_2',
+            category: 'technical_debt',
+            description: 'Test 2',
+            severity: { frequency: 2, effort: 2, impact: 2 },
+          });
+          result.current.updateFrictionCost(fp1, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 0,
+          });
+          result.current.updateFrictionCost(fp2, {
+            hoursPerWeek: 5,
+            hourlyRate: 100,
+            opportunityCost: 10000,
+          });
+        });
+
+        const costs = result.current.getCostByCategory();
+        expect(costs.access_bureaucracy).toBe(36000);
+        expect(costs.technical_debt).toBe(34000);
+        expect(costs.quality_degradation).toBe(0);
+        expect(costs.multiple_sources).toBe(0);
+      });
+    });
+
+    describe('getCostBreakdown', () => {
+      it('returns FTE and opportunity cost breakdown', () => {
+        const { result } = renderHook(() => useTool5Store());
+
+        act(() => {
+          const fp1 = result.current.addFrictionPoint({
+            journeyId: 'j_1',
+            stageId: 'stage_1',
+            category: 'access_bureaucracy',
+            description: 'Test',
+            severity: { frequency: 1, effort: 1, impact: 1 },
+          });
+          result.current.updateFrictionCost(fp1, {
+            hoursPerWeek: 10,
+            hourlyRate: 75,
+            opportunityCost: 5000,
+          });
+        });
+
+        const breakdown = result.current.getCostBreakdown();
+        expect(breakdown.fteCost).toBe(36000);
+        expect(breakdown.opportunityCost).toBe(5000);
+        expect(breakdown.total).toBe(41000);
       });
     });
   });

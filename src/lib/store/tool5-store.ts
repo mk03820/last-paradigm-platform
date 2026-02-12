@@ -13,6 +13,17 @@ import {
 } from '@/components/tools/data-flow/journey-constants';
 import type { FrictionPoint } from '@/components/tools/data-flow/friction-constants';
 import { generateFrictionId } from '@/components/tools/data-flow/friction-constants';
+import type {
+  FrictionCost,
+  FrictionPointWithCost,
+} from '@/components/tools/data-flow/cost-constants';
+import {
+  calculateFrictionPointCost,
+  calculateJourneyCost,
+  calculateEnterpriseTotalCost,
+  calculateCostByCategory,
+  calculateCostBreakdown,
+} from '@/components/tools/data-flow/cost-constants';
 
 /**
  * Tool 5 Data Flow Friction Analysis Store
@@ -25,6 +36,9 @@ import { generateFrictionId } from '@/components/tools/data-flow/friction-consta
  *
  * Story 12.2: Friction Point Identification
  * Covers: FR2-22 (friction CRUD, severity scoring)
+ *
+ * Story 12.3: Friction Cost Calculation
+ * Covers: FR2-23 (cost estimation, FTE + opportunity)
  */
 
 export interface Tool5CompletionData {
@@ -45,8 +59,8 @@ export interface Tool5State {
   isDirty: boolean;
   // Completion tracking
   completion: Tool5CompletionData | null;
-  // Friction points for all journeys
-  frictionPoints: FrictionPoint[];
+  // Friction points for all journeys (with optional cost data)
+  frictionPoints: FrictionPointWithCost[];
 
   // Journey CRUD
   addJourney: (journey: Omit<DataJourney, 'id' | 'createdAt' | 'updatedAt'>) => string;
@@ -61,9 +75,12 @@ export interface Tool5State {
   reorderStages: (journeyId: string, stageIds: string[]) => void;
 
   // Friction CRUD
-  addFrictionPoint: (point: Omit<FrictionPoint, 'id' | 'createdAt' | 'updatedAt'>) => string;
-  updateFrictionPoint: (id: string, updates: Partial<Omit<FrictionPoint, 'id' | 'createdAt'>>) => void;
+  addFrictionPoint: (point: Omit<FrictionPointWithCost, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateFrictionPoint: (id: string, updates: Partial<Omit<FrictionPointWithCost, 'id' | 'createdAt'>>) => void;
   removeFrictionPoint: (id: string) => void;
+
+  // Cost management
+  updateFrictionCost: (frictionId: string, cost: FrictionCost | null) => void;
 
   // Template
   applyTemplate: (templateId: string, journeyName?: string) => string | null;
@@ -79,9 +96,16 @@ export interface Tool5State {
   getJourneyCount: () => number;
   getActiveJourney: () => DataJourney | undefined;
   getTotalLatency: () => number;
-  getFrictionPointsByJourney: (journeyId: string) => FrictionPoint[];
-  getFrictionPointsByStage: (stageId: string) => FrictionPoint[];
+  getFrictionPointsByJourney: (journeyId: string) => FrictionPointWithCost[];
+  getFrictionPointsByStage: (stageId: string) => FrictionPointWithCost[];
   getTotalFrictionCount: () => number;
+
+  // Cost calculations
+  getFrictionPointCost: (frictionId: string) => number;
+  getJourneyCost: (journeyId: string) => number;
+  getEnterpriseTotalCost: () => number;
+  getCostByCategory: () => Record<string, number>;
+  getCostBreakdown: () => { fteCost: number; opportunityCost: number; total: number };
 }
 
 export const useTool5Store = create<Tool5State>()(
@@ -280,6 +304,19 @@ export const useTool5Store = create<Tool5State>()(
         }));
       },
 
+      // Update cost data for a friction point
+      updateFrictionCost: (frictionId, cost) => {
+        set((state) => ({
+          frictionPoints: state.frictionPoints.map((fp) =>
+            fp.id === frictionId
+              ? { ...fp, cost, updatedAt: new Date().toISOString() }
+              : fp
+          ),
+          isDirty: true,
+          completion: null,
+        }));
+      },
+
       // Apply a template to create a new journey
       applyTemplate: (templateId, journeyName) => {
         const template = getJourneyTemplate(templateId);
@@ -383,6 +420,38 @@ export const useTool5Store = create<Tool5State>()(
       // Get total friction point count
       getTotalFrictionCount: () => {
         return get().frictionPoints.length;
+      },
+
+      // Get cost for a specific friction point
+      getFrictionPointCost: (frictionId) => {
+        const { frictionPoints } = get();
+        const point = frictionPoints.find((fp) => fp.id === frictionId);
+        return point ? calculateFrictionPointCost(point) : 0;
+      },
+
+      // Get total cost for a journey
+      getJourneyCost: (journeyId) => {
+        const { frictionPoints } = get();
+        const journeyPoints = frictionPoints.filter((fp) => fp.journeyId === journeyId);
+        return calculateJourneyCost(journeyPoints);
+      },
+
+      // Get enterprise-wide total cost
+      getEnterpriseTotalCost: () => {
+        const { frictionPoints } = get();
+        return calculateEnterpriseTotalCost(frictionPoints);
+      },
+
+      // Get cost breakdown by category
+      getCostByCategory: () => {
+        const { frictionPoints } = get();
+        return calculateCostByCategory(frictionPoints);
+      },
+
+      // Get FTE vs opportunity cost breakdown
+      getCostBreakdown: () => {
+        const { frictionPoints } = get();
+        return calculateCostBreakdown(frictionPoints);
       },
     }),
     {
