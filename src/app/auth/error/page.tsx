@@ -54,7 +54,7 @@ export default async function AuthErrorPage({ searchParams }: AuthErrorPageProps
 
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-md min-w-[320px] space-y-6">
         {/* Back to home */}
         <Link
           href="/"
@@ -64,7 +64,7 @@ export default async function AuthErrorPage({ searchParams }: AuthErrorPageProps
           Back to home
         </Link>
 
-        <Card>
+        <Card className="w-full">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
               <AlertCircle className="w-8 h-8 text-destructive" />

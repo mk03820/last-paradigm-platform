@@ -36,7 +36,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-md min-w-[320px] space-y-6">
         {/* Back to home */}
         <Link
           href="/"
@@ -47,7 +47,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         </Link>
 
         {/* Sign in card */}
-        <Card>
+        <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
               <span className="text-primary">The Last Paradigm</span>
