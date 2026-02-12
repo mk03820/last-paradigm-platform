@@ -4,16 +4,51 @@
  * Exports all components for Tool 6.
  *
  * Story 13.1: Communication Metrics Input
- * Task 8: Create index.ts exports (AC: all)
+ * Story 13.2: Anti-Pattern Detection
+ * Story 13.3: Health Indicators Dashboard
  */
 
+// Story 13.1 Components
 export { EmailMetricsForm } from './EmailMetricsForm';
 export { ChatMetricsForm } from './ChatMetricsForm';
 export { MeetingMetricsForm } from './MeetingMetricsForm';
 export { MetricsSection, getSectionStatus } from './MetricsSection';
 
+// Story 13.2 Components
+export { AntiPatternCard } from './AntiPatternCard';
+export { AntiPatternSummary } from './AntiPatternSummary';
+
+// Story 13.3 Components
+export { HealthIndicatorRow, HealthIndicatorCard } from './HealthIndicatorRow';
+export { HealthIndicatorsTable, IndicatorStatusSummary } from './HealthIndicatorsTable';
+export { OverallHealthScore, HealthScoreBadge } from './OverallHealthScore';
+
+// Story 13.2 Detection Engine
+export {
+  detectBroadcastOverload,
+  detectTelephoneGame,
+  detectTribalKnowledge,
+  detectToolSprawl,
+  detectCYACulture,
+  analyzePatterns,
+  getSeverityDistribution,
+} from './detection-engine';
+
+// Story 13.3 Health Engine
+export {
+  evaluateHealthIndicator,
+  evaluateAllIndicators,
+  calculateHealthScore,
+  getOverallStatus,
+  countIndicatorsByStatus,
+  evaluateHealth,
+  formatIndicatorValue,
+  formatThreshold,
+} from './health-engine';
+
 // Re-export types and constants for convenience
 export type {
+  // Story 13.1 types
   FrequencyLevel,
   EmailMetrics,
   ChatMetrics,
@@ -22,9 +57,21 @@ export type {
   FrequencyLevelInfo,
   MetricFieldConfig,
   MetricsSectionConfig,
+  // Story 13.2 types
+  SeverityLevel,
+  AntiPattern,
+  DetectionResult,
+  PatternAnalysis,
+  // Story 13.3 types
+  HealthStatus,
+  IndicatorCategory,
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthEvaluationResult,
 } from './comm-constants';
 
 export {
+  // Story 13.1 constants and helpers
   FREQUENCY_LEVELS,
   EMAIL_METRICS_CONFIG,
   CHAT_METRICS_CONFIG,
@@ -41,4 +88,18 @@ export {
   isAllMetricsComplete,
   countCompletedSections,
   frequencyToScore,
+  // Story 13.2 constants and helpers
+  ANTI_PATTERNS,
+  DETECTION_THRESHOLDS,
+  SEVERITY_STYLES,
+  HEALTH_STYLES,
+  getAntiPatternById,
+  getSeverityStyle,
+  calculateOverallHealth,
+  // Story 13.3 constants and helpers
+  HEALTH_INDICATORS,
+  HEALTH_SCORE_INTERPRETATIONS,
+  getHealthIndicatorById,
+  getHealthIndicatorsByCategory,
+  getHealthStatusStyle,
 } from './comm-constants';

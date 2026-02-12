@@ -5,6 +5,7 @@ import type {
   ChatMetrics,
   MeetingMetrics,
   CommunicationMetrics,
+  PatternAnalysis,
 } from '@/components/tools/communication/comm-constants';
 import {
   createDefaultEmailMetrics,
@@ -16,6 +17,7 @@ import {
   isAllMetricsComplete,
   countCompletedSections,
 } from '@/components/tools/communication/comm-constants';
+import { analyzePatterns } from '@/components/tools/communication/detection-engine';
 import { useCalculatorStore } from './calculator-store';
 
 /**
@@ -40,6 +42,9 @@ export interface Tool6State {
   email: EmailMetrics | null;
   chat: ChatMetrics | null;
   meetings: MeetingMetrics | null;
+
+  // Analysis results (Story 13.2)
+  analysisResults: PatternAnalysis | null;
 
   // Server session ID for sync (if authenticated)
   sessionId: string | null;
@@ -75,6 +80,11 @@ export interface Tool6State {
 
   // Tool 2 integration
   pullFromTool2: () => boolean;
+
+  // Analysis (Story 13.2)
+  runAnalysis: () => PatternAnalysis | null;
+  isAnalysisComplete: () => boolean;
+  clearAnalysis: () => void;
 }
 
 export const useTool6Store = create<Tool6State>()(
@@ -84,6 +94,7 @@ export const useTool6Store = create<Tool6State>()(
       email: null,
       chat: null,
       meetings: null,
+      analysisResults: null,
       sessionId: null,
       isDirty: false,
       completion: null,
@@ -173,6 +184,7 @@ export const useTool6Store = create<Tool6State>()(
           email: null,
           chat: null,
           meetings: null,
+          analysisResults: null,
           isDirty: false,
           completion: null,
         });
@@ -252,6 +264,37 @@ export const useTool6Store = create<Tool6State>()(
 
         return true;
       },
+
+      // Run anti-pattern analysis (Story 13.2)
+      runAnalysis: () => {
+        const { email, chat, meetings } = get();
+        const metrics = { email, chat, meetings };
+
+        // Only run if we have at least some metrics
+        if (!email && !chat && !meetings) {
+          return null;
+        }
+
+        const results = analyzePatterns(metrics);
+        set({
+          analysisResults: results,
+          isDirty: true,
+        });
+
+        return results;
+      },
+
+      // Check if analysis has been run
+      isAnalysisComplete: () => {
+        return get().analysisResults !== null;
+      },
+
+      // Clear analysis results (useful when metrics change)
+      clearAnalysis: () => {
+        set({
+          analysisResults: null,
+        });
+      },
     }),
     {
       name: 'tool6-communication-session',
@@ -260,6 +303,7 @@ export const useTool6Store = create<Tool6State>()(
         email: state.email,
         chat: state.chat,
         meetings: state.meetings,
+        analysisResults: state.analysisResults,
         sessionId: state.sessionId,
         completion: state.completion,
       }),

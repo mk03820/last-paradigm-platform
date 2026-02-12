@@ -380,3 +380,446 @@ export function frequencyToScore(frequency: FrequencyLevel): number {
   };
   return scores[frequency];
 }
+
+// ============================================================================
+// Anti-Pattern Detection Types and Constants (Story 13.2)
+// ============================================================================
+
+/**
+ * Severity levels for anti-pattern detection
+ */
+export type SeverityLevel = 'none' | 'low' | 'medium' | 'high';
+
+/**
+ * Anti-pattern definition
+ */
+export interface AntiPattern {
+  id: string;
+  name: string;
+  description: string;
+  examples: string[];
+  icon: string;
+}
+
+/**
+ * Detection result for a single anti-pattern
+ */
+export interface DetectionResult {
+  patternId: string;
+  detected: boolean;
+  severity: SeverityLevel;
+  evidence: string[];
+  confidence: number; // 0-1 scale
+}
+
+/**
+ * Complete pattern analysis results
+ */
+export interface PatternAnalysis {
+  results: DetectionResult[];
+  detectedCount: number;
+  overallHealth: 'healthy' | 'warning' | 'critical';
+  analyzedAt: string;
+}
+
+/**
+ * The 5 communication anti-patterns from Playbook 1
+ */
+export const ANTI_PATTERNS: AntiPattern[] = [
+  {
+    id: 'broadcast-overload',
+    name: 'Broadcast Overload',
+    description: 'Over-reliance on broadcast communication (@here, @channel, mass emails) that creates noise and reduces signal.',
+    examples: [
+      'Every message uses @here or @channel',
+      'Distribution lists used for information that affects few people',
+      'Same message cross-posted to 3+ channels',
+    ],
+    icon: '📢',
+  },
+  {
+    id: 'telephone-game',
+    name: 'Telephone Game',
+    description: 'Information passes through multiple intermediaries before reaching the people who need it, degrading accuracy.',
+    examples: [
+      'Decisions made in small meetings, then cascaded through managers',
+      'Information travels executive → director → manager → team',
+      'Second-hand information is the norm',
+    ],
+    icon: '📞',
+  },
+  {
+    id: 'tribal-knowledge',
+    name: 'Tribal Knowledge',
+    description: 'Critical information lives in people\'s heads or private channels rather than searchable, shared locations.',
+    examples: [
+      'High DM usage for work discussions',
+      'Decisions made but not documented',
+      '"Ask Sarah, she knows how this works"',
+    ],
+    icon: '🧠',
+  },
+  {
+    id: 'tool-sprawl',
+    name: 'Tool Sprawl',
+    description: 'Too many communication channels creating fragmentation and duplication of discussions.',
+    examples: [
+      'Same topic discussed in Slack, email, and meetings',
+      'Hundreds of channels with overlapping purposes',
+      'No clear guidance on which tool for what purpose',
+    ],
+    icon: '🔀',
+  },
+  {
+    id: 'cya-culture',
+    name: 'CYA Culture',
+    description: 'Communication patterns driven by covering tracks rather than effective information sharing.',
+    examples: [
+      'Excessive CC/BCC usage',
+      'Reply-all to establish record',
+      'Documentation for blame protection, not knowledge',
+    ],
+    icon: '🛡️',
+  },
+];
+
+/**
+ * Detection thresholds for anti-patterns
+ */
+export const DETECTION_THRESHOLDS = {
+  // Broadcast Overload thresholds
+  atHereFrequency: {
+    low: 'sometimes' as FrequencyLevel,
+    medium: 'often' as FrequencyLevel,
+    high: 'always' as FrequencyLevel,
+  },
+  crossChannelRedundancy: {
+    low: 20,    // 20% redundancy
+    medium: 30, // 30% redundancy
+    high: 50,   // 50% redundancy
+  },
+
+  // Telephone Game thresholds
+  infoCascadeMeetings: {
+    low: 3,     // 3 per week
+    medium: 5,  // 5 per week
+    high: 10,   // 10 per week
+  },
+  decisionDocRate: {
+    healthy: 70,  // 70%+ is healthy
+    warning: 50,  // 50-70% is warning
+    crisis: 25,   // Below 25% is crisis
+  },
+
+  // Tribal Knowledge thresholds
+  dmRatio: {
+    low: 40,    // 40% DMs
+    medium: 50, // 50% DMs
+    high: 70,   // 70% DMs
+  },
+
+  // Tool Sprawl thresholds
+  activeChannels: {
+    low: 75,    // 75 channels
+    medium: 100, // 100 channels
+    high: 200,   // 200 channels
+  },
+
+  // CYA Culture thresholds
+  replyAllFrequency: {
+    low: 'sometimes' as FrequencyLevel,
+    medium: 'often' as FrequencyLevel,
+    high: 'always' as FrequencyLevel,
+  },
+  distributionListImpact: {
+    low: 500,     // DL count × avg size
+    medium: 1000,
+    high: 2500,
+  },
+};
+
+/**
+ * Severity color and style mapping
+ */
+export const SEVERITY_STYLES: Record<SeverityLevel, { color: string; bgColor: string; label: string }> = {
+  none: {
+    color: 'text-green-700 dark:text-green-300',
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
+    label: 'Not Detected',
+  },
+  low: {
+    color: 'text-yellow-700 dark:text-yellow-300',
+    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+    label: 'Low',
+  },
+  medium: {
+    color: 'text-orange-700 dark:text-orange-300',
+    bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+    label: 'Medium',
+  },
+  high: {
+    color: 'text-red-700 dark:text-red-300',
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    label: 'High',
+  },
+};
+
+/**
+ * Get anti-pattern by ID
+ */
+export function getAntiPatternById(id: string): AntiPattern | undefined {
+  return ANTI_PATTERNS.find((p) => p.id === id);
+}
+
+/**
+ * Get severity style configuration
+ */
+export function getSeverityStyle(severity: SeverityLevel) {
+  return SEVERITY_STYLES[severity];
+}
+
+/**
+ * Calculate overall health from detection results
+ */
+export function calculateOverallHealth(results: DetectionResult[]): 'healthy' | 'warning' | 'critical' {
+  const highCount = results.filter((r) => r.severity === 'high').length;
+  const mediumCount = results.filter((r) => r.severity === 'medium').length;
+  const detectedCount = results.filter((r) => r.detected).length;
+
+  if (highCount >= 2 || (highCount >= 1 && mediumCount >= 2)) {
+    return 'critical';
+  }
+  if (detectedCount >= 3 || highCount >= 1 || mediumCount >= 2) {
+    return 'warning';
+  }
+  return 'healthy';
+}
+
+/**
+ * Health indicator styles
+ */
+export const HEALTH_STYLES = {
+  healthy: {
+    color: 'text-green-700 dark:text-green-300',
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
+    label: 'Healthy',
+    icon: '✅',
+  },
+  warning: {
+    color: 'text-yellow-700 dark:text-yellow-300',
+    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+    label: 'Warning',
+    icon: '⚠️',
+  },
+  critical: {
+    color: 'text-red-700 dark:text-red-300',
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    label: 'Critical',
+    icon: '🚨',
+  },
+};
+
+// ============================================================================
+// Health Indicators Types and Constants (Story 13.3)
+// ============================================================================
+
+/**
+ * Health status for individual indicators
+ */
+export type HealthStatus = 'healthy' | 'warning' | 'crisis';
+
+/**
+ * Category for health indicators
+ */
+export type IndicatorCategory = 'email' | 'chat' | 'meetings';
+
+/**
+ * Health indicator definition
+ */
+export interface HealthIndicator {
+  id: string;
+  name: string;
+  description: string;
+  category: IndicatorCategory;
+  unit: string;
+  direction: 'lower-is-better' | 'higher-is-better';
+  thresholds: {
+    healthy: number;
+    warning: number;
+    crisis: number;
+  };
+  getValue: (metrics: CommunicationMetrics) => number | null;
+}
+
+/**
+ * Result of evaluating a single health indicator
+ */
+export interface HealthIndicatorResult {
+  indicatorId: string;
+  value: number | null;
+  status: HealthStatus;
+  evidence: string;
+}
+
+/**
+ * Complete health evaluation results
+ */
+export interface HealthEvaluationResult {
+  indicators: HealthIndicatorResult[];
+  overallScore: number;
+  overallStatus: HealthStatus;
+  evaluatedAt: string;
+}
+
+/**
+ * Key health indicators for communication patterns
+ */
+export const HEALTH_INDICATORS: HealthIndicator[] = [
+  // Email Indicators
+  {
+    id: 'email-response-time',
+    name: 'Urgent Email Response Time',
+    description: 'Average time to respond to urgent emails',
+    category: 'email',
+    unit: 'hours',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 4,
+      warning: 12,
+      crisis: 24,
+    },
+    getValue: (m) => m.email?.urgentResponseTimeHours ?? null,
+  },
+  {
+    id: 'broadcast-intensity',
+    name: 'Distribution List Intensity',
+    description: 'DL count × average size (broadcast reach)',
+    category: 'email',
+    unit: 'recipients',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 500,
+      warning: 1500,
+      crisis: 3000,
+    },
+    getValue: (m) => m.email ? m.email.distributionListCount * m.email.avgListSize : null,
+  },
+
+  // Chat Indicators
+  {
+    id: 'dm-ratio',
+    name: 'Direct Message Ratio',
+    description: 'Percentage of conversations in private DMs (tribal knowledge risk)',
+    category: 'chat',
+    unit: '%',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 30,
+      warning: 50,
+      crisis: 70,
+    },
+    getValue: (m) => m.chat?.dmRatioPercent ?? null,
+  },
+  {
+    id: 'channel-count',
+    name: 'Active Channel Count',
+    description: 'Number of active Slack/Teams channels (tool sprawl risk)',
+    category: 'chat',
+    unit: 'channels',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 50,
+      warning: 100,
+      crisis: 200,
+    },
+    getValue: (m) => m.chat?.activeChannels ?? null,
+  },
+  {
+    id: 'cross-post-rate',
+    name: 'Cross-Channel Redundancy',
+    description: 'Messages duplicated across multiple channels',
+    category: 'chat',
+    unit: '%',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 10,
+      warning: 25,
+      crisis: 50,
+    },
+    getValue: (m) => m.chat?.crossChannelRedundancyPercent ?? null,
+  },
+
+  // Meeting Indicators
+  {
+    id: 'decision-doc-rate',
+    name: 'Decision Documentation Rate',
+    description: 'Percentage of meeting decisions that get documented',
+    category: 'meetings',
+    unit: '%',
+    direction: 'higher-is-better',
+    thresholds: {
+      healthy: 70,
+      warning: 40,
+      crisis: 25,
+    },
+    getValue: (m) => m.meetings?.decisionDocumentationRatePercent ?? null,
+  },
+  {
+    id: 'info-cascade-meetings',
+    name: 'Information Cascade Meetings',
+    description: 'Weekly meetings that should have been emails',
+    category: 'meetings',
+    unit: '/week',
+    direction: 'lower-is-better',
+    thresholds: {
+      healthy: 2,
+      warning: 5,
+      crisis: 10,
+    },
+    getValue: (m) => m.meetings?.infoCascadeMeetingsPerWeek ?? null,
+  },
+];
+
+/**
+ * Get health indicator by ID
+ */
+export function getHealthIndicatorById(id: string): HealthIndicator | undefined {
+  return HEALTH_INDICATORS.find((i) => i.id === id);
+}
+
+/**
+ * Get health indicators by category
+ */
+export function getHealthIndicatorsByCategory(category: IndicatorCategory): HealthIndicator[] {
+  return HEALTH_INDICATORS.filter((i) => i.category === category);
+}
+
+/**
+ * Get health status style (maps to existing HEALTH_STYLES)
+ */
+export function getHealthStatusStyle(status: HealthStatus) {
+  // Map 'crisis' to 'critical' for HEALTH_STYLES
+  const styleKey = status === 'crisis' ? 'critical' : status;
+  return HEALTH_STYLES[styleKey];
+}
+
+/**
+ * Health score interpretation text
+ */
+export const HEALTH_SCORE_INTERPRETATIONS = {
+  healthy: {
+    range: '70-100',
+    title: 'Healthy Communication',
+    description: 'Your organization demonstrates strong communication patterns. Continue maintaining these practices.',
+  },
+  warning: {
+    range: '40-69',
+    title: 'Mixed Communication Health',
+    description: 'Some communication patterns need attention. Review the indicators below to identify areas for improvement.',
+  },
+  crisis: {
+    range: '0-39',
+    title: 'Critical Communication Issues',
+    description: 'Multiple communication patterns are in crisis. Immediate intervention is recommended to prevent organizational drag.',
+  },
+};
