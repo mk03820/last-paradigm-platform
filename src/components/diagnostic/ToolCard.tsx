@@ -47,11 +47,11 @@ export function ToolCard({
       aria-label={`Tool ${tool.number}: ${tool.name}`}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between gap-2 overflow-hidden">
+          <div className="flex items-center gap-3 min-w-0">
             <div
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg',
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
                 status === 'completed'
                   ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                   : status === 'in_progress'
@@ -61,9 +61,9 @@ export function ToolCard({
             >
               <Icon className="h-5 w-5" aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground font-medium">Tool {tool.number}</p>
-              <CardTitle className="text-base">{tool.shortName}</CardTitle>
+              <CardTitle className="text-base whitespace-nowrap">{tool.shortName}</CardTitle>
             </div>
           </div>
           <Badge
