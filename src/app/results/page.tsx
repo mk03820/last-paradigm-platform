@@ -8,7 +8,6 @@ import { AlignmentTaxEstimate } from '@/components/results/AlignmentTaxEstimate'
 import { InputsSummary } from '@/components/results/InputsSummary';
 import { FormulaDisplay } from '@/components/results/FormulaDisplay';
 import { AssumptionsPanel } from '@/components/results/AssumptionsPanel';
-import { EmailCaptureForm } from '@/components/email/EmailCaptureForm';
 import { PdfExportButton } from '@/components/pdf/PdfExportButton';
 import { SaveProgressPrompt } from '@/components/results/SaveProgressPrompt';
 import { Button } from '@/components/ui/button';
@@ -127,14 +126,6 @@ export default function ResultsPage() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </section>
-
-        {/* Email Capture Section - Optional, Non-blocking */}
-        <section aria-labelledby="email-capture-heading" style={{ marginBottom: '2rem' }}>
-          <h2 id="email-capture-heading" className="sr-only">
-            Get Notified
-          </h2>
-          <EmailCaptureForm />
         </section>
 
         {/* Actions Section */}
