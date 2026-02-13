@@ -23,10 +23,10 @@ describe('HeroSection', () => {
   it('renders dual CTA buttons for mode selection', () => {
     render(<HeroSection />);
 
-    // Should have "Let Us Guide You" button linking to /calculator
+    // Should have "Let Us Guide You" button linking to /diagnostic
     const guidedButton = screen.getByRole('link', { name: /let us guide you/i });
     expect(guidedButton).toBeInTheDocument();
-    expect(guidedButton).toHaveAttribute('href', '/calculator');
+    expect(guidedButton).toHaveAttribute('href', '/diagnostic');
 
     // Should have "Run It Yourself" button linking to /templates
     const templateButton = screen.getByRole('link', { name: /run it yourself/i });

@@ -76,7 +76,7 @@ export function HeroSection() {
             size="lg"
             className="bg-accent text-accent-foreground hover:bg-accent/90 text-base font-medium px-8 py-6 w-full"
           >
-            <Link href="/calculator" aria-label="Let Us Guide You - Recommended option for step-by-step analysis">
+            <Link href="/diagnostic" aria-label="Let Us Guide You - Recommended option for step-by-step analysis">
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
                 <span>Let Us Guide You</span>
                 <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>(Recommended)</span>
