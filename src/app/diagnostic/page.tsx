@@ -38,9 +38,7 @@ export default function DiagnosticHubPage() {
               Alignment Tax Diagnostic
             </h1>
             <p className="mt-2 text-muted-foreground max-w-2xl">
-              Complete all 7 tools to calculate your organization&apos;s total cost of
-              misalignment. Each tool provides insights into different aspects of
-              organizational friction.
+              Complete all 7 tools to calculate your organization&apos;s total cost of misalignment. Each tool provides insights into different aspects of organizational friction.
             </p>
           </header>
 
