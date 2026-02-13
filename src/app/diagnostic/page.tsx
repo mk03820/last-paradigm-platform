@@ -24,7 +24,7 @@ export default function DiagnosticHubPage() {
       <main className="min-h-[calc(100vh-56px)] bg-background">
         <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Page Header */}
-          <div className="mb-8">
+          <header className="mb-8">
             <nav aria-label="Breadcrumb" className="mb-4">
               <Link
                 href="/"
@@ -37,10 +37,10 @@ export default function DiagnosticHubPage() {
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Alignment Tax Diagnostic
             </h1>
-            <p className="mt-2 text-muted-foreground max-w-2xl block">
+            <p className="mt-2 text-muted-foreground max-w-2xl">
               Complete all 7 tools to calculate your organization&apos;s total cost of misalignment. Each tool provides insights into different aspects of organizational friction.
             </p>
-          </div>
+          </header>
 
           {/* Progress Section */}
           <section className="mb-8 p-4 rounded-lg border bg-card" aria-labelledby="progress-heading">
