@@ -132,11 +132,27 @@ export default function TotalCostExportPage() {
   const { aggregatedData, additionalCosts, revenue } = hasDiagnosticData
     ? {
         aggregatedData: storeData,
+        // Convert AdditionalCostsInput to AdditionalCosts format
         additionalCosts: {
-          projectDelays: additionalCostsInput.projectDelays,
-          rework: additionalCostsInput.rework,
-          turnover: additionalCostsInput.turnover,
-          opportunityCost: additionalCostsInput.opportunityCost,
+          projectDelays: {
+            annualProjectBudget: 0,
+            delayPercentage: 0,
+            subtotal: additionalCostsInput.projectDelays.subtotal,
+          },
+          rework: {
+            annualLaborBudget: 0,
+            reworkPercentage: 0,
+            subtotal: additionalCostsInput.rework.subtotal,
+          },
+          turnover: {
+            annualTurnoverCost: 0,
+            alignmentAttributionPercent: 0,
+            subtotal: additionalCostsInput.turnover.subtotal,
+          },
+          opportunityCost: {
+            estimatedAmount: 0,
+            subtotal: additionalCostsInput.opportunityCost.subtotal,
+          },
           total: additionalCostsInput.total,
         },
         revenue: storeRevenue,
