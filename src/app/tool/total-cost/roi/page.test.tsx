@@ -89,7 +89,8 @@ describe('ROICalculatorPage', () => {
 
     // Total alignment tax: 1,200,000 + 450,000 + 350,000 = 2,000,000
     expect(screen.getByText('Your Current Annual Alignment Tax')).toBeInTheDocument();
-    expect(screen.getByText('$2.0M')).toBeInTheDocument();
+    // Use getAllByText since $2.0M may appear multiple times
+    expect(screen.getAllByText('$2.0M').length).toBeGreaterThan(0);
   });
 
   it('should display percentage of revenue', () => {
@@ -161,10 +162,10 @@ describe('ROICalculatorPage', () => {
       expect(screen.getByText('ROI Scenarios')).toBeInTheDocument();
     });
 
-    // Should show all three scenarios
-    expect(screen.getByText('Conservative')).toBeInTheDocument();
-    expect(screen.getByText('Moderate')).toBeInTheDocument();
-    expect(screen.getByText('Aggressive')).toBeInTheDocument();
+    // Should show all three scenarios (may appear multiple times in cards and summary)
+    expect(screen.getAllByText('Conservative').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Moderate').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Aggressive').length).toBeGreaterThan(0);
   });
 
   it('should show board summary after calculation', async () => {
@@ -186,12 +187,6 @@ describe('ROICalculatorPage', () => {
 });
 
 describe('ROICalculatorPage - No Data', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Override mock to return canProceed false
-    vi.mocked(mockStore.canProceed).mockReturnValue(false);
-  });
-
   it('should redirect if canProceed is false', async () => {
     const originalCanProceed = mockStore.canProceed;
     mockStore.canProceed = () => false;

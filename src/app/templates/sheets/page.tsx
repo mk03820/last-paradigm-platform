@@ -106,7 +106,7 @@ export default function GoogleSheetsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.875rem' }}>Use our guided calculator online</span>
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/calculator">Start Calculator</Link>
+                  <Link href="/tool/meeting-audit">Start Calculator</Link>
                 </Button>
               </div>
             </div>

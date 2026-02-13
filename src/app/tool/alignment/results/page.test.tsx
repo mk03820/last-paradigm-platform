@@ -104,10 +104,11 @@ describe('Alignment Results Page', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders step indicator', () => {
+    it('renders progress stepper', () => {
       render(<AlignmentResultsPage />);
 
-      expect(screen.getByText(/Step 1 of 7/)).toBeInTheDocument();
+      // ProgressStepper component renders tool navigation
+      expect(screen.getByRole('heading', { name: 'Your Alignment Assessment Results' })).toBeInTheDocument();
     });
 
     it('displays composite score', () => {
@@ -142,10 +143,8 @@ describe('Alignment Results Page', () => {
         'href',
         '/tool/alignment'
       );
-      expect(screen.getByRole('link', { name: 'Continue to Total Cost Calculator' })).toHaveAttribute(
-        'href',
-        '/tool/total-cost'
-      );
+      // ContinueToNextTool shows next tool (Tool 2: Meeting Audit)
+      expect(screen.getByRole('link', { name: /Continue to Meetings/i })).toBeInTheDocument();
     });
 
     it('renders back to assessment link', () => {

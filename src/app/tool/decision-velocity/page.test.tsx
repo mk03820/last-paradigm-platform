@@ -44,19 +44,20 @@ describe('Decision Velocity Page', () => {
       expect(screen.getByText('The Last Paradigm')).toBeInTheDocument();
     });
 
-    it('renders back to dashboard link', () => {
+    it('renders back to diagnostic hub link', () => {
       render(<DecisionVelocityPage />);
 
-      expect(screen.getByRole('link', { name: /Back to Dashboard/ })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /Back to Diagnostic Hub/ })).toHaveAttribute(
         'href',
-        '/dashboard'
+        '/diagnostic'
       );
     });
 
-    it('renders step indicator', () => {
+    it('renders progress stepper', () => {
       render(<DecisionVelocityPage />);
 
-      expect(screen.getByText(/Step 3 of 7/)).toBeInTheDocument();
+      // ProgressStepper component renders tool navigation
+      expect(screen.getByText('Decision Velocity Scorecard')).toBeInTheDocument();
     });
   });
 

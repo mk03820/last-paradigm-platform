@@ -121,7 +121,7 @@ describe('ProgressStepper', () => {
     render(<ProgressStepper currentToolId="alignment" />);
 
     const meetingAuditLink = screen.getByRole('link', { name: /Tool 2/i });
-    expect(meetingAuditLink).toHaveAttribute('href', '/calculator');
+    expect(meetingAuditLink).toHaveAttribute('href', '/tool/meeting-audit');
   });
 
   describe('mobile stepper', () => {

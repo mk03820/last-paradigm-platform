@@ -32,7 +32,7 @@ export default function ResultsPage() {
 
   // Redirect to calculator if no results available
   if (!results) {
-    redirect('/calculator');
+    redirect('/tool/meeting-audit');
   }
 
   return (
@@ -43,7 +43,7 @@ export default function ResultsPage() {
         {/* Back Navigation */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: '2rem' }}>
           <Link
-            href="/calculator"
+            href="/tool/meeting-audit"
             style={{
               fontSize: '0.875rem',
               color: 'var(--muted-foreground)',
@@ -132,7 +132,7 @@ export default function ResultsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
           <PdfExportButton results={results} buttonText="Export PDF" />
           <Button asChild variant="outline" size="lg">
-            <Link href="/calculator">Recalculate</Link>
+            <Link href="/tool/meeting-audit">Recalculate</Link>
           </Button>
         </div>
 

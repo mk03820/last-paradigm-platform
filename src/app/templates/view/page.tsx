@@ -192,7 +192,7 @@ export default function ViewTemplatePage() {
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button asChild variant="secondary">
-                <Link href="/calculator">Use Guided Calculator</Link>
+                <Link href="/tool/meeting-audit">Use Guided Calculator</Link>
               </Button>
               <Button asChild variant="outline" style={{ borderColor: 'var(--primary-foreground)', color: 'var(--primary-foreground)' }}>
                 <a href="/api/templates/excel" download>Download Excel</a>

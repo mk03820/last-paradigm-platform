@@ -101,7 +101,7 @@ function DashboardContent({
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="calculator-card">
-              <a href="/calculator">Open Calculator</a>
+              <a href="/tool/meeting-audit">Open Calculator</a>
             </div>
             <div data-testid="templates-card">
               <a href="/templates">View Templates</a>
@@ -209,7 +209,7 @@ describe('Dashboard Page', () => {
 
       const calculatorCard = screen.getByTestId('calculator-card');
       expect(calculatorCard).toBeInTheDocument();
-      expect(calculatorCard.querySelector('a')).toHaveAttribute('href', '/calculator');
+      expect(calculatorCard.querySelector('a')).toHaveAttribute('href', '/tool/meeting-audit');
     });
 
     it('displays templates card with link', () => {

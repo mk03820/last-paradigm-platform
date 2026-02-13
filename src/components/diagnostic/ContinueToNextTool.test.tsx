@@ -33,7 +33,7 @@ describe('ContinueToNextTool', () => {
     expect(screen.getByText(/Meeting Audit Calculator/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Continue to Meetings/i })).toHaveAttribute(
       'href',
-      '/calculator'
+      '/tool/meeting-audit'
     );
   });
 

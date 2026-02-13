@@ -139,7 +139,7 @@ export default function TemplatesPage() {
             Prefer step-by-step guidance?
           </p>
           <Button asChild variant="outline">
-            <Link href="/calculator">Use Guided Calculator</Link>
+            <Link href="/tool/meeting-audit">Use Guided Calculator</Link>
           </Button>
         </div>
       </div>

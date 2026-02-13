@@ -9,7 +9,7 @@ vi.mock('next-auth/react', () => ({
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/calculator',
+  usePathname: () => '/tool/meeting-audit',
 }));
 
 // Mock UserMenu to simplify tests
@@ -75,7 +75,7 @@ describe('Header', () => {
 
     const signInLink = screen.getByRole('link', { name: /sign in/i });
     expect(signInLink).toBeInTheDocument();
-    expect(signInLink).toHaveAttribute('href', '/auth/signin?callbackUrl=%2Fcalculator');
+    expect(signInLink).toHaveAttribute('href', '/auth/signin?callbackUrl=%2Ftool%2Fmeeting-audit');
   });
 
   it('shows UserMenu for authenticated users', () => {
@@ -105,7 +105,7 @@ describe('Header', () => {
     render(<Header />);
 
     const signInLink = screen.getByRole('link', { name: /sign in/i });
-    // Should include encoded /calculator path
-    expect(signInLink).toHaveAttribute('href', expect.stringContaining('callbackUrl=%2Fcalculator'));
+    // Should include encoded /tool/meeting-audit path
+    expect(signInLink).toHaveAttribute('href', expect.stringContaining('callbackUrl=%2Ftool%2Fmeeting-audit'));
   });
 });

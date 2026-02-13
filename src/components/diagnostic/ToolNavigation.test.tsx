@@ -49,9 +49,9 @@ describe('ToolNavigation', () => {
   it('links to correct previous tool route', () => {
     render(<ToolNavigation currentToolNumber={3} />);
 
-    // Previous should link to Tool 2 (/calculator)
+    // Previous should link to Tool 2 (/tool/meeting-audit)
     const prevLink = screen.getByRole('link', { name: /Previous.*Meetings/i });
-    expect(prevLink).toHaveAttribute('href', '/calculator');
+    expect(prevLink).toHaveAttribute('href', '/tool/meeting-audit');
   });
 
   it('links to correct next tool route', () => {

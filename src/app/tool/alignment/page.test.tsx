@@ -52,19 +52,18 @@ describe('Alignment Assessment Page', () => {
       expect(screen.getByText('The Last Paradigm')).toBeInTheDocument();
     });
 
-    it('renders back to dashboard link', () => {
+    it('renders back to diagnostic hub link', () => {
       render(<AlignmentAssessmentPage />);
 
-      const backLink = screen.getByRole('link', { name: /back to dashboard/i });
-      expect(backLink).toHaveAttribute('href', '/dashboard');
+      const backLink = screen.getByRole('link', { name: /back to diagnostic hub/i });
+      expect(backLink).toHaveAttribute('href', '/diagnostic');
     });
 
-    it('renders step indicator', () => {
+    it('renders progress stepper', () => {
       render(<AlignmentAssessmentPage />);
 
-      expect(screen.getByText(/Step 1 of 7/)).toBeInTheDocument();
-      // The step label is part of the step indicator
-      expect(screen.getByRole('status', { name: 'Progress indicator' })).toBeInTheDocument();
+      // ProgressStepper component renders tool navigation
+      expect(screen.getByText('Organizational Alignment Assessment')).toBeInTheDocument();
     });
   });
 

@@ -263,11 +263,11 @@ describe('CostCategoryChart', () => {
     it('links to correct tool paths', () => {
       render(<CostCategoryChart result={mockResult} />);
 
-      // Tool 2 (Meeting Audit) should link to /calculator
+      // Tool 2 (Meeting Audit) should link to /tool/meeting-audit
       const links = screen.getAllByTestId('next-link');
       const hrefs = links.map((link) => link.getAttribute('href'));
 
-      expect(hrefs).toContain('/calculator');
+      expect(hrefs).toContain('/tool/meeting-audit');
       expect(hrefs).toContain('/tool/data-flow');
     });
   });

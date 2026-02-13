@@ -58,7 +58,7 @@ export const DIAGNOSTIC_TOOLS: DiagnosticTool[] = [
     shortName: 'Meetings',
     description: 'Quantify the cost of unproductive meetings',
     icon: Calculator,
-    route: '/calculator',
+    route: '/tool/meeting-audit',
     storeKey: 'calculator',
     anonymousAccess: true,
     estimatedMinutes: 5,

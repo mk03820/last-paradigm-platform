@@ -147,7 +147,7 @@ export function CalculatorForm() {
           calculatedAt: new Date().toISOString(),
         };
         setResults(calculationResult);
-        router.push('/results');
+        router.push('/tool/meeting-audit/results');
       } else {
         setApiError(result.error || 'Calculation failed. Please try again.');
       }

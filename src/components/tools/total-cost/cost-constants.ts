@@ -156,7 +156,7 @@ export const TOOLS: ToolInfo[] = [
     name: 'Meeting Audit Calculator',
     shortName: 'Meeting Audit',
     description: 'Calculate the cost of meeting waste in your organization',
-    path: '/calculator',
+    path: '/tool/meeting-audit',
     isRequired: true, // Minimum requirement per AC3
   },
   {

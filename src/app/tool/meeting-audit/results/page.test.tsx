@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     back: vi.fn(),
   }),
-  usePathname: () => '/results',
+  usePathname: () => '/tool/meeting-audit/results',
   redirect: (path: string) => {
     redirectCalled = true;
     redirectTarget = path;
@@ -100,7 +100,7 @@ describe('ResultsPage', () => {
 
       const recalculateLink = screen.getByRole('link', { name: /recalculate/i });
       expect(recalculateLink).toBeInTheDocument();
-      expect(recalculateLink).toHaveAttribute('href', '/calculator');
+      expect(recalculateLink).toHaveAttribute('href', '/tool/meeting-audit');
     });
 
     it('has aria-live region for screen reader announcement', () => {
@@ -132,10 +132,10 @@ describe('ResultsPage', () => {
       });
     });
 
-    it('redirects to /calculator when no results', () => {
+    it('redirects to /tool/meeting-audit when no results', () => {
       expect(() => render(<ResultsPage />)).toThrow('NEXT_REDIRECT');
       expect(redirectCalled).toBe(true);
-      expect(redirectTarget).toBe('/calculator');
+      expect(redirectTarget).toBe('/tool/meeting-audit');
     });
   });
 });

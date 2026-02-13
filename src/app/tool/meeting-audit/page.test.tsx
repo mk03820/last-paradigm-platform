@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     back: vi.fn(),
   }),
-  usePathname: () => '/calculator',
+  usePathname: () => '/tool/meeting-audit',
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -142,7 +142,7 @@ describe('CalculatorPage', () => {
           }),
         })
       );
-      expect(navigatedTo).toBe('/results');
+      expect(navigatedTo).toBe('/tool/meeting-audit/results');
     });
 
     it('shows loading state while calculating', async () => {

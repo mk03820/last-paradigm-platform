@@ -90,7 +90,7 @@ describe('SignIn Page - AuthFormWrapper', () => {
 
   describe('callback URL handling', () => {
     it('passes callbackUrl to form wrapper', () => {
-      render(<AuthFormWrapper callbackUrl="/calculator" />);
+      render(<AuthFormWrapper callbackUrl="/tool/meeting-audit" />);
 
       expect(screen.getByTestId('auth-form-placeholder')).toBeInTheDocument();
     });
