@@ -21,6 +21,12 @@ import { ToolCompletionStatus } from '@/components/tools/total-cost/ToolCompleti
 import { AggregatedDataPreview } from '@/components/tools/total-cost/AggregatedDataPreview';
 import { aggregateAllTools } from '@/components/tools/total-cost/aggregation-engine';
 import { useTool7Store } from '@/lib/store/tool7-store';
+import { useCalculatorStore } from '@/lib/store/calculator-store';
+import { useTool1Store } from '@/lib/store/tool1-store';
+import { useTool3Store } from '@/lib/store/tool3-store';
+import { useTool4Store } from '@/lib/store/tool4-store';
+import { useTool5Store } from '@/lib/store/tool5-store';
+import { useTool6Store } from '@/lib/store/tool6-store';
 import { AlertCircle, Calculator, RefreshCw } from 'lucide-react';
 
 export default function TotalCostPage() {
@@ -37,12 +43,21 @@ export default function TotalCostPage() {
   // Local state for refresh
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  // Initial aggregation on mount
+  // Subscribe to stores that affect aggregation - this ensures we re-aggregate
+  // after Zustand persist middleware finishes hydrating from sessionStorage
+  const calculatorResults = useCalculatorStore((state) => state.results);
+  const tool1Completion = useTool1Store((state) => state.completion);
+  const tool3Completion = useTool3Store((state) => state.completion);
+  const tool4Completion = useTool4Store((state) => state.completion);
+  const tool5Completion = useTool5Store((state) => state.completion);
+  const tool6Completion = useTool6Store((state) => state.completion);
+
+  // Initial aggregation on mount and when stores hydrate
   React.useEffect(() => {
-    if (!aggregatedData) {
-      handleRefresh();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Always refresh when this effect runs - this handles both initial mount
+    // and re-hydration from sessionStorage
+    handleRefresh();
+  }, [calculatorResults, tool1Completion, tool3Completion, tool4Completion, tool5Completion, tool6Completion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle data refresh from tools (AC5)
   const handleRefresh = React.useCallback(async () => {
