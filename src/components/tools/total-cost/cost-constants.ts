@@ -1028,6 +1028,164 @@ export function getCostCategoryById(categoryId: string): AdditionalCostCategory 
 }
 
 // ============================================================================
+// Story 14.5: ROI Calculator Types
+// ============================================================================
+
+/**
+ * Scenario type for ROI calculations
+ */
+export type ROIScenarioType = 'conservative' | 'moderate' | 'aggressive';
+
+/**
+ * ROI Scenario configuration
+ */
+export interface ROIScenario {
+  type: ROIScenarioType;
+  label: string;
+  description: string;
+  reductionMultiplier: number; // Multiplier applied to target reduction
+  achievementProbability: number; // Percentage likelihood of achieving
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}
+
+/**
+ * ROI Calculation Result
+ */
+export interface ROIResult {
+  scenarioType: ROIScenarioType;
+  scenarioLabel: string;
+  targetReduction: number; // Percentage (0-100)
+  timelineMonths: number;
+  investment: number;
+
+  // Core metrics
+  annualSavings: number;
+  threeYearSavings: number;
+  npv: number; // Net Present Value over 3 years
+  roiRatio: number; // ROI as ratio (e.g., 3.5x)
+  roiPercent: number; // ROI as percentage (e.g., 350%)
+  paybackMonths: number; // Months to break even
+
+  // Achievement probability
+  probability: number;
+}
+
+/**
+ * ROI Calculator Input Parameters
+ */
+export interface ROICalculatorInput {
+  alignmentTax: number; // Current annual alignment tax
+  investment: number; // Proposed transformation investment
+  targetReduction: number; // Target reduction percentage (0-100)
+  timelineMonths: number; // Timeline to achieve reduction
+  discountRate?: number; // NPV discount rate (default 10%)
+}
+
+/**
+ * ROI Scenarios Configuration
+ */
+export const ROI_SCENARIOS: ROIScenario[] = [
+  {
+    type: 'conservative',
+    label: 'Conservative',
+    description: 'Lower reduction targets with higher certainty of achievement',
+    reductionMultiplier: 0.6, // Achieves 60% of target
+    achievementProbability: 85,
+    color: 'text-blue-700 dark:text-blue-300',
+    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+    borderColor: 'border-blue-200 dark:border-blue-800',
+  },
+  {
+    type: 'moderate',
+    label: 'Moderate',
+    description: 'Balanced reduction targets with reasonable probability',
+    reductionMultiplier: 1.0, // Achieves 100% of target
+    achievementProbability: 65,
+    color: 'text-emerald-700 dark:text-emerald-300',
+    bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+    borderColor: 'border-emerald-200 dark:border-emerald-800',
+  },
+  {
+    type: 'aggressive',
+    label: 'Aggressive',
+    description: 'Higher reduction targets with lower certainty',
+    reductionMultiplier: 1.4, // Achieves 140% of target
+    achievementProbability: 35,
+    color: 'text-purple-700 dark:text-purple-300',
+    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+    borderColor: 'border-purple-200 dark:border-purple-800',
+  },
+];
+
+/**
+ * Default ROI Calculator values
+ */
+export const ROI_DEFAULTS = {
+  targetReduction: 50, // 50% reduction
+  timelineMonths: 18, // 18 months
+  discountRate: 0.10, // 10% discount rate for NPV
+  minInvestment: 10000,
+  maxInvestment: 50000000,
+};
+
+/**
+ * Timeline options for ROI calculator
+ */
+export const ROI_TIMELINE_OPTIONS = [
+  { value: 12, label: '12 months' },
+  { value: 18, label: '18 months' },
+  { value: 24, label: '24 months' },
+  { value: 36, label: '36 months' },
+];
+
+/**
+ * Target reduction options for ROI calculator
+ */
+export const ROI_REDUCTION_OPTIONS = [
+  { value: 25, label: '25%' },
+  { value: 50, label: '50%' },
+  { value: 75, label: '75%' },
+];
+
+/**
+ * Get ROI scenario by type
+ */
+export function getROIScenario(type: ROIScenarioType): ROIScenario {
+  return ROI_SCENARIOS.find((s) => s.type === type) || ROI_SCENARIOS[1];
+}
+
+/**
+ * Format ROI ratio for display
+ */
+export function formatROIRatio(ratio: number): string {
+  if (ratio < 0) return 'Negative';
+  if (ratio === Infinity || isNaN(ratio)) return 'N/A';
+  return `${ratio.toFixed(1)}x`;
+}
+
+/**
+ * Format months to years and months
+ */
+export function formatPaybackPeriod(months: number): string {
+  if (months <= 0) return 'Immediate';
+  if (months === Infinity || isNaN(months)) return 'Never';
+  if (months > 120) return '10+ years';
+
+  const years = Math.floor(months / 12);
+  const remainingMonths = Math.round(months % 12);
+
+  if (years === 0) {
+    return `${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
+  }
+  if (remainingMonths === 0) {
+    return `${years} year${years !== 1 ? 's' : ''}`;
+  }
+  return `${years}y ${remainingMonths}m`;
+}
+
+// ============================================================================
 // Validation Helpers (Story 14.2)
 // ============================================================================
 

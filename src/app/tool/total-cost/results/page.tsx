@@ -12,6 +12,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header, StepIndicator } from '@/components/layout';
 import {
@@ -19,6 +20,7 @@ import {
   PercentOfRevenueDisplay,
   InterpretationCard,
   CostSourceBreakdown,
+  CostCategoryMiniChart,
   calculateTotalAlignmentTax,
 } from '@/components/tools/total-cost';
 import type { AggregatedToolData, AdditionalCosts } from '@/components/tools/total-cost/cost-constants';
@@ -215,12 +217,37 @@ export default function TotalCostResultsPage() {
               Cost Breakdown
             </h2>
             <CostSourceBreakdown result={result} />
+
+            {/* Link to detailed breakdown */}
+            <div className="mt-4 flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-4">
+                <CostCategoryMiniChart result={result} className="hidden sm:block" />
+                <div>
+                  <p className="font-medium">Want more detail?</p>
+                  <p className="text-sm text-muted-foreground">
+                    View interactive charts with filtering and sorting
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/tool/total-cost/breakdown">
+                  <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+                  View Breakdown
+                </Link>
+              </Button>
+            </div>
           </section>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button variant="outline" asChild>
               <Link href="/tool/total-cost/inputs">Revise Inputs</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/tool/total-cost/breakdown">
+                <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+                Category Breakdown
+              </Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard">Return to Dashboard</Link>

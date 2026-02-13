@@ -129,6 +129,19 @@ export {
 export type { CostSourceBreakdownProps } from './CostSourceBreakdown';
 
 // ============================================================================
+// Story 14.4 Components
+// ============================================================================
+
+export {
+  CostCategoryChart,
+  CostCategoryMiniChart,
+} from './CostCategoryChart';
+export type {
+  CostCategoryChartProps,
+  CostCategoryMiniChartProps,
+} from './CostCategoryChart';
+
+// ============================================================================
 // Story 14.3 Calculation Engine
 // ============================================================================
 
@@ -218,3 +231,85 @@ export {
   hasAnyAdditionalCostsInput,
   countCompletedCostCategories,
 } from './cost-constants';
+
+// ============================================================================
+// Story 14.5: ROI Calculator Components
+// ============================================================================
+
+export { ROICalculator } from './ROICalculator';
+export type { ROICalculatorProps } from './ROICalculator';
+
+export { ROIScenarioCard, ROIScenarioBadge, ROIQuickSummary } from './ROIScenarioCard';
+export type { ROIScenarioCardProps } from './ROIScenarioCard';
+
+export { ROIResults, ROICompactSummary } from './ROIResults';
+export type { ROIResultsProps } from './ROIResults';
+
+// ============================================================================
+// Story 14.5: ROI Calculator Engine
+// ============================================================================
+
+export {
+  calculateNPV,
+  calculateIRR,
+  calculateROIScenario,
+  buildCashflows,
+  calculatePaybackPeriod,
+  generateScenarios,
+  calculateROI,
+  validateROIInput,
+  canCalculateROI,
+  getScenarioRecommendation,
+  formatNPV,
+} from './roi-calculator';
+
+// ============================================================================
+// Story 14.5: ROI Types and Constants
+// ============================================================================
+
+export type {
+  ROIScenarioType,
+  ROIScenario,
+  ROIResult,
+  ROICalculatorInput,
+} from './cost-constants';
+
+export {
+  ROI_SCENARIOS,
+  ROI_DEFAULTS,
+  ROI_TIMELINE_OPTIONS,
+  ROI_REDUCTION_OPTIONS,
+  getROIScenario,
+  formatROIRatio,
+  formatPaybackPeriod,
+} from './cost-constants';
+
+// ============================================================================
+// Story 14.6: PDF Export Components
+// ============================================================================
+
+export {
+  DiagnosticPDFDocument,
+  DiagnosticPDFExport,
+  DocumentIcon,
+  PDFCoverPage,
+  PDFExecutiveSummary,
+  PDFToolSummary,
+  PDFAllToolsSummary,
+  PDFCostBreakdown,
+  PDFROISummary,
+  PDFROIPlaceholder,
+  PDFRecommendations,
+  // Styles and utilities
+  diagnosticPDFStyles,
+  brandColors,
+  formatCurrencyPDF,
+  formatFullCurrencyPDF,
+  formatPercentPDF,
+  formatDatePDF,
+} from './pdf';
+
+export type {
+  DiagnosticPDFDocumentProps,
+  DiagnosticPDFExportProps,
+} from './pdf';
