@@ -1,10 +1,10 @@
 /**
  * Sign In Page
  *
- * Magic link authentication entry point.
- * Users enter their email to receive a sign-in link.
+ * User authentication entry point with password and magic link options.
+ * Supports Phase 3 custom JWT auth alongside NextAuth magic links.
  *
- * Covers: FR2-1 (account creation), FR2-2 (sign in via magic link)
+ * Covers: FR2-1 (account creation), FR2-2 (sign in via magic link), FR41 (login)
  */
 
 import { Suspense } from 'react';
@@ -20,9 +20,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
+import { SignInClient } from './signin-client';
 
 interface SignInPageProps {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string; mode?: string }>;
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
@@ -58,7 +59,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<div className="h-32 flex items-center justify-center">Loading...</div>}>
-              <AuthFormWrapper callbackUrl={params.callbackUrl} error={params.error} />
+              <SignInClient callbackUrl={params.callbackUrl} error={params.error} />
             </Suspense>
           </CardContent>
         </Card>
@@ -71,24 +72,5 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         </p>
       </div>
     </main>
-  );
-}
-
-function AuthFormWrapper({ callbackUrl, error }: { callbackUrl?: string; error?: string }) {
-  return (
-    <div className="space-y-4">
-      {error && (
-        <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-center">
-          <p className="text-sm text-destructive">
-            {error === 'OAuthAccountNotLinked'
-              ? 'This email is already associated with another account.'
-              : error === 'Verification'
-              ? 'The magic link has expired or already been used.'
-              : 'Something went wrong. Please try again.'}
-          </p>
-        </div>
-      )}
-      <AuthForm callbackUrl={callbackUrl} />
-    </div>
   );
 }

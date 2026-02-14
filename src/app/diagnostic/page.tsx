@@ -10,6 +10,7 @@
 
 import { Header } from '@/components/layout';
 import { DiagnosticProgress, ToolGrid } from '@/components/diagnostic';
+import { SaveResultsButtonWrapper } from '@/components/session';
 import Link from 'next/link';
 
 export const metadata = {
@@ -25,15 +26,19 @@ export default function DiagnosticHubPage() {
         <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Page Header */}
           <header className="mb-8">
-            <nav aria-label="Breadcrumb" className="mb-4">
-              <Link
-                href="/"
-                className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-              >
-                <span aria-hidden="true">&larr;</span>
-                Home
-              </Link>
-            </nav>
+            <div className="flex items-center justify-between mb-4">
+              <nav aria-label="Breadcrumb">
+                <Link
+                  href="/"
+                  className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                >
+                  <span aria-hidden="true">&larr;</span>
+                  Home
+                </Link>
+              </nav>
+              {/* Save Results Button - Story 15.8 */}
+              <SaveResultsButtonWrapper variant="outline" size="sm" showOnlyIfData />
+            </div>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Alignment Tax Diagnostic
             </h1>

@@ -12,9 +12,10 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header, StepIndicator } from '@/components/layout';
+import { SaveResultsButton } from '@/components/session';
 import {
   AlignmentTaxHeadline,
   PercentOfRevenueDisplay,
@@ -237,6 +238,11 @@ export default function TotalCostResultsPage() {
               </Button>
             </div>
           </section>
+
+          {/* Save Results - Story 15.8 */}
+          <div className="flex justify-center pt-4">
+            <SaveResultsButton variant="default" size="lg" />
+          </div>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">

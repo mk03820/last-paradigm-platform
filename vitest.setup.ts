@@ -1,26 +1,28 @@
 import '@testing-library/jest-dom';
 
-// Mock sessionStorage for tests
-const sessionStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index: number) => Object.keys(store)[index] || null,
-  };
-})();
+// Mock sessionStorage for tests (only in browser environments)
+if (typeof window !== 'undefined') {
+  const sessionStorageMock = (() => {
+    let store: Record<string, string> = {};
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => {
+        store[key] = value;
+      },
+      removeItem: (key: string) => {
+        delete store[key];
+      },
+      clear: () => {
+        store = {};
+      },
+      get length() {
+        return Object.keys(store).length;
+      },
+      key: (index: number) => Object.keys(store)[index] || null,
+    };
+  })();
 
-Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock,
-});
+  Object.defineProperty(window, 'sessionStorage', {
+    value: sessionStorageMock,
+  });
+}
