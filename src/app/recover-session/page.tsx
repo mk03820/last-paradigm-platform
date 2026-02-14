@@ -134,7 +134,7 @@ async function restoreToStores(sessionData: PreservedSessionData): Promise<void>
   }
 }
 
-export default function RecoverSessionPage() {
+function RecoverSessionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -440,5 +440,19 @@ export default function RecoverSessionPage() {
         </Card>
       </main>
     </>
+  );
+}
+
+export default function RecoverSessionPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <RecoverSessionContent />
+    </React.Suspense>
   );
 }

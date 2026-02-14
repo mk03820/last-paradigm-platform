@@ -16,7 +16,14 @@ import {
 } from '@/lib/auth/password-reset';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialized Resend client to avoid build-time errors
+let resend: Resend | null = null;
+function getResend() {
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -61,7 +68,7 @@ export async function POST(request: NextRequest) {
       const resetUrl = buildResetUrl(result.token);
 
       try {
-        await resend.emails.send({
+        await getResend().emails.send({
           from: process.env.EMAIL_FROM || 'The Last Paradigm <noreply@thelastparadigm.com>',
           to: normalizedEmail,
           subject: 'Reset Your Password - The Last Paradigm',

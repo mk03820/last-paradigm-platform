@@ -89,10 +89,12 @@ function collectSessionData(): PreservedSessionData {
   }
 
   // Tool 3: Decision Velocity
-  if (tool3.decisions && tool3.decisions.length > 0) {
+  // Collect all samples from archetypes as decisions
+  const allSamples = Object.values(tool3.archetypes).flatMap(a => a.samples);
+  if (allSamples.length > 0) {
     sessionData.tool3 = {
-      decisions: tool3.decisions,
-      metrics: tool3.metrics,
+      decisions: allSamples,
+      metrics: { archetypes: tool3.archetypes },
       completedAt: tool3.completion?.completedAt,
     };
   }
@@ -109,16 +111,16 @@ function collectSessionData(): PreservedSessionData {
   if (tool5.journeys && tool5.journeys.length > 0) {
     sessionData.tool5 = {
       journeys: tool5.journeys,
-      frictionCost: tool5.completion?.totalFrictionCost,
+      frictionCost: tool5.completion?.totalLatencyHours,
       completedAt: tool5.completion?.completedAt,
     };
   }
 
   // Tool 6: Communication Pattern
-  if (tool6.metrics) {
+  if (tool6.email || tool6.chat || tool6.meetings) {
     sessionData.tool6 = {
-      metrics: tool6.metrics,
-      antiPatterns: tool6.antiPatterns,
+      metrics: { email: tool6.email, chat: tool6.chat, meetings: tool6.meetings },
+      antiPatterns: tool6.analysisResults?.results,
       completedAt: tool6.completion?.completedAt,
     };
   }
@@ -156,13 +158,18 @@ function hasSessionData(): boolean {
   const tool6 = useTool6Store.getState();
   const tool7 = useTool7Store.getState();
 
+  // Check tool3 archetypes for samples
+  const tool3HasData = Object.values(tool3.archetypes).some(a => a.samples.length > 0);
+  // Check tool6 for any metrics
+  const tool6HasData = tool6.email !== null || tool6.chat !== null || tool6.meetings !== null;
+
   return (
     calculator.meetingData !== null ||
     Object.keys(tool1.scores).length > 0 ||
-    (tool3.decisions && tool3.decisions.length > 0) ||
+    tool3HasData ||
     (tool4.stakeholders && tool4.stakeholders.length > 0) ||
     (tool5.journeys && tool5.journeys.length > 0) ||
-    tool6.metrics !== null ||
+    tool6HasData ||
     tool7.aggregatedData !== null
   );
 }

@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { getPasswordStrength } from '@/lib/auth/password';
+import { getPasswordStrength } from '@/lib/auth/password-utils';
 
 const resetPasswordSchema = z.object({
   password: z

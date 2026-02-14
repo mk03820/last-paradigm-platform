@@ -13,7 +13,14 @@ import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialized Resend client to avoid build-time errors
+let resend: Resend | null = null;
+function getResend() {
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export const registrationAbandonmentCheck = inngest.createFunction(
   {
@@ -52,7 +59,7 @@ export const registrationAbandonmentCheck = inngest.createFunction(
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       const resumeUrl = `${baseUrl}/auth/register?email=${encodeURIComponent(email)}`;
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: process.env.EMAIL_FROM || 'The Last Paradigm <noreply@thelastparadigm.com>',
         to: email,
         subject: 'Complete Your Account - The Last Paradigm',

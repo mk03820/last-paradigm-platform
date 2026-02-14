@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { registerSchema, type RegisterInput } from '@/lib/schemas/register.schema';
-import { getPasswordStrength } from '@/lib/auth/password';
+import { getPasswordStrength } from '@/lib/auth/password-utils';
 import { cn } from '@/lib/utils';
 
 interface RegisterFormProps {
