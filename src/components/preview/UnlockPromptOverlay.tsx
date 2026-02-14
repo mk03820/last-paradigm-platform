@@ -268,7 +268,7 @@ export function UnlockPromptOverlay({
   // Animation transition configuration
   const transition = reducedMotion
     ? { duration: 0 }
-    : { duration: 0.15, ease: 'easeOut' };
+    : { duration: 0.15, ease: 'easeOut' as const };
 
   return (
     <AnimatePresence>

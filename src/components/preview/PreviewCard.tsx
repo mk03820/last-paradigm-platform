@@ -240,11 +240,11 @@ export function PreviewCard({
 
   // Animation transition configuration
   const cardTransition = shouldAnimate
-    ? { delay, duration: 0.3, ease: 'easeOut' }
+    ? { delay, duration: 0.3, ease: 'easeOut' as const }
     : { duration: 0 };
 
   const hoverTransition = shouldAnimate
-    ? { duration: 0.2, ease: 'easeOut' }
+    ? { duration: 0.2, ease: 'easeOut' as const }
     : { duration: 0 };
 
   return (
