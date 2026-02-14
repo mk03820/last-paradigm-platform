@@ -1,0 +1,1045 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DiagnosticPreviewCardGrid > Snapshot tests > should match snapshot for empty state 1`] = `
+<section
+  aria-label="Recommendations"
+  class="space-y-6"
+>
+  <div
+    class="mb-6"
+  >
+    <h2
+      class="text-2xl font-bold tracking-tight"
+    >
+      Top 3 Recommendations for You
+    </h2>
+  </div>
+  <div
+    class="rounded-xl border border-dashed p-8 text-center"
+  >
+    <div
+      class="mx-auto mb-4 h-12 w-12 rounded-full bg-muted flex items-center justify-center"
+    >
+      <svg
+        aria-hidden="true"
+        class="text-muted-foreground"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <path
+          d="M12 16v-4"
+        />
+        <path
+          d="M12 8h.01"
+        />
+      </svg>
+    </div>
+    <h3
+      class="text-lg font-semibold"
+    >
+      No Recommendations Available
+    </h3>
+    <p
+      class="mt-2 text-sm text-muted-foreground"
+    >
+      Complete more diagnostic tools to receive personalized tool recommendations.
+    </p>
+  </div>
+</section>
+`;
+
+exports[`DiagnosticPreviewCardGrid > Snapshot tests > should match snapshot for loading state 1`] = `
+<section
+  aria-busy="true"
+  aria-label="Loading preview cards"
+  class="space-y-6"
+>
+  <div
+    class="mb-6"
+  >
+    <h2
+      class="text-2xl font-bold tracking-tight"
+    >
+      Top 3 Recommendations for You
+    </h2>
+    <p
+      class="mt-1 text-sm text-muted-foreground"
+    >
+      Loading your personalized recommendations...
+    </p>
+  </div>
+  <div
+    class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+  >
+    <div
+      aria-hidden="true"
+      class="animate-pulse rounded-xl border bg-muted/50 p-6 min-h-[420px]"
+    >
+      <div
+        class="flex items-start gap-3 mb-4"
+      >
+        <div
+          class="h-8 w-8 rounded-full bg-muted"
+        />
+        <div
+          class="flex-1 space-y-2"
+        >
+          <div
+            class="h-5 w-3/4 rounded bg-muted"
+          />
+          <div
+            class="h-4 w-1/2 rounded bg-muted"
+          />
+        </div>
+      </div>
+      <div
+        class="space-y-3"
+      >
+        <div
+          class="h-4 w-full rounded bg-muted"
+        />
+        <div
+          class="h-4 w-5/6 rounded bg-muted"
+        />
+        <div
+          class="h-20 rounded bg-muted mt-4"
+        />
+      </div>
+      <div
+        class="mt-4 border-t border-dashed pt-4"
+      >
+        <div
+          class="h-32 rounded bg-muted"
+        />
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      class="animate-pulse rounded-xl border bg-muted/50 p-6 min-h-[420px]"
+    >
+      <div
+        class="flex items-start gap-3 mb-4"
+      >
+        <div
+          class="h-8 w-8 rounded-full bg-muted"
+        />
+        <div
+          class="flex-1 space-y-2"
+        >
+          <div
+            class="h-5 w-3/4 rounded bg-muted"
+          />
+          <div
+            class="h-4 w-1/2 rounded bg-muted"
+          />
+        </div>
+      </div>
+      <div
+        class="space-y-3"
+      >
+        <div
+          class="h-4 w-full rounded bg-muted"
+        />
+        <div
+          class="h-4 w-5/6 rounded bg-muted"
+        />
+        <div
+          class="h-20 rounded bg-muted mt-4"
+        />
+      </div>
+      <div
+        class="mt-4 border-t border-dashed pt-4"
+      >
+        <div
+          class="h-32 rounded bg-muted"
+        />
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      class="animate-pulse rounded-xl border bg-muted/50 p-6 min-h-[420px]"
+    >
+      <div
+        class="flex items-start gap-3 mb-4"
+      >
+        <div
+          class="h-8 w-8 rounded-full bg-muted"
+        />
+        <div
+          class="flex-1 space-y-2"
+        >
+          <div
+            class="h-5 w-3/4 rounded bg-muted"
+          />
+          <div
+            class="h-4 w-1/2 rounded bg-muted"
+          />
+        </div>
+      </div>
+      <div
+        class="space-y-3"
+      >
+        <div
+          class="h-4 w-full rounded bg-muted"
+        />
+        <div
+          class="h-4 w-5/6 rounded bg-muted"
+        />
+        <div
+          class="h-20 rounded bg-muted mt-4"
+        />
+      </div>
+      <div
+        class="mt-4 border-t border-dashed pt-4"
+      >
+        <div
+          class="h-32 rounded bg-muted"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+`;
+
+exports[`DiagnosticPreviewCardGrid > Snapshot tests > should match snapshot with recommendations 1`] = `
+<section
+  aria-label="Tool recommendations"
+  class="space-y-6"
+>
+  <div
+    class="mb-6"
+  >
+    <h2
+      class="text-2xl font-bold tracking-tight"
+    >
+      Top 3 Recommendations for You
+    </h2>
+    <p
+      class="mt-1 text-sm text-muted-foreground"
+    >
+      Personalized tools based on your diagnostic results
+    </p>
+  </div>
+  <div
+    aria-label="Ranked recommendations"
+    class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+    role="list"
+  >
+    <div
+      role="listitem"
+    >
+      <div
+        aria-label="Preview of Tool 3: Decision Rights & Delegation Framework"
+        class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm flex flex-col overflow-hidden border-l-4 border-l-red-600 min-h-[420px]"
+        data-slot="card"
+        role="article"
+      >
+        <div
+          class="flex flex-col gap-2 px-6 has-data-[slot=card-action]:grid has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3"
+          data-slot="card-header"
+        >
+          <div
+            class="flex items-start justify-between gap-4"
+          >
+            <div
+              class="flex items-center gap-3"
+            >
+              <span
+                aria-label="Rank 1"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold bg-amber-600 text-white"
+              >
+                1
+              </span>
+              <div>
+                <h3
+                  class="text-lg font-semibold leading-tight text-foreground"
+                >
+                  Tool 
+                  3
+                  : 
+                  Delegation Framework
+                </h3>
+                <p
+                  class="mt-1 text-sm text-muted-foreground"
+                >
+                  Decision Rights & Delegation Framework
+                </p>
+              </div>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-1 text-xs font-medium capitalize bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300"
+            >
+              critical
+            </span>
+          </div>
+        </div>
+        <div
+          class="px-6 flex-1 flex flex-col"
+          data-slot="card-content"
+        >
+          <div
+            class="space-y-4"
+          >
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Clarifies who can make which decisions and pushes authority to where learning happens fastest.
+            </p>
+            <div
+              class="rounded-lg border border-border bg-muted/30 p-4"
+            >
+              <h4
+                class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Your Diagnostic Results
+              </h4>
+              <div
+                class="flex flex-wrap items-baseline gap-2"
+              >
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  Decision Velocity
+                  :
+                </span>
+                <span
+                  class="text-lg font-bold text-foreground"
+                >
+                  21 days
+                </span>
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  (benchmark: 
+                  7 days
+                  )
+                </span>
+              </div>
+              <p
+                class="mt-2 text-sm font-medium text-amber-700 dark:text-amber-400"
+              >
+                Your decision velocity of 21 days is 3.0x slower than the benchmark.
+              </p>
+            </div>
+            <div
+              class="flex items-center gap-2 text-xs text-muted-foreground"
+            >
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+                />
+              </svg>
+              <span>
+                Based on 
+                Chapter 10: Decision Velocity
+              </span>
+            </div>
+          </div>
+          <div
+            aria-hidden="true"
+            class="my-4 border-t border-dashed border-border"
+          />
+          <div
+            class="relative flex-1 min-h-[140px]"
+          >
+            <div
+              aria-hidden="true"
+              class="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-card to-transparent z-10 pointer-events-none"
+            />
+            <div
+              aria-hidden="true"
+              class="blur-[6px] select-none pointer-events-none pt-4 space-y-3"
+              role="presentation"
+            >
+              <p
+                class="text-sm text-muted-foreground leading-relaxed"
+              >
+                The Decision Rights Matrix maps decision types to authority levels with clear delegation criteria and accountability structures...
+              </p>
+              <div
+                class="rounded-md border border-border bg-muted/50 p-3"
+              >
+                <p
+                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+                >
+                  Methodology Includes:
+                </p>
+                <ul
+                  class="space-y-1"
+                >
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Decision Type Categorization
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Authority Level Assignment
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Delegation Criteria Definition
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="flex items-center gap-2 text-xs text-muted-foreground border-t border-border pt-3"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="none"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+                  />
+                  <path
+                    d="M14 2v4a2 2 0 0 0 2 2h4"
+                  />
+                </svg>
+                <span>
+                  Output: 
+                </span>
+                <span
+                  class="font-mono"
+                >
+                  Decision_Rights_Matrix.xlsx
+                </span>
+              </div>
+            </div>
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm"
+            >
+              <div
+                class="flex items-center gap-2 rounded-lg px-4 py-2 bg-primary/10 border border-primary/20 text-foreground shadow-lg"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="h-5 w-5 text-amber-600 dark:text-amber-400"
+                  fill="none"
+                  height="20"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="text-sm font-semibold"
+                >
+                  Unlock with Playbook 2
+                </span>
+              </div>
+            </div>
+            <span
+              class="sr-only"
+            >
+              Content locked - purchase Playbook 2 to access full tool details and templates. This includes the 
+              Decision_Rights_Matrix.xlsx
+               document.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      role="listitem"
+    >
+      <div
+        aria-label="Preview of Tool 4: Meeting Protocol"
+        class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm flex flex-col overflow-hidden border-l-4 border-l-amber-500 min-h-[420px]"
+        data-slot="card"
+        role="article"
+      >
+        <div
+          class="flex flex-col gap-2 px-6 has-data-[slot=card-action]:grid has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3"
+          data-slot="card-header"
+        >
+          <div
+            class="flex items-start justify-between gap-4"
+          >
+            <div
+              class="flex items-center gap-3"
+            >
+              <span
+                aria-label="Rank 2"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold bg-slate-600 text-white"
+              >
+                2
+              </span>
+              <div>
+                <h3
+                  class="text-lg font-semibold leading-tight text-foreground"
+                >
+                  Tool 
+                  4
+                  : 
+                  Meeting Protocol
+                </h3>
+                <p
+                  class="mt-1 text-sm text-muted-foreground"
+                >
+                  Meeting Protocol
+                </p>
+              </div>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-1 text-xs font-medium capitalize bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"
+            >
+              high
+            </span>
+          </div>
+        </div>
+        <div
+          class="px-6 flex-1 flex flex-col"
+          data-slot="card-content"
+        >
+          <div
+            class="space-y-4"
+          >
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Establishes rules for when meetings are required, attendee limits, and documentation standards.
+            </p>
+            <div
+              class="rounded-lg border border-border bg-muted/30 p-4"
+            >
+              <h4
+                class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Your Diagnostic Results
+              </h4>
+              <div
+                class="flex flex-wrap items-baseline gap-2"
+              >
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  Meeting Waste
+                  :
+                </span>
+                <span
+                  class="text-lg font-bold text-foreground"
+                >
+                  45%
+                </span>
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  (benchmark: 
+                  15%
+                  )
+                </span>
+              </div>
+              <p
+                class="mt-2 text-sm font-medium text-amber-700 dark:text-amber-400"
+              >
+                Your meetings show 45% waste, exceeding the 30% threshold.
+              </p>
+            </div>
+            <div
+              class="flex items-center gap-2 text-xs text-muted-foreground"
+            >
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+                />
+              </svg>
+              <span>
+                Based on 
+                Chapter 11: Meeting Effectiveness
+              </span>
+            </div>
+          </div>
+          <div
+            aria-hidden="true"
+            class="my-4 border-t border-dashed border-border"
+          />
+          <div
+            class="relative flex-1 min-h-[140px]"
+          >
+            <div
+              aria-hidden="true"
+              class="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-card to-transparent z-10 pointer-events-none"
+            />
+            <div
+              aria-hidden="true"
+              class="blur-[6px] select-none pointer-events-none pt-4 space-y-3"
+              role="presentation"
+            >
+              <p
+                class="text-sm text-muted-foreground leading-relaxed"
+              >
+                The Meeting Protocol establishes necessity criteria, attendee limits, agenda requirements, and documentation standards...
+              </p>
+              <div
+                class="rounded-md border border-border bg-muted/50 p-3"
+              >
+                <p
+                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+                >
+                  Methodology Includes:
+                </p>
+                <ul
+                  class="space-y-1"
+                >
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Meeting Necessity Checklist
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Attendee Role Matrix
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Agenda Template Standards
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="flex items-center gap-2 text-xs text-muted-foreground border-t border-border pt-3"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="none"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+                  />
+                  <path
+                    d="M14 2v4a2 2 0 0 0 2 2h4"
+                  />
+                </svg>
+                <span>
+                  Output: 
+                </span>
+                <span
+                  class="font-mono"
+                >
+                  Meeting_Protocol.docx
+                </span>
+              </div>
+            </div>
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm"
+            >
+              <div
+                class="flex items-center gap-2 rounded-lg px-4 py-2 bg-primary/10 border border-primary/20 text-foreground shadow-lg"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="h-5 w-5 text-amber-600 dark:text-amber-400"
+                  fill="none"
+                  height="20"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="text-sm font-semibold"
+                >
+                  Unlock with Playbook 2
+                </span>
+              </div>
+            </div>
+            <span
+              class="sr-only"
+            >
+              Content locked - purchase Playbook 2 to access full tool details and templates. This includes the 
+              Meeting_Protocol.docx
+               document.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      role="listitem"
+    >
+      <div
+        aria-label="Preview of Tool 6: Data Platform Playbook"
+        class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm flex flex-col overflow-hidden border-l-4 border-l-blue-500 min-h-[420px]"
+        data-slot="card"
+        role="article"
+      >
+        <div
+          class="flex flex-col gap-2 px-6 has-data-[slot=card-action]:grid has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3"
+          data-slot="card-header"
+        >
+          <div
+            class="flex items-start justify-between gap-4"
+          >
+            <div
+              class="flex items-center gap-3"
+            >
+              <span
+                aria-label="Rank 3"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold bg-slate-400 text-white"
+              >
+                3
+              </span>
+              <div>
+                <h3
+                  class="text-lg font-semibold leading-tight text-foreground"
+                >
+                  Tool 
+                  6
+                  : 
+                  Data Platform Playbook
+                </h3>
+                <p
+                  class="mt-1 text-sm text-muted-foreground"
+                >
+                  Data Platform Playbook
+                </p>
+              </div>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-1 text-xs font-medium capitalize bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+            >
+              moderate
+            </span>
+          </div>
+        </div>
+        <div
+          class="px-6 flex-1 flex flex-col"
+          data-slot="card-content"
+        >
+          <div
+            class="space-y-4"
+          >
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Addresses systematic data friction through platform architecture and governance improvements.
+            </p>
+            <div
+              class="rounded-lg border border-border bg-muted/30 p-4"
+            >
+              <h4
+                class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Your Diagnostic Results
+              </h4>
+              <div
+                class="flex flex-wrap items-baseline gap-2"
+              >
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  Data Friction Cost
+                  :
+                </span>
+                <span
+                  class="text-lg font-bold text-foreground"
+                >
+                  $8.0M
+                </span>
+                <span
+                  class="text-sm text-muted-foreground"
+                >
+                  (benchmark: 
+                  $5.0M
+                  )
+                </span>
+              </div>
+              <p
+                class="mt-2 text-sm font-medium text-amber-700 dark:text-amber-400"
+              >
+                Your organization loses $8M annually to data friction.
+              </p>
+            </div>
+            <div
+              class="flex items-center gap-2 text-xs text-muted-foreground"
+            >
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+                />
+              </svg>
+              <span>
+                Based on 
+                Chapter 13: Information Flow
+              </span>
+            </div>
+          </div>
+          <div
+            aria-hidden="true"
+            class="my-4 border-t border-dashed border-border"
+          />
+          <div
+            class="relative flex-1 min-h-[140px]"
+          >
+            <div
+              aria-hidden="true"
+              class="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-card to-transparent z-10 pointer-events-none"
+            />
+            <div
+              aria-hidden="true"
+              class="blur-[6px] select-none pointer-events-none pt-4 space-y-3"
+              role="presentation"
+            >
+              <p
+                class="text-sm text-muted-foreground leading-relaxed"
+              >
+                The Data Platform Playbook addresses data friction through architecture patterns, governance frameworks, and implementation guides...
+              </p>
+              <div
+                class="rounded-md border border-border bg-muted/50 p-3"
+              >
+                <p
+                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
+                >
+                  Methodology Includes:
+                </p>
+                <ul
+                  class="space-y-1"
+                >
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Data Architecture Assessment
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Integration Pattern Selection
+                  </li>
+                  <li
+                    class="text-sm text-foreground flex items-center gap-2"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full bg-amber-500"
+                    />
+                    Governance Framework Setup
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="flex items-center gap-2 text-xs text-muted-foreground border-t border-border pt-3"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="none"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+                  />
+                  <path
+                    d="M14 2v4a2 2 0 0 0 2 2h4"
+                  />
+                </svg>
+                <span>
+                  Output: 
+                </span>
+                <span
+                  class="font-mono"
+                >
+                  Data_Platform_Playbook.docx
+                </span>
+              </div>
+            </div>
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm"
+            >
+              <div
+                class="flex items-center gap-2 rounded-lg px-4 py-2 bg-primary/10 border border-primary/20 text-foreground shadow-lg"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="h-5 w-5 text-amber-600 dark:text-amber-400"
+                  fill="none"
+                  height="20"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="text-sm font-semibold"
+                >
+                  Unlock with Playbook 2
+                </span>
+              </div>
+            </div>
+            <span
+              class="sr-only"
+            >
+              Content locked - purchase Playbook 2 to access full tool details and templates. This includes the 
+              Data_Platform_Playbook.docx
+               document.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground"
+  >
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="14"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+      />
+    </svg>
+    <span>
+      Based on The Last Paradigm methodology
+    </span>
+  </div>
+</section>
+`;
