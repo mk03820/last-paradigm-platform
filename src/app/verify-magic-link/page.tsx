@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 type VerificationState =
   | 'loading'
@@ -33,6 +34,7 @@ interface VerificationResult {
 function VerifyMagicLinkContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [result, setResult] = useState<VerificationResult>({
     state: 'loading',
   });
@@ -60,9 +62,17 @@ function VerifyMagicLinkContent() {
       const data = await response.json();
 
       if (data.success) {
-        // Store access token in memory/localStorage for API calls
-        if (data.data?.accessToken) {
-          sessionStorage.setItem('accessToken', data.data.accessToken);
+        // Store auth state in Zustand (in-memory, not sessionStorage for security)
+        if (data.data?.accessToken && data.data?.user) {
+          setAuth(
+            {
+              id: data.data.user.id,
+              email: data.data.user.email,
+              name: data.data.user.name,
+              purchaseStatus: data.data.user.purchaseStatus || 'none',
+            },
+            data.data.accessToken
+          );
         }
 
         setResult({
@@ -95,7 +105,7 @@ function VerifyMagicLinkContent() {
         errorMessage: 'Network error. Please check your connection and try again.',
       });
     }
-  }, [token, callbackUrl, router]);
+  }, [token, callbackUrl, router, setAuth]);
 
   useEffect(() => {
     verifyToken();

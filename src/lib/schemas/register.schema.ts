@@ -17,6 +17,7 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+    .max(72, 'Password cannot exceed 72 characters') // bcrypt truncates at 72 bytes
     .regex(/\d/, 'Password must contain at least one number')
     .regex(/[a-zA-Z]/, 'Password must contain at least one letter'),
   confirmPassword: z
@@ -41,6 +42,7 @@ export const registerApiSchema = z.object({
   password: z
     .string()
     .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+    .max(72, 'Password cannot exceed 72 characters') // bcrypt truncates at 72 bytes
     .regex(/\d/, 'Password must contain at least one number')
     .regex(/[a-zA-Z]/, 'Password must contain at least one letter'),
   name: z

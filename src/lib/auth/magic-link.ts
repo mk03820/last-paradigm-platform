@@ -153,7 +153,8 @@ export async function verifyMagicLink(token: string): Promise<VerifyMagicLinkRes
     }
 
     // Mark as used (atomic operation to prevent race conditions)
-    await db
+    // Check return value to ensure we actually updated a row (handles race condition)
+    const updateResult = await db
       .update(magicLinks)
       .set({ usedAt: new Date() })
       .where(
@@ -161,7 +162,16 @@ export async function verifyMagicLink(token: string): Promise<VerifyMagicLinkRes
           eq(magicLinks.token, token),
           isNull(magicLinks.usedAt)
         )
-      );
+      )
+      .returning({ id: magicLinks.id });
+
+    // If no rows updated, another request already used this token (race condition)
+    if (updateResult.length === 0) {
+      return {
+        success: false,
+        error: 'ALREADY_USED',
+      };
+    }
 
     return {
       success: true,

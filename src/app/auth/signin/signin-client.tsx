@@ -4,14 +4,15 @@
  * Sign In Client Component
  *
  * Client-side authentication form with password and magic link options.
+ * Uses Phase 3 custom JWT authentication (not NextAuth).
  *
- * Covers: Story 15.3, FR41 (User login)
+ * Covers: Story 15.3, 15.4, FR41 (User login), FR39 (Magic link auth)
  */
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AuthForm } from '@/components/auth/auth-form';
+import { MagicLinkForm } from '@/components/auth/MagicLinkForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 
 interface SignInClientProps {
@@ -62,7 +63,7 @@ export function SignInClient({ callbackUrl, error }: SignInClientProps) {
         </>
       ) : (
         <>
-          <AuthForm callbackUrl={callbackUrl} />
+          <MagicLinkForm onSuccess={handleLoginSuccess} />
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />

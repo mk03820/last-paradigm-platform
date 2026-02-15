@@ -1,20 +1,33 @@
 /**
  * Logout API Endpoint
  *
- * Clears the refresh token cookie to log the user out.
+ * Clears the refresh token cookie to log out the user.
  *
- * Covers: Story 15.3 Task 3, FR41 (Session management)
+ * Covers: Story 15.2 Task 6.3, NFR18 (JWT session management)
  */
 
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { REFRESH_TOKEN_COOKIE_OPTIONS } from '@/lib/auth';
+import { REFRESH_TOKEN_COOKIE_OPTIONS } from '@/lib/auth/jwt';
 
-export async function POST() {
+interface LogoutResponse {
+  success: boolean;
+  message?: string;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+/**
+ * POST /api/auth/logout
+ * Clear session and refresh token cookie
+ */
+export async function POST(): Promise<NextResponse<LogoutResponse>> {
   try {
     const cookieStore = await cookies();
 
-    // Clear refresh token cookie
+    // Clear the refresh token cookie
     cookieStore.delete(REFRESH_TOKEN_COOKIE_OPTIONS.name);
 
     return NextResponse.json({
@@ -28,7 +41,7 @@ export async function POST() {
         success: false,
         error: {
           code: 'SERVER_ERROR',
-          message: 'An unexpected error occurred.',
+          message: 'An error occurred during logout.',
         },
       },
       { status: 500 }

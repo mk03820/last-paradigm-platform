@@ -132,9 +132,17 @@ export async function GET(
       }
     );
 
-    // Determine redirect URL
+    // Determine redirect URL (validate to prevent open redirects)
     const defaultRedirect = '/dashboard';
-    const redirectUrl = callbackUrl || defaultRedirect;
+    let redirectUrl = defaultRedirect;
+
+    if (callbackUrl) {
+      // Only allow relative paths starting with / (no protocol or external domains)
+      const isRelativePath = callbackUrl.startsWith('/') && !callbackUrl.startsWith('//');
+      if (isRelativePath) {
+        redirectUrl = callbackUrl;
+      }
+    }
 
     return NextResponse.json({
       success: true,

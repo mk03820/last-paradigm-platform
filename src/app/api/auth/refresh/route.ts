@@ -1,23 +1,44 @@
 /**
  * Token Refresh API Endpoint
  *
- * Refreshes access token using refresh token from cookie.
+ * Refreshes the access token using the refresh token from httpOnly cookie.
  *
- * Covers: Story 15.3 Task 2, NFR18 (JWT session management)
+ * Covers: Story 15.2 Task 6.3, NFR18 (JWT session management)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { cookies } from 'next/headers';
 import {
   verifyRefreshToken,
   createAccessToken,
   REFRESH_TOKEN_COOKIE_OPTIONS,
-} from '@/lib/auth';
+} from '@/lib/auth/jwt';
 
-export async function POST(request: NextRequest) {
+interface RefreshResponse {
+  success: boolean;
+  data?: {
+    accessToken: string;
+    user: {
+      id: string;
+      email: string;
+      name: string | null;
+      purchaseStatus: string;
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+/**
+ * POST /api/auth/refresh
+ * Refresh the access token using refresh token cookie
+ */
+export async function POST(): Promise<NextResponse<RefreshResponse>> {
   try {
     // Get refresh token from cookie
     const cookieStore = await cookies();
@@ -29,7 +50,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'NO_REFRESH_TOKEN',
-            message: 'No refresh token provided.',
+            message: 'No refresh token found. Please sign in again.',
           },
         },
         { status: 401 }
@@ -37,9 +58,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify refresh token
-    const payload = await verifyRefreshToken(refreshToken);
+    const tokenPayload = await verifyRefreshToken(refreshToken);
 
-    if (!payload) {
+    if (!tokenPayload) {
       // Clear invalid cookie
       cookieStore.delete(REFRESH_TOKEN_COOKIE_OPTIONS.name);
 
@@ -48,7 +69,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'INVALID_REFRESH_TOKEN',
-            message: 'Invalid or expired refresh token.',
+            message: 'Session expired. Please sign in again.',
           },
         },
         { status: 401 }
@@ -59,7 +80,7 @@ export async function POST(request: NextRequest) {
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, payload.userId))
+      .where(eq(users.id, tokenPayload.userId))
       .limit(1);
 
     if (!user) {
@@ -71,7 +92,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'USER_NOT_FOUND',
-            message: 'User not found.',
+            message: 'User not found. Please sign in again.',
           },
         },
         { status: 401 }
@@ -89,13 +110,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
+        accessToken,
         user: {
           id: user.id,
-          email: user.email,
+          email: user.email!,
           name: user.name,
-          purchaseStatus: user.purchaseStatus,
+          purchaseStatus: user.purchaseStatus || 'none',
         },
-        accessToken,
       },
     });
   } catch (error) {
@@ -105,7 +126,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: {
           code: 'SERVER_ERROR',
-          message: 'An unexpected error occurred.',
+          message: 'An unexpected error occurred. Please try again.',
         },
       },
       { status: 500 }
