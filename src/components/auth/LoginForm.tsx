@@ -60,10 +60,8 @@ export function LoginForm({ onSuccess, callbackUrl }: LoginFormProps) {
       const result = await response.json();
 
       if (result.success) {
-        // Store access token
-        if (result.data?.accessToken) {
-          sessionStorage.setItem('accessToken', result.data.accessToken);
-        }
+        // Access token passed to parent via onSuccess callback
+        // Parent component should store in Zustand auth-store (not sessionStorage - XSS vulnerable)
         onSuccess?.(result.data);
       } else {
         setSubmitError(result.error?.message || 'Login failed. Please try again.');

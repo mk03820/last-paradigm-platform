@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { getPasswordStrength } from '@/lib/auth/password-utils';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 const resetPasswordSchema = z.object({
   password: z
@@ -40,6 +41,7 @@ function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -93,9 +95,9 @@ function ResetPasswordContent() {
       const result = await response.json();
 
       if (result.success) {
-        // Store access token
-        if (result.data?.accessToken) {
-          sessionStorage.setItem('accessToken', result.data.accessToken);
+        // Store auth state in Zustand (memory-based, not sessionStorage - XSS safe)
+        if (result.data?.accessToken && result.data?.user) {
+          setAuth(result.data.user, result.data.accessToken);
         }
         setSubmitSuccess(true);
         // Redirect to dashboard after brief success message
