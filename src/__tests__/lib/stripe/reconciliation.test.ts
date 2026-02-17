@@ -522,9 +522,7 @@ describe('reconcileStripePayments', () => {
       const result = await reconcileStripePayments(undefined, true);
 
       expect(result.processed).toBe(0);
-      expect(result.errors).toContain(
-        expect.stringContaining('cs_unresolvable')
-      );
+      expect(result.errors.some(e => e.includes('cs_unresolvable'))).toBe(true);
     });
   });
 
@@ -536,9 +534,7 @@ describe('reconcileStripePayments', () => {
 
       const result = await reconcileStripePayments();
 
-      expect(result.errors).toContain(
-        expect.stringContaining('Stripe API error')
-      );
+      expect(result.errors.some(e => e.includes('Stripe API error'))).toBe(true);
     });
 
     it('should handle database errors during processing', async () => {
