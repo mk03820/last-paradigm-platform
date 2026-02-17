@@ -27,6 +27,10 @@ import {
   generatedDocuments,
   emailSequences,
   webhookLogs,
+  // Phase 3 - Epic 18: Toolkit Generation
+  toolkitDocuments,
+  documentStatusEnum,
+  documentTypeEnum,
 } from '@/lib/db/schema';
 import type {
   Email,
@@ -52,6 +56,9 @@ import type {
   NewEmailSequence,
   WebhookLog,
   NewWebhookLog,
+  // Phase 3 - Epic 18: Toolkit Generation
+  ToolkitDocument,
+  NewToolkitDocument,
 } from '@/lib/db/schema';
 
 describe('Phase 1 Schema: emails table', () => {
@@ -140,6 +147,8 @@ describe('Phase 2 Schema: users table', () => {
       purchaseStatus: 'completed',
       purchasedAt: new Date(),
       stripeCustomerId: 'cus_123',
+      hasPb2Access: true,
+      pb2PurchasedAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -377,9 +386,11 @@ describe('Phase 3 Schema: purchases table', () => {
       userId: 'user-123',
       stripeSessionId: 'cs_test_123',
       stripePaymentIntentId: 'pi_test_123',
+      stripeCustomerId: 'cus_123',
       amount: 250000, // $2,500.00 in cents
       currency: 'usd',
       status: 'completed',
+      metadata: { sessionSource: 'preview_page' },
       createdAt: new Date(),
       completedAt: new Date(),
     };
@@ -611,11 +622,140 @@ describe('Schema field constraints', () => {
       generatedDocuments,
       emailSequences,
       webhookLogs,
+      toolkitDocuments,
     ];
 
     phase3Tables.forEach((table) => {
       expect(table.id.columnType).toBe('PgUUID');
       expect(table.id.hasDefault).toBe(true);
     });
+  });
+});
+
+// ============================================================================
+// PHASE 3 - EPIC 18: Toolkit Document Generation
+// ============================================================================
+
+describe('Phase 3 Schema: toolkit_documents table (Story 18.1)', () => {
+  it('should have correct columns for document tracking', () => {
+    const columns = Object.keys(toolkitDocuments);
+    expect(columns).toContain('id');
+    expect(columns).toContain('purchaseId');
+    expect(columns).toContain('userId');
+    expect(columns).toContain('documentType');
+    expect(columns).toContain('documentName');
+    expect(columns).toContain('status');
+    expect(columns).toContain('fileUrl');
+    expect(columns).toContain('s3Key');
+    expect(columns).toContain('fileSizeBytes');
+    expect(columns).toContain('errorMessage');
+    expect(columns).toContain('attempts');
+    expect(columns).toContain('createdAt');
+    expect(columns).toContain('updatedAt');
+    expect(columns).toContain('generatedAt');
+  });
+
+  it('should have id as uuid primary key', () => {
+    const idColumn = toolkitDocuments.id;
+    expect(idColumn.columnType).toBe('PgUUID');
+    expect(idColumn.hasDefault).toBe(true);
+  });
+
+  it('should have purchaseId as required uuid foreign key', () => {
+    const purchaseIdColumn = toolkitDocuments.purchaseId;
+    expect(purchaseIdColumn.columnType).toBe('PgUUID');
+    expect(purchaseIdColumn.notNull).toBe(true);
+  });
+
+  it('should have userId as required text foreign key', () => {
+    const userIdColumn = toolkitDocuments.userId;
+    expect(userIdColumn.columnType).toBe('PgText');
+    expect(userIdColumn.notNull).toBe(true);
+  });
+
+  it('should have documentName as required varchar', () => {
+    const documentNameColumn = toolkitDocuments.documentName;
+    expect(documentNameColumn.columnType).toBe('PgVarchar');
+    expect(documentNameColumn.notNull).toBe(true);
+  });
+
+  it('should have status with default pending', () => {
+    const statusColumn = toolkitDocuments.status;
+    expect(statusColumn.hasDefault).toBe(true);
+    expect(statusColumn.notNull).toBe(true);
+  });
+
+  it('should have attempts with default 0', () => {
+    const attemptsColumn = toolkitDocuments.attempts;
+    expect(attemptsColumn.hasDefault).toBe(true);
+    expect(attemptsColumn.notNull).toBe(true);
+  });
+
+  it('should have fileUrl and s3Key as optional', () => {
+    expect(toolkitDocuments.fileUrl.notNull).toBeFalsy();
+    expect(toolkitDocuments.s3Key.notNull).toBeFalsy();
+  });
+
+  it('should have errorMessage as optional text', () => {
+    expect(toolkitDocuments.errorMessage.columnType).toBe('PgText');
+    expect(toolkitDocuments.errorMessage.notNull).toBeFalsy();
+  });
+
+  it('should export correct types', () => {
+    const doc: ToolkitDocument = {
+      id: 'doc-uuid',
+      purchaseId: 'purchase-uuid',
+      userId: 'user-123',
+      documentType: 'word',
+      documentName: 'Strategic Alignment Brief',
+      status: 'completed',
+      fileUrl: 'https://s3.example.com/presigned-url',
+      s3Key: 'toolkits/user-123/doc-uuid.docx',
+      fileSizeBytes: 125000,
+      errorMessage: null,
+      attempts: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      generatedAt: new Date(),
+    };
+    expect(doc).toBeDefined();
+
+    const newDoc: NewToolkitDocument = {
+      purchaseId: 'purchase-uuid',
+      userId: 'user-123',
+      documentType: 'excel',
+      documentName: 'Meeting Cost Tracker',
+    };
+    expect(newDoc).toBeDefined();
+  });
+});
+
+describe('Phase 3 Schema: document enums (Story 18.1)', () => {
+  it('should have document_status enum with correct values', () => {
+    expect(documentStatusEnum.enumValues).toEqual([
+      'pending',
+      'generating',
+      'completed',
+      'failed',
+    ]);
+  });
+
+  it('should have document_type enum with correct values', () => {
+    expect(documentTypeEnum.enumValues).toEqual([
+      'word',
+      'excel',
+      'pptx',
+      'pdf',
+    ]);
+  });
+});
+
+describe('Phase 3 Schema: toolkit_documents relationships', () => {
+  it('should reference purchases table via purchaseId', () => {
+    expect(Object.keys(toolkitDocuments)).toContain('purchaseId');
+  });
+
+  it('should reference users table via userId', () => {
+    expect(Object.keys(toolkitDocuments)).toContain('userId');
   });
 });

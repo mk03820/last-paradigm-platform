@@ -18,6 +18,8 @@ import type {
   PreservedSession as DrizzlePreservedSession,
   NewPreservedSession as DrizzleNewPreservedSession,
   PreservedSessionData as DrizzlePreservedSessionData,
+  AbandonedRegistration as DrizzleAbandonedRegistration,
+  NewAbandonedRegistration as DrizzleNewAbandonedRegistration,
 } from '@/lib/db/schema';
 
 // ============================================================================
@@ -246,5 +248,66 @@ export function isPreservedSessionValid(session: PreservedSession): boolean {
 export function getPreservedSessionStatus(session: PreservedSession): PreservedSessionStatus {
   if (session.usedAt) return 'used';
   if (new Date(session.expiresAt) < new Date()) return 'expired';
+  return 'pending';
+}
+
+// ============================================================================
+// Phase 3 Registration Abandonment Recovery Types (Story 15.9)
+// ============================================================================
+
+/**
+ * Full abandoned registration record from database
+ */
+export type AbandonedRegistration = DrizzleAbandonedRegistration;
+
+/**
+ * Data required to create a new abandoned registration record
+ */
+export type AbandonedRegistrationCreate = DrizzleNewAbandonedRegistration;
+
+/**
+ * Request payload for tracking registration start
+ */
+export interface TrackRegistrationStartRequest {
+  email: string;
+}
+
+/**
+ * Response for track registration start API
+ */
+export interface TrackRegistrationStartResponse {
+  success: boolean;
+  token?: string;
+  error?: {
+    code: 'RATE_LIMITED' | 'INVALID_EMAIL' | 'SERVER_ERROR';
+    message: string;
+  };
+}
+
+/**
+ * Response for resume registration API
+ */
+export interface ResumeRegistrationResponse {
+  success: boolean;
+  email?: string;
+  error?: {
+    code: 'INVALID_TOKEN' | 'ALREADY_COMPLETED' | 'SERVER_ERROR';
+    message: string;
+  };
+}
+
+/**
+ * Abandoned registration status
+ */
+export type AbandonedRegistrationStatus = 'pending' | 'completed' | 'email_sent';
+
+/**
+ * Helper to get abandoned registration status
+ */
+export function getAbandonedRegistrationStatus(
+  registration: AbandonedRegistration
+): AbandonedRegistrationStatus {
+  if (registration.completedAt) return 'completed';
+  if (registration.emailSentAt) return 'email_sent';
   return 'pending';
 }

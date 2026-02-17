@@ -7,3 +7,6 @@
 export { useReducedMotion } from './useReducedMotion';
 export { useTouchDevice } from './useTouchDevice';
 export { useStaggeredReveal } from './useStaggeredReveal';
+export { useWindowSize } from './useWindowSize';
+export { useAnalytics, useTrackOnMount, useTrackOnUnmount } from './useAnalytics';
+export type { UseAnalyticsReturn } from './useAnalytics';

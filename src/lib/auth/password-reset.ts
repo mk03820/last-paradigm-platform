@@ -15,8 +15,8 @@ import { eq, and, lt, isNull } from 'drizzle-orm';
 // Password reset expiry: 1 hour
 const RESET_EXPIRY_MS = 60 * 60 * 1000;
 
-// Rate limiting: 3 requests per email per hour
-const RATE_LIMIT_MAX = 3;
+// Rate limiting: 5 requests per email per hour (Story 15.5 Task 1.7)
+const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 // In-memory rate limiting (use Redis in production)
@@ -169,6 +169,28 @@ export async function markResetUsed(token: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('[password-reset] Mark used error:', error);
+    return false;
+  }
+}
+
+/**
+ * Invalidate all pending reset tokens for a user
+ * Called after successful password reset to ensure single-use (Task 3.10)
+ */
+export async function invalidateAllUserResets(userId: string): Promise<boolean> {
+  try {
+    await db
+      .update(passwordResets)
+      .set({ usedAt: new Date() })
+      .where(
+        and(
+          eq(passwordResets.userId, userId),
+          isNull(passwordResets.usedAt)
+        )
+      );
+    return true;
+  } catch (error) {
+    console.error('[password-reset] Invalidate user resets error:', error);
     return false;
   }
 }

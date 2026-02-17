@@ -23,12 +23,11 @@ import {
 } from '@/types/diagnostic.types';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
 // Auth types - imported separately to avoid next-auth side effects
-import type {
-  MagicLink,
-  PasswordReset,
-  MagicLinkStatus,
-  PasswordResetStatus,
-} from '@/lib/db/schema';
+import type { MagicLink, PasswordReset } from '@/lib/db/schema';
+
+// Define status types locally (not exported from schema)
+type MagicLinkStatus = 'pending' | 'used' | 'expired';
+type PasswordResetStatus = 'pending' | 'used' | 'expired';
 
 // Helper functions defined inline to avoid next-auth import chain
 function isMagicLinkValid(magicLink: MagicLink): boolean {
@@ -68,6 +67,8 @@ describe('User types', () => {
         purchaseStatus: 'completed',
         purchasedAt: new Date('2024-02-01'),
         stripeCustomerId: 'cus_123',
+        hasPb2Access: true,
+        pb2PurchasedAt: new Date('2024-02-01'),
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-02-01'),
       };
@@ -97,6 +98,8 @@ describe('User types', () => {
         purchaseStatus: 'none',
         purchasedAt: null,
         stripeCustomerId: null,
+        hasPb2Access: false,
+        pb2PurchasedAt: null,
         createdAt: null,
         updatedAt: null,
       };

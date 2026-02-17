@@ -16,6 +16,7 @@ import { cookies } from 'next/headers';
 import {
   verifyPasswordReset,
   markResetUsed,
+  invalidateAllUserResets,
 } from '@/lib/auth/password-reset';
 import {
   hashPassword,
@@ -115,10 +116,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Mark reset token as used
+    // Mark reset token as used and invalidate all other pending tokens (Task 3.9, 3.10)
     await markResetUsed(token);
+    await invalidateAllUserResets(updatedUser.id);
 
-    // Auto-login: Create JWT tokens
+    // Auto-login: Create JWT tokens (AC4)
     const { accessToken, refreshToken } = await createTokenPair({
       userId: updatedUser.id,
       email: updatedUser.email!,

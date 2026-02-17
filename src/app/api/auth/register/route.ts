@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { users, abandonedRegistrations } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { registerApiSchema } from '@/lib/schemas/register.schema';
 import { hashPassword, createTokenPair, REFRESH_TOKEN_COOKIE_OPTIONS } from '@/lib/auth';
@@ -110,6 +110,13 @@ export async function POST(request: NextRequest) {
         purchaseStatus: 'none',
       })
       .returning();
+
+    // Mark any abandoned registration as completed (Story 15.9 - AC6)
+    // This cancels any pending abandonment recovery emails
+    await db
+      .update(abandonedRegistrations)
+      .set({ completedAt: new Date() })
+      .where(eq(abandonedRegistrations.email, normalizedEmail));
 
     // Create JWT tokens
     const { accessToken, refreshToken } = await createTokenPair({

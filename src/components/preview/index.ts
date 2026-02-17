@@ -5,6 +5,7 @@
  * Story 16.2: Tool Recommendation Algorithm
  * Story 16.3: Preview Cards with Blur Effect
  * Story 16.4: Premium Card Interactions
+ * Story 17.2: Stripe Checkout Integration
  */
 
 // Story 16.1 Components
@@ -13,6 +14,9 @@ export { BookAttribution } from './BookAttribution';
 export { PersonalizedMessage } from './PersonalizedMessage';
 export { PreviewHero } from './PreviewHero';
 export { PreviewPageSkeleton } from './PreviewPageSkeleton';
+
+// Story 17.2 Components - Checkout Integration
+export { CheckoutCancelledBanner } from './CheckoutCancelledBanner';
 
 // Story 16.2 Components
 export { RecommendationCard } from './RecommendationCard';

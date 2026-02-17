@@ -14,6 +14,7 @@ import {
   isResetRateLimited,
   buildResetUrl,
 } from '@/lib/auth/password-reset';
+import { generatePasswordResetEmail } from '@/lib/email/templates/password-reset';
 import { Resend } from 'resend';
 
 // Lazy-initialized Resend client to avoid build-time errors
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     const { email } = validation.data;
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check rate limit
+    // Check rate limit (5 requests per email per hour)
     if (isResetRateLimited(normalizedEmail)) {
       // Still return success to prevent enumeration
       return NextResponse.json({
@@ -66,40 +67,31 @@ export async function POST(request: NextRequest) {
     // Send email if token was created (user exists)
     if (result.token) {
       const resetUrl = buildResetUrl(result.token);
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const host = new URL(baseUrl).host;
+
+      // Generate branded email using template
+      const emailContent = generatePasswordResetEmail({
+        resetUrl,
+        host,
+        expiresInMinutes: 60, // 1 hour
+      });
 
       try {
         await getResend().emails.send({
           from: process.env.EMAIL_FROM || 'The Last Paradigm <noreply@thelastparadigm.com>',
           to: normalizedEmail,
-          subject: 'Reset Your Password - The Last Paradigm',
-          html: `
-            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px;">Reset Your Password</h1>
-              <p style="color: #475569; font-size: 16px; line-height: 1.5;">
-                You requested to reset your password for The Last Paradigm. Click the button below to set a new password.
-              </p>
-              <p style="margin: 24px 0;">
-                <a href="${resetUrl}" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                  Reset Password
-                </a>
-              </p>
-              <p style="color: #64748b; font-size: 14px;">
-                This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
-              </p>
-              <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-              <p style="color: #94a3b8; font-size: 12px;">
-                Based on the methodology from <em>The Last Paradigm</em>
-              </p>
-            </div>
-          `,
+          subject: emailContent.subject,
+          text: emailContent.text,
+          html: emailContent.html,
         });
       } catch (emailError) {
         console.error('[forgot-password] Email send error:', emailError);
-        // Don't reveal email failure
+        // Don't reveal email failure to prevent enumeration
       }
     }
 
-    // Always return success to prevent enumeration
+    // Always return success to prevent enumeration (AC8)
     return NextResponse.json({
       success: true,
       message: 'If an account exists with this email, you will receive a password reset link.',

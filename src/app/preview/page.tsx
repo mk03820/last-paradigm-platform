@@ -5,6 +5,8 @@
  * Requires authentication and redirects if not logged in.
  *
  * Story 16.1: Preview Page Layout & Savings Headline
+ * Story 17.1: Purchase CTA & Guarantee Display
+ * Story 17.2: Stripe Checkout Integration (cancelled checkout handling)
  * Task 1: Create preview page route and layout
  * Covers: AC1, AC5, AC8 (FR43, FR65)
  */
@@ -17,7 +19,12 @@ import { db } from '@/lib/db';
 import { diagnosticResults } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { Header } from '@/components/layout';
-import { PreviewHero, PreviewPageSkeleton } from '@/components/preview';
+import {
+  PreviewHero,
+  PreviewPageSkeleton,
+  CheckoutCancelledBanner,
+} from '@/components/preview';
+import { PurchaseCTASection } from '@/components/purchase';
 import {
   calculateEstimatedSavings,
   getSavingsContext,
@@ -88,6 +95,11 @@ export default async function PreviewPage() {
 
   return (
     <>
+      {/* Checkout cancelled banner - Story 17.2 (AC6) */}
+      <Suspense fallback={null}>
+        <CheckoutCancelledBanner />
+      </Suspense>
+
       <Header />
       <main className="min-h-[calc(100vh-56px)]">
         <Suspense fallback={<PreviewPageSkeleton />}>
@@ -102,9 +114,12 @@ export default async function PreviewPage() {
         {/* Placeholder for Story 16.2-16.5 content */}
         <section className="py-16 px-4 bg-background text-center">
           <p className="text-muted-foreground">
-            Tool recommendations and purchase options coming in Stories 16.2-16.5
+            Tool recommendations and trust signals coming in Stories 16.2-16.5
           </p>
         </section>
+
+        {/* Purchase CTA Section - Story 17.1 */}
+        <PurchaseCTASection />
       </main>
     </>
   );

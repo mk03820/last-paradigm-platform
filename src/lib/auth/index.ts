@@ -46,7 +46,18 @@ export {
   createPasswordReset,
   verifyPasswordReset,
   markResetUsed,
+  invalidateAllUserResets,
   cleanupExpiredResets,
   buildResetUrl,
   isResetRateLimited,
 } from './password-reset';
+
+// Access control utilities (Story 17.4)
+export {
+  checkPb2Access,
+  getUserAccess,
+  requirePb2Access,
+  checkPb2AccessByEmail,
+  AccessDeniedError,
+  type UserAccess,
+} from './access';

@@ -65,8 +65,8 @@ describe('PdfExportButton', () => {
     // Mock URL methods
     mockCreateObjectURL = vi.fn(() => 'blob:mock-url');
     mockRevokeObjectURL = vi.fn();
-    global.URL.createObjectURL = mockCreateObjectURL;
-    global.URL.revokeObjectURL = mockRevokeObjectURL;
+    global.URL.createObjectURL = mockCreateObjectURL as typeof URL.createObjectURL;
+    global.URL.revokeObjectURL = mockRevokeObjectURL as typeof URL.revokeObjectURL;
 
     // Mock successful blob generation by default
     mockToBlob.mockResolvedValue(new Blob(['mock pdf content'], { type: 'application/pdf' }));

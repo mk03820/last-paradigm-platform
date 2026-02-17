@@ -1,118 +1,195 @@
 /**
  * User Dashboard Page
  *
- * Shows user's diagnostic sessions and all 7 diagnostic tools with progress.
+ * Main dashboard overview showing welcome message, quick stats,
+ * diagnostic progress, and session management.
  *
- * Covers: FR2-3 (View saved sessions), FR2-4 (Cross-device continuity), FR2-37 (Tool Hub)
- * Story 8.2: User Dashboard and Session Management
- * Story 8.5: Diagnostic Tool Hub
+ * Story 19.1: Dashboard Layout & Navigation
+ * Task 1.1: Create `/app/dashboard/page.tsx` protected route
+ * Covers: FR64 (Account dashboard), NFR23 (<2s load), NFR24 (Mobile responsive)
+ *
+ * Story 19.3: Purchase Status & Toolkit Access
+ * Task 7: Integrate with dashboard page
+ * Covers: FR64 (Purchase status), FR54 (Analytics tracking)
+ *
+ * Also covers from previous stories:
+ * - FR2-3 (View saved sessions)
+ * - FR2-4 (Cross-device continuity)
+ * - FR2-37 (Tool Hub)
  */
 
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { diagnosticSessions } from '@/lib/db/schema';
+import {
+  diagnosticSessions,
+  diagnosticResults,
+  users,
+  invoiceRequests,
+} from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { Button } from '@/components/ui/button';
-import { LogOut, User } from 'lucide-react';
-import { SessionList, NewSessionButton, SessionMigrator } from '@/components/dashboard';
+import {
+  SessionList,
+  NewSessionButton,
+  SessionMigrator,
+  WelcomeSection,
+  QuickStats,
+  PurchaseStatusSection,
+} from '@/components/dashboard';
 import { toSessionSummary } from '@/types/session.types';
 import { DiagnosticProgress, ToolGrid } from '@/components/diagnostic';
+import { getToolkitStatus } from '@/lib/services/toolkit-status';
 
 export default async function DashboardPage() {
   const session = await auth();
 
   // Redirect to sign-in if not authenticated
   if (!session?.user?.id) {
-    redirect('/auth/signin');
+    redirect('/auth/signin?callbackUrl=/dashboard');
   }
 
-  // Fetch user's sessions server-side for initial render
-  const sessions = await db
-    .select()
-    .from(diagnosticSessions)
-    .where(eq(diagnosticSessions.userId, session.user.id))
-    .orderBy(desc(diagnosticSessions.updatedAt));
+  // Fetch all dashboard data in parallel for performance (NFR23)
+  const [sessionsData, resultsData, userData, invoiceData, toolkitStatus] = await Promise.all([
+    // User's diagnostic sessions
+    db
+      .select()
+      .from(diagnosticSessions)
+      .where(eq(diagnosticSessions.userId, session.user.id))
+      .orderBy(desc(diagnosticSessions.updatedAt)),
 
-  const sessionSummaries = sessions.map(toSessionSummary);
+    // User's latest diagnostic results (for quick stats)
+    db
+      .select({
+        totalAlignmentTax: diagnosticResults.totalAlignmentTax,
+        estimatedSavings: diagnosticResults.estimatedSavings,
+        completedAt: diagnosticResults.completedAt,
+        toolResults: diagnosticResults.toolResults,
+      })
+      .from(diagnosticResults)
+      .where(eq(diagnosticResults.userId, session.user.id))
+      .orderBy(desc(diagnosticResults.completedAt))
+      .limit(1),
+
+    // User profile data with purchase status (Story 19.3)
+    db
+      .select({
+        email: users.email,
+        name: users.name,
+        createdAt: users.createdAt,
+        purchaseStatus: users.purchaseStatus,
+        purchasedAt: users.purchasedAt,
+        hasPb2Access: users.hasPb2Access,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1),
+
+    // Latest invoice request (Story 19.3)
+    db
+      .select({
+        id: invoiceRequests.id,
+        status: invoiceRequests.status,
+        createdAt: invoiceRequests.createdAt,
+      })
+      .from(invoiceRequests)
+      .where(eq(invoiceRequests.userId, session.user.id))
+      .orderBy(desc(invoiceRequests.createdAt))
+      .limit(1),
+
+    // Toolkit generation status (Story 19.3)
+    getToolkitStatus(session.user.id),
+  ]);
+
+  const sessionSummaries = sessionsData.map(toSessionSummary);
+  const latestResults = resultsData[0];
+  const userProfile = userData[0];
+  const latestInvoice = invoiceData[0];
+
+  // Calculate diagnostic summary for QuickStats and PurchaseStatusSection
+  const diagnosticSummary = latestResults
+    ? {
+        completedTools: latestResults.toolResults
+          ? Object.keys(latestResults.toolResults).filter(
+              (key) =>
+                latestResults.toolResults?.[key as keyof typeof latestResults.toolResults]?.completedAt
+            ).length
+          : 0,
+        totalAlignmentTax: latestResults.totalAlignmentTax
+          ? Number(latestResults.totalAlignmentTax)
+          : null,
+        estimatedSavings: latestResults.estimatedSavings
+          ? Number(latestResults.estimatedSavings)
+          : null,
+        lastCompletedAt: latestResults.completedAt?.toISOString() || null,
+      }
+    : sessionsData.length > 0
+    ? {
+        completedTools: sessionsData[0].toolsCompleted || 0,
+        totalAlignmentTax: null,
+        estimatedSavings: null,
+        lastCompletedAt: null,
+      }
+    : null;
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <header className="flex items-center justify-between py-4 border-b mb-8">
-          <div>
-            <Link href="/">
-              <h1 className="text-2xl font-bold text-primary hover:text-primary/90 transition-colors">
-                The Last Paradigm
-              </h1>
-            </Link>
-            <p className="text-sm text-muted-foreground">Your Diagnostic Dashboard</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <User className="w-4 h-4" />
-              <span>{session.user.email}</span>
-            </div>
-            <form
-              action={async () => {
-                'use server';
-                await signOut({ redirectTo: '/' });
-              }}
-            >
-              <Button variant="ghost" size="sm" type="submit">
-                <LogOut className="w-4 h-4" />
-                Sign out
-              </Button>
-            </form>
-          </div>
-        </header>
+    <>
+      {/* Session migration for anonymous data */}
+      <SessionMigrator />
 
-        {/* Session migration for anonymous data */}
-        <SessionMigrator />
+      {/* Welcome Section (AC1: Welcome message with user's name/email) */}
+      <WelcomeSection
+        user={{
+          email: userProfile?.email || session.user.email,
+          name: userProfile?.name || session.user.name,
+        }}
+        lastLogin={null} // TODO: Track last login in user table
+      />
 
-        {/* Welcome and new session */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Welcome back!
-            </h2>
-            <p className="text-muted-foreground">
-              Continue where you left off or start a new diagnostic assessment.
-            </p>
-          </div>
-          <NewSessionButton />
-        </div>
+      {/* Quick Stats Summary (AC1: Quick stats summary) */}
+      <QuickStats diagnosticSummary={diagnosticSummary} />
 
-        {/* Diagnostic Progress */}
-        <section className="mb-8 p-4 rounded-lg border bg-card" aria-labelledby="progress-heading">
-          <h3 id="progress-heading" className="text-lg font-semibold mb-4">Diagnostic Progress</h3>
-          <DiagnosticProgress />
-        </section>
+      {/* Purchase Status & Toolkit Access (Story 19.3) */}
+      <PurchaseStatusSection
+        purchaseStatus={(userProfile?.purchaseStatus as 'none' | 'pending' | 'completed' | 'refunded') ?? 'none'}
+        purchasedAt={userProfile?.purchasedAt ?? null}
+        hasPb2Access={userProfile?.hasPb2Access ?? false}
+        invoiceRequestedAt={latestInvoice?.createdAt ?? null}
+        diagnosticSummary={diagnosticSummary}
+        toolkitStatus={toolkitStatus}
+      />
 
-        {/* Diagnostic Tools */}
-        <section className="mb-8" aria-labelledby="tools-heading">
-          <h3 id="tools-heading" className="text-lg font-semibold mb-4">Diagnostic Tools</h3>
-          <ToolGrid />
-        </section>
-
-        {/* Sessions list */}
-        <section className="mb-8">
-          <h3 className="text-lg font-semibold mb-4">Your Diagnostic Sessions</h3>
-          <SessionList initialSessions={sessionSummaries} />
-        </section>
-
-        {/* Quick links */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4">Resources</h3>
-          <div className="flex gap-4">
-            <Button variant="outline" asChild>
-              <Link href="/templates">Download Templates</Link>
-            </Button>
-          </div>
-        </section>
+      {/* New Session CTA */}
+      <div className="flex justify-end mb-6">
+        <NewSessionButton />
       </div>
-    </main>
+
+      {/* Diagnostic Progress */}
+      <section
+        className="mb-8 p-4 rounded-lg border bg-card"
+        aria-labelledby="progress-heading"
+        role="region"
+      >
+        <h2 id="progress-heading" className="text-lg font-semibold mb-4">
+          Diagnostic Progress
+        </h2>
+        <DiagnosticProgress />
+      </section>
+
+      {/* Diagnostic Tools */}
+      <section className="mb-8" aria-labelledby="tools-heading" role="region">
+        <h2 id="tools-heading" className="text-lg font-semibold mb-4">
+          Diagnostic Tools
+        </h2>
+        <ToolGrid />
+      </section>
+
+      {/* Sessions list */}
+      <section aria-labelledby="sessions-heading" role="region">
+        <h2 id="sessions-heading" className="text-lg font-semibold mb-4">
+          Your Diagnostic Sessions
+        </h2>
+        <SessionList initialSessions={sessionSummaries} />
+      </section>
+    </>
   );
 }

@@ -5,6 +5,9 @@
  *
  * Story 14.3: Alignment Tax Calculation and Interpretation
  * Task 7: Create results page (AC: all)
+ *
+ * Story 15.6: PB1 Completion Handoff Prompt
+ * Task 3: Integrate with Total Cost Calculator results page
  */
 
 'use client';
@@ -12,10 +15,12 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BarChart3, Save } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header, StepIndicator } from '@/components/layout';
 import { SaveResultsButton } from '@/components/session';
+import { PB1CompletionHandoff } from '@/components/handoff';
 import {
   AlignmentTaxHeadline,
   PercentOfRevenueDisplay,
@@ -111,10 +116,14 @@ function getMockData(): {
  */
 export default function TotalCostResultsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = React.useState(true);
 
   // TODO: Replace with actual store data when 14.1 and 14.2 are complete
   const { aggregatedData, additionalCosts, revenue } = getMockData();
+
+  // Check if user is authenticated (Story 15.6 - AC7)
+  const isAuthenticated = status === 'authenticated';
 
   // Calculate alignment tax
   const result = React.useMemo(
@@ -238,6 +247,26 @@ export default function TotalCostResultsPage() {
               </Button>
             </div>
           </section>
+
+          {/* PB1 Completion Handoff - Story 15.6 */}
+          {/* Only shown for anonymous users, positioned below results, above methodology */}
+          {!isAuthenticated && (
+            <section className="mb-8" aria-label="Account Creation Prompt">
+              <PB1CompletionHandoff
+                totalAlignmentTax={result.total}
+                estimatedSavings={Math.round(result.total * 0.3)} // Estimate ~30% recovery
+              />
+            </section>
+          )}
+
+          {/* Authenticated users see link to preview instead */}
+          {isAuthenticated && (
+            <div className="mb-8 flex justify-center">
+              <Button asChild>
+                <Link href="/preview">View Your Transformation Roadmap</Link>
+              </Button>
+            </div>
+          )}
 
           {/* Save Results - Story 15.8 */}
           <div className="flex justify-center pt-4">

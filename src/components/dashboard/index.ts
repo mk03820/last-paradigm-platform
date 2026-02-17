@@ -3,3 +3,8 @@ export { SessionList } from './SessionList';
 export { NewSessionButton } from './NewSessionButton';
 export { DeleteSessionDialog } from './DeleteSessionDialog';
 export { SessionMigrator } from './SessionMigrator';
+export { WelcomeSection } from './WelcomeSection';
+export { QuickStats } from './QuickStats';
+export { DashboardNav } from './DashboardNav';
+export { DashboardLayout } from './DashboardLayout';
+export { PurchaseStatusSection } from './PurchaseStatusSection';

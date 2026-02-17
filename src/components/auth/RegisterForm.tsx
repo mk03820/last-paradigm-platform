@@ -20,29 +20,71 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { registerSchema, type RegisterInput } from '@/lib/schemas/register.schema';
 import { getPasswordStrength } from '@/lib/auth/password-utils';
+import { useAuthStore } from '@/lib/store/auth-store';
 import { cn } from '@/lib/utils';
 
 interface RegisterFormProps {
   onSuccess?: (data: { accessToken: string; user: { id: string; email: string; name: string | null } }) => void;
   callbackUrl?: string;
+  /** Pre-fill email field (for resume registration flow) */
+  defaultEmail?: string;
 }
 
-export function RegisterForm({ onSuccess, callbackUrl }: RegisterFormProps) {
+export function RegisterForm({ onSuccess, callbackUrl, defaultEmail }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isTrackingEmail, setIsTrackingEmail] = useState(false);
+
+  // Use auth store for token storage (not sessionStorage)
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
     handleSubmit,
     watch,
+    getValues,
     formState: { errors, touchedFields },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: 'onBlur',
+    defaultValues: {
+      email: defaultEmail || '',
+    },
   });
+
+  /**
+   * Track registration start when email field loses focus (Story 15.9 - AC1)
+   * Only track if email is valid (passes basic Zod validation)
+   */
+  const handleEmailBlur = async () => {
+    const email = getValues('email');
+
+    // Only track if email looks valid and not already tracking
+    if (!email || isTrackingEmail) return;
+
+    // Basic email regex check (Zod will do full validation)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return;
+
+    setIsTrackingEmail(true);
+
+    try {
+      // Silent tracking - don't block user or show errors
+      await fetch('/api/auth/track-registration-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+    } catch (error) {
+      // Silent fail - don't interrupt user experience
+      console.debug('[RegisterForm] Tracking error (silent):', error);
+    } finally {
+      setIsTrackingEmail(false);
+    }
+  };
 
   const password = watch('password', '');
   const passwordStrength = getPasswordStrength(password);
@@ -66,9 +108,17 @@ export function RegisterForm({ onSuccess, callbackUrl }: RegisterFormProps) {
 
       if (result.success) {
         setSubmitSuccess(true);
-        // Store access token
-        if (result.data?.accessToken) {
-          sessionStorage.setItem('accessToken', result.data.accessToken);
+        // Store auth state in Zustand store (not sessionStorage for security)
+        if (result.data?.accessToken && result.data?.user) {
+          setAuth(
+            {
+              id: result.data.user.id,
+              email: result.data.user.email,
+              name: result.data.user.name,
+              purchaseStatus: result.data.user.purchaseStatus || 'none',
+            },
+            result.data.accessToken
+          );
         }
         onSuccess?.(result.data);
       } else {
@@ -142,7 +192,9 @@ export function RegisterForm({ onSuccess, callbackUrl }: RegisterFormProps) {
             errors.email && touchedFields.email && 'border-destructive focus-visible:ring-destructive'
           )}
           aria-invalid={errors.email ? 'true' : 'false'}
-          {...register('email')}
+          {...register('email', {
+            onBlur: handleEmailBlur, // Track registration start (Story 15.9)
+          })}
         />
         {errors.email && touchedFields.email && (
           <p className="text-sm text-destructive">{errors.email.message}</p>

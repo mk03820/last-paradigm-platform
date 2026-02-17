@@ -4,23 +4,16 @@
  * Sends reminder email to users who started but didn't complete registration.
  * Triggered 1 hour after email entry if registration not completed.
  *
- * Covers: Story 15.9, FR67 (Registration abandonment recovery)
+ * Story 15.9: Registration Abandonment Recovery
+ * Covers: Task 4, FR67 (Registration abandonment recovery)
+ *         AC1 (1-hour trigger), AC5 (One email per abandonment), AC6 (Cancel if completed)
  */
 
 import { inngest } from '../client';
 import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { Resend } from 'resend';
-
-// Lazy-initialized Resend client to avoid build-time errors
-let resend: Resend | null = null;
-function getResend() {
-  if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY);
-  }
-  return resend;
-}
+import { abandonedRegistrations, users } from '@/lib/db/schema';
+import { eq, and, isNull } from 'drizzle-orm';
+import { sendCompleteRegistrationEmail } from '@/lib/email/send-complete-registration-email';
 
 export const registrationAbandonmentCheck = inngest.createFunction(
   {
@@ -30,12 +23,12 @@ export const registrationAbandonmentCheck = inngest.createFunction(
   },
   { event: 'registration/abandoned' },
   async ({ event, step }) => {
-    const { email, abandonedAt } = event.data;
+    const { email, token } = event.data;
 
-    // Wait 1 hour before sending reminder
+    // Wait 1 hour before sending reminder (AC1)
     await step.sleep('wait-1-hour', '1h');
 
-    // Check if user has since registered
+    // Check if user has since completed registration (AC6)
     const userExists = await step.run('check-user-registered', async () => {
       const [user] = await db
         .select({ id: users.id })
@@ -47,6 +40,14 @@ export const registrationAbandonmentCheck = inngest.createFunction(
     });
 
     if (userExists) {
+      // Mark as completed in abandoned_registrations table
+      await step.run('mark-completed', async () => {
+        await db
+          .update(abandonedRegistrations)
+          .set({ completedAt: new Date() })
+          .where(eq(abandonedRegistrations.email, email.toLowerCase()));
+      });
+
       return {
         success: true,
         action: 'skipped',
@@ -54,52 +55,67 @@ export const registrationAbandonmentCheck = inngest.createFunction(
       };
     }
 
-    // Send reminder email
-    await step.run('send-reminder-email', async () => {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const resumeUrl = `${baseUrl}/auth/register?email=${encodeURIComponent(email)}`;
+    // Check if email already sent for this abandonment (AC5 - idempotency)
+    const shouldSendEmail = await step.run('check-and-send', async () => {
+      const [record] = await db
+        .select()
+        .from(abandonedRegistrations)
+        .where(
+          and(
+            eq(abandonedRegistrations.email, email.toLowerCase()),
+            isNull(abandonedRegistrations.completedAt),
+            isNull(abandonedRegistrations.emailSentAt)
+          )
+        )
+        .limit(1);
 
-      await getResend().emails.send({
-        from: process.env.EMAIL_FROM || 'The Last Paradigm <noreply@thelastparadigm.com>',
+      if (!record) {
+        // Either completed or email already sent
+        return { shouldSend: false, record: null };
+      }
+
+      return { shouldSend: true, record };
+    });
+
+    if (!shouldSendEmail.shouldSend) {
+      return {
+        success: true,
+        action: 'skipped',
+        reason: 'Email already sent or registration completed',
+      };
+    }
+
+    // Send reminder email (AC2)
+    const emailResult = await step.run('send-reminder-email', async () => {
+      const result = await sendCompleteRegistrationEmail({
         to: email,
-        subject: 'Complete Your Account - The Last Paradigm',
-        html: `
-          <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px;">Complete Your Account</h1>
-            <p style="color: #475569; font-size: 16px; line-height: 1.5;">
-              You started creating an account with The Last Paradigm but didn't finish.
-              Your diagnostic results are waiting for you!
-            </p>
-            <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin: 24px 0;">
-              <h3 style="color: #1e293b; font-size: 16px; margin: 0 0 8px;">Why create an account?</h3>
-              <ul style="color: #475569; font-size: 14px; margin: 0; padding-left: 20px;">
-                <li>Save your diagnostic results permanently</li>
-                <li>Access your personalized transformation roadmap</li>
-                <li>Preview Playbook 2 tools tailored to your results</li>
-              </ul>
-            </div>
-            <p style="margin: 24px 0;">
-              <a href="${resumeUrl}" style="display: inline-block; background-color: #b45309; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                Complete Your Account
-              </a>
-            </p>
-            <p style="color: #64748b; font-size: 14px;">
-              If you didn't start this registration, you can safely ignore this email.
-            </p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-            <p style="color: #94a3b8; font-size: 12px;">
-              Based on the methodology from <em>The Last Paradigm</em>
-            </p>
-          </div>
-        `,
+        token,
       });
+
+      return result;
+    });
+
+    if (!emailResult.success) {
+      return {
+        success: false,
+        action: 'email_failed',
+        error: emailResult.error,
+      };
+    }
+
+    // Mark email as sent to prevent duplicates (AC5)
+    await step.run('mark-email-sent', async () => {
+      await db
+        .update(abandonedRegistrations)
+        .set({ emailSentAt: new Date() })
+        .where(eq(abandonedRegistrations.email, email.toLowerCase()));
     });
 
     return {
       success: true,
       action: 'email_sent',
       email,
-      abandonedAt,
+      emailId: emailResult.id,
     };
   }
 );
