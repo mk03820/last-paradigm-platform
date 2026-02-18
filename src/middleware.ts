@@ -30,6 +30,7 @@ const PUBLIC_ROUTES = [
   '/shared',
   '/unsubscribe',
   '/admin',
+  '/dev',
   '/_next',
   '/favicon.ico',
 ];
