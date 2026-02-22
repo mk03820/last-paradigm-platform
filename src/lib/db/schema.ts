@@ -188,7 +188,15 @@ export interface DiagnosticSessionData {
       people?: number;
       governance?: number;
     };
+    dimensions?: {
+      strategic?: number;
+      structural?: number;
+      processAlignment?: number;
+      cultural?: number;
+      technological?: number;
+    };
     compositeScore?: number;
+    interpretation?: string;
     completedAt?: string;
   };
   // Tool 2: Meeting Audit Calculator
@@ -211,6 +219,10 @@ export interface DiagnosticSessionData {
       wastedCost?: number;
       effectiveHours?: number;
       effectiveCost?: number;
+      totalMeetings?: number;
+      avgAttendees?: number;
+      inefficiencyPercent?: number;
+      avgDuration?: number;
     };
     completedAt?: string;
   };
@@ -218,29 +230,70 @@ export interface DiagnosticSessionData {
   tool3?: {
     decisions?: unknown[];
     metrics?: unknown;
+    overallVelocityScore?: number;
+    archetypes?: Record<string, { median?: number; p90?: number; samples?: number }>;
+    bottlenecks?: Array<{ pattern: string; severity: string; description: string }>;
     completedAt?: string;
   };
   // Tool 4: Stakeholder Power/Interest Mapping
   tool4?: {
-    stakeholders?: unknown[];
+    stakeholders?: Array<{
+      name: string;
+      role: string;
+      power: number;
+      interest: number;
+      sentiment?: string;
+      quadrant?: string;
+    }>;
+    quadrantSummary?: {
+      manageClosely?: number;
+      keepSatisfied?: number;
+      keepInformed?: number;
+      monitor?: number;
+    };
+    riskCount?: number;
     completedAt?: string;
   };
   // Tool 5: Data Flow Friction Analysis
   tool5?: {
     journeys?: unknown[];
     frictionCost?: number;
+    totalFrictionCost?: number;
+    frictionByCategory?: Record<string, number>;
     completedAt?: string;
   };
   // Tool 6: Communication Pattern Diagnostic
   tool6?: {
-    metrics?: unknown;
-    antiPatterns?: unknown[];
+    metrics?: Record<string, unknown>;
+    antiPatterns?: Array<{
+      pattern?: string;
+      severity?: string;
+      recommendation?: string;
+    }>;
+    healthScore?: number;
     completedAt?: string;
   };
   // Tool 7: Total Cost of Misalignment
   tool7?: {
     totalCost?: number;
     alignmentTaxPercent?: number;
+    interpretation?: string;
+    costBreakdown?: {
+      meetingWaste?: number;
+      decisionDelay?: number;
+      communicationOverhead?: number;
+      frictionCost?: number;
+      projectDelays?: number;
+      rework?: number;
+      turnover?: number;
+      opportunityCost?: number;
+    };
+    roiProjection?: {
+      conservative?: number;
+      moderate?: number;
+      aggressive?: number;
+      paybackMonths?: number;
+    };
     completedAt?: string;
   };
 }

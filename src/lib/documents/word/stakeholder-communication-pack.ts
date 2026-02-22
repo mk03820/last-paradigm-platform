@@ -9,7 +9,7 @@
  * Covers: AC3, AC7, FR65 (Book attribution)
  */
 
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table } from 'docx';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
 import {
   createBrandedHeader,
@@ -114,7 +114,7 @@ function createOverviewSection(tool4: DiagnosticSessionData['tool4']): Paragraph
   ];
 }
 
-function createMatrixSection(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createMatrixSection(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   const summary = tool4?.quadrantSummary || {};
 
   // Create text-based 2x2 matrix visualization
@@ -144,7 +144,7 @@ function createMatrixSection(tool4: DiagnosticSessionData['tool4']): Paragraph[]
   ];
 }
 
-function createManageCloselySection(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createManageCloselySection(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   const stakeholders = (tool4?.stakeholders || []).filter(
     (s) => s.quadrant === 'manage_closely'
   );
@@ -192,7 +192,7 @@ function createManageCloselySection(tool4: DiagnosticSessionData['tool4']): Para
   ];
 }
 
-function createKeepSatisfiedSection(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createKeepSatisfiedSection(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   const stakeholders = (tool4?.stakeholders || []).filter(
     (s) => s.quadrant === 'keep_satisfied'
   );
@@ -239,7 +239,7 @@ function createKeepSatisfiedSection(tool4: DiagnosticSessionData['tool4']): Para
   ];
 }
 
-function createKeepInformedSection(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createKeepInformedSection(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   const stakeholders = (tool4?.stakeholders || []).filter(
     (s) => s.quadrant === 'keep_informed'
   );
@@ -286,7 +286,7 @@ function createKeepInformedSection(tool4: DiagnosticSessionData['tool4']): Parag
   ];
 }
 
-function createMonitorSection(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createMonitorSection(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   const stakeholders = (tool4?.stakeholders || []).filter(
     (s) => s.quadrant === 'monitor'
   );
@@ -332,7 +332,7 @@ function createMonitorSection(tool4: DiagnosticSessionData['tool4']): Paragraph[
   ];
 }
 
-function createCommunicationStrategies(): Paragraph[] {
+function createCommunicationStrategies(): (Paragraph | Table)[] {
   return [
     createPageBreak(),
     createSectionTitle('Communication Channel Strategy'),

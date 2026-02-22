@@ -9,7 +9,7 @@
  * Covers: AC5, AC7, FR65 (Book attribution)
  */
 
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table } from 'docx';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
 import {
   createBrandedHeader,
@@ -28,6 +28,24 @@ import {
 } from './components';
 import { PAGE_MARGINS, DOCUMENT_STYLES, BRAND_COLORS } from './styles';
 import type { GenerationResult } from './types';
+
+// Local types for Tool 5 data structures
+interface FrictionPoint {
+  severity: number;
+  stageIndex: number;
+  category?: string;
+  description?: string;
+}
+
+interface JourneyStage {
+  name: string;
+}
+
+interface Journey {
+  name: string;
+  stages?: JourneyStage[];
+  frictionPoints?: FrictionPoint[];
+}
 
 /**
  * Generate the Data Flow Optimization Plan document
@@ -98,7 +116,7 @@ export async function generateDataFlowOptimizationPlan(
   };
 }
 
-function createExecutiveSummary(tool5: DiagnosticSessionData['tool5']): Paragraph[] {
+function createExecutiveSummary(tool5: DiagnosticSessionData['tool5']): (Paragraph | Table)[] {
   const totalCost = tool5?.totalFrictionCost || 0;
   const journeyCount = tool5?.journeys?.length || 0;
   const byCategory = tool5?.frictionByCategory || {};
@@ -138,8 +156,8 @@ function createExecutiveSummary(tool5: DiagnosticSessionData['tool5']): Paragrap
   ];
 }
 
-function createJourneyOverview(tool5: DiagnosticSessionData['tool5']): Paragraph[] {
-  const journeys = tool5?.journeys || [];
+function createJourneyOverview(tool5: DiagnosticSessionData['tool5']): (Paragraph | Table)[] {
+  const journeys = (tool5?.journeys || []) as Journey[];
 
   if (journeys.length === 0) {
     return [
@@ -173,9 +191,9 @@ function createJourneyOverview(tool5: DiagnosticSessionData['tool5']): Paragraph
   ];
 }
 
-function createFrictionAnalysis(tool5: DiagnosticSessionData['tool5']): Paragraph[] {
-  const journeys = tool5?.journeys || [];
-  const paragraphs: Paragraph[] = [
+function createFrictionAnalysis(tool5: DiagnosticSessionData['tool5']): (Paragraph | Table)[] {
+  const journeys = (tool5?.journeys || []) as Journey[];
+  const paragraphs: (Paragraph | Table)[] = [
     createPageBreak(),
     createSectionTitle('Friction Point Analysis'),
     createBodyParagraph(
@@ -209,9 +227,9 @@ function createFrictionAnalysis(tool5: DiagnosticSessionData['tool5']): Paragrap
       allFrictionPoints.slice(0, 10).map((fp) => [
         fp.journeyName,
         fp.stageName,
-        formatCategoryName(fp.category),
+        formatCategoryName(fp.category || 'unknown'),
         `${fp.severity}/9`,
-        fp.description,
+        fp.description || 'No description',
       ])
     ),
     new Paragraph({ text: '', spacing: { after: 200 } })
@@ -339,7 +357,7 @@ function createImprovementRecommendations(tool5: DiagnosticSessionData['tool5'])
   return paragraphs;
 }
 
-function createImplementationRoadmap(): Paragraph[] {
+function createImplementationRoadmap(): (Paragraph | Table)[] {
   return [
     createSectionTitle('Implementation Roadmap'),
     createBodyParagraph(

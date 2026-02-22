@@ -607,7 +607,7 @@ export function transformPB1ToPB2(
   const governanceCharter = data.tool4 ? transformToGovernanceCharter(data.tool4) : undefined;
   const dataPlatformPlaybook = data.tool5 ? transformToDataPlatformPlaybook(data.tool5) : undefined;
   const communicationArchitecture = data.tool6 ? transformToCommunicationArchitecture(data.tool6) : undefined;
-  const roiDashboard = transformToROIDashboard(data.tool7, data.tool2, data.tool5);
+  const roiDashboard = transformToROIDashboard(data.tool7 ?? undefined, data.tool2 ?? undefined, data.tool5 ?? undefined);
 
   const context: PartialToolkitGenerationContext = {
     userId,

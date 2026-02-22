@@ -9,7 +9,7 @@
  * Covers: AC4, AC7, FR65 (Book attribution)
  */
 
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table } from 'docx';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
 import {
   createBrandedHeader,
@@ -122,7 +122,7 @@ function createExecutiveSummary(tool3: DiagnosticSessionData['tool3']): Paragrap
   ];
 }
 
-function createArchetypeAnalysis(tool3: DiagnosticSessionData['tool3']): Paragraph[] {
+function createArchetypeAnalysis(tool3: DiagnosticSessionData['tool3']): (Paragraph | Table)[] {
   const archetypes = tool3?.archetypes || {};
 
   const archetypeRows = [
@@ -180,7 +180,7 @@ function createArchetypeRow(
   ];
 }
 
-function createBottleneckSection(tool3: DiagnosticSessionData['tool3']): Paragraph[] {
+function createBottleneckSection(tool3: DiagnosticSessionData['tool3']): (Paragraph | Table)[] {
   const bottlenecks = tool3?.bottlenecks || [];
 
   if (bottlenecks.length === 0) {
@@ -264,7 +264,7 @@ function createDecisionProtocols(): Paragraph[] {
   ];
 }
 
-function createDecisionRightsMatrix(): Paragraph[] {
+function createDecisionRightsMatrix(): (Paragraph | Table)[] {
   return [
     createSectionTitle('Decision Rights Matrix (RAPID)'),
     createBodyParagraph(

@@ -9,7 +9,7 @@
  * Covers: AC2, AC7, FR65 (Book attribution)
  */
 
-import { Document, Packer, Paragraph, TextRun, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, Table } from 'docx';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
 import {
   createBrandedHeader,
@@ -102,13 +102,13 @@ export async function generateStrategicAlignmentBrief(
 /**
  * Create Executive Summary section
  */
-function createExecutiveSummary(data: DiagnosticSessionData): Paragraph[] {
+function createExecutiveSummary(data: DiagnosticSessionData): (Paragraph | Table)[] {
   const totalCost = data.tool7?.totalCost || 0;
   const alignmentTaxPercent = data.tool7?.alignmentTaxPercent || 0;
   const compositeScore = data.tool1?.compositeScore || 0;
   const interpretation = data.tool7?.interpretation || 'unknown';
 
-  const paragraphs: Paragraph[] = [
+  const paragraphs: (Paragraph | Table)[] = [
     createSectionTitle('Executive Summary'),
     new Paragraph({
       children: [
@@ -185,7 +185,7 @@ function createExecutiveSummary(data: DiagnosticSessionData): Paragraph[] {
 /**
  * Tool 1: Organizational Alignment Assessment section
  */
-function createTool1Section(tool1: DiagnosticSessionData['tool1']): Paragraph[] {
+function createTool1Section(tool1: DiagnosticSessionData['tool1']): (Paragraph | Table)[] {
   if (!tool1) {
     return [
       createPageBreak(),
@@ -220,7 +220,7 @@ function createTool1Section(tool1: DiagnosticSessionData['tool1']): Paragraph[] 
 /**
  * Tool 2: Meeting Audit section
  */
-function createTool2Section(tool2: DiagnosticSessionData['tool2']): Paragraph[] {
+function createTool2Section(tool2: DiagnosticSessionData['tool2']): (Paragraph | Table)[] {
   if (!tool2?.results) {
     return [
       createPageBreak(),
@@ -250,7 +250,7 @@ function createTool2Section(tool2: DiagnosticSessionData['tool2']): Paragraph[] 
 /**
  * Tool 3: Decision Velocity section
  */
-function createTool3Section(tool3: DiagnosticSessionData['tool3']): Paragraph[] {
+function createTool3Section(tool3: DiagnosticSessionData['tool3']): (Paragraph | Table)[] {
   if (!tool3) {
     return [
       createPageBreak(),
@@ -270,7 +270,7 @@ function createTool3Section(tool3: DiagnosticSessionData['tool3']): Paragraph[] 
   const bottleneckItems = (tool3.bottlenecks || [])
     .map(b => `${b.pattern} (${b.severity}): ${b.description}`);
 
-  const paragraphs: Paragraph[] = [
+  const paragraphs: (Paragraph | Table)[] = [
     createPageBreak(),
     createSectionTitle('3. Decision Velocity Analysis'),
     ...createHighlightMetric(
@@ -295,7 +295,7 @@ function createTool3Section(tool3: DiagnosticSessionData['tool3']): Paragraph[] 
 /**
  * Tool 4: Stakeholder Mapping section
  */
-function createTool4Section(tool4: DiagnosticSessionData['tool4']): Paragraph[] {
+function createTool4Section(tool4: DiagnosticSessionData['tool4']): (Paragraph | Table)[] {
   if (!tool4) {
     return [
       createPageBreak(),
@@ -331,7 +331,7 @@ function createTool4Section(tool4: DiagnosticSessionData['tool4']): Paragraph[] 
 /**
  * Tool 5: Data Flow Friction section
  */
-function createTool5Section(tool5: DiagnosticSessionData['tool5']): Paragraph[] {
+function createTool5Section(tool5: DiagnosticSessionData['tool5']): (Paragraph | Table)[] {
   if (!tool5) {
     return [
       createPageBreak(),
@@ -367,7 +367,7 @@ function createTool5Section(tool5: DiagnosticSessionData['tool5']): Paragraph[] 
 /**
  * Tool 6: Communication Pattern section
  */
-function createTool6Section(tool6: DiagnosticSessionData['tool6']): Paragraph[] {
+function createTool6Section(tool6: DiagnosticSessionData['tool6']): (Paragraph | Table)[] {
   if (!tool6) {
     return [
       createPageBreak(),
@@ -376,10 +376,15 @@ function createTool6Section(tool6: DiagnosticSessionData['tool6']): Paragraph[] 
     ];
   }
 
-  const metrics = tool6.metrics || {};
+  const metrics = (tool6.metrics || {}) as {
+    emailsPerDay?: number;
+    slackMessagesPerDay?: number;
+    meetingHoursPerWeek?: number;
+    afterHoursPercent?: number;
+  };
   const antiPatterns = tool6.antiPatterns || [];
 
-  const paragraphs: Paragraph[] = [
+  const paragraphs: (Paragraph | Table)[] = [
     createPageBreak(),
     createSectionTitle('6. Communication Pattern Analysis'),
     ...createHighlightMetric(
@@ -399,7 +404,7 @@ function createTool6Section(tool6: DiagnosticSessionData['tool6']): Paragraph[] 
       createSubsectionTitle('Detected Anti-Patterns'),
       createDataTable(
         ['Pattern', 'Severity', 'Recommendation'],
-        antiPatterns.map(ap => [ap.pattern, ap.severity.toUpperCase(), ap.recommendation])
+        antiPatterns.map(ap => [ap.pattern || '', (ap.severity || '').toUpperCase(), ap.recommendation || ''])
       ),
       new Paragraph({ text: '', spacing: { after: 200 } })
     );
@@ -411,7 +416,7 @@ function createTool6Section(tool6: DiagnosticSessionData['tool6']): Paragraph[] 
 /**
  * Tool 7: Total Cost section
  */
-function createTool7Section(tool7: DiagnosticSessionData['tool7']): Paragraph[] {
+function createTool7Section(tool7: DiagnosticSessionData['tool7']): (Paragraph | Table)[] {
   if (!tool7) {
     return [
       createPageBreak(),
@@ -423,7 +428,7 @@ function createTool7Section(tool7: DiagnosticSessionData['tool7']): Paragraph[] 
   const breakdown = tool7.costBreakdown || {};
   const roi = tool7.roiProjection;
 
-  const paragraphs: Paragraph[] = [
+  const paragraphs: (Paragraph | Table)[] = [
     createPageBreak(),
     createSectionTitle('7. Total Cost of Misalignment'),
     ...createHighlightMetric(
@@ -469,7 +474,7 @@ function createTool7Section(tool7: DiagnosticSessionData['tool7']): Paragraph[] 
 /**
  * Create Priority Recommendations section
  */
-function createPriorityRecommendations(data: DiagnosticSessionData): Paragraph[] {
+function createPriorityRecommendations(data: DiagnosticSessionData): (Paragraph | Table)[] {
   const recommendations = generateRecommendations(data);
 
   return [

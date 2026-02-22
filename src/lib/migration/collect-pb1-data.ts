@@ -157,7 +157,13 @@ export function collectTool3Data(): DiagnosticSessionData['tool3'] | null {
     skipped: data.skipped,
     avgDays:
       data.samples.length > 0
-        ? data.samples.reduce((sum, s) => sum + s.daysToDecision, 0) / data.samples.length
+        ? data.samples.reduce((sum, s) => {
+            // Calculate days from requestDate to decisionDate
+            const requestDate = new Date(s.requestDate);
+            const decisionDate = new Date(s.decisionDate);
+            const daysToDecision = Math.ceil((decisionDate.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24));
+            return sum + daysToDecision;
+          }, 0) / data.samples.length
         : 0,
   }));
 
@@ -219,7 +225,7 @@ export function collectTool6Data(): DiagnosticSessionData['tool6'] | null {
 
   return {
     metrics: { email, chat, meetings },
-    antiPatterns: analysisResults?.patterns || [],
+    antiPatterns: analysisResults?.results || [],
     completedAt: completion?.completedAt,
   };
 }
