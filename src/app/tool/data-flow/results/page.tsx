@@ -180,7 +180,7 @@ export default function ResultsPage() {
           <Link href="/tool/data-flow/costs">Back to Cost Analysis</Link>
         </Button>
         <Button asChild>
-          <Link href="/tool/governance">Continue to Tool 6</Link>
+          <Link href="/tool/communication">Continue to Tool 6</Link>
         </Button>
       </div>
     </div>
