@@ -1,7 +1,8 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout';
 import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
-import { DecisionVelocityScorer } from '@/components/tools/decision-velocity';
+import { DecisionVelocityScorer, Tool3SessionLoader } from '@/components/tools/decision-velocity';
 
 /**
  * Tool 3: Decision Velocity Scorecard Page
@@ -11,6 +12,7 @@ import { DecisionVelocityScorer } from '@/components/tools/decision-velocity';
  * Story 10.1: Decision Sample Input Interface
  * Story 8.6: Progress Stepper Navigation
  * Story 8.7: Guided Diagnostic Flow
+ * C3-S4: Session persistence integration
  * Covers: FR2-11 (Decision sample input), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function DecisionVelocityPage() {
@@ -37,6 +39,11 @@ export default function DecisionVelocityPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="decision-velocity" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool3SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">

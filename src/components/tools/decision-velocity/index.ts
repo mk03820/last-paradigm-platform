@@ -9,6 +9,7 @@ export { DecisionSampleForm } from './DecisionSampleForm';
 export { DecisionSampleList } from './DecisionSampleList';
 export { DecisionVelocityScorer } from './DecisionVelocityScorer';
 export { LatencyMetricsCard } from './LatencyMetricsCard';
+export { Tool3SessionLoader } from './Tool3SessionLoader';
 export { VelocityResultsSummary } from './VelocityResultsSummary';
 export {
   DECISION_ARCHETYPES,

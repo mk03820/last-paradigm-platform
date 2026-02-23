@@ -11,6 +11,7 @@ import {
   generateSampleId,
   canCalculateVelocity,
 } from '@/components/tools/decision-velocity/constants';
+import type { SessionSyncStore } from '@/components/session';
 
 /**
  * Tool 3 Decision Velocity Store
@@ -19,6 +20,7 @@ import {
  * Uses sessionStorage for persistence (clears on tab close).
  *
  * Story 10.1: Decision Sample Input Interface
+ * C3-S4: Server sync for session persistence
  * Covers: AC7 (auto-save to Zustand store)
  */
 
@@ -26,13 +28,15 @@ export interface Tool3CompletionData {
   completedAt: string;
 }
 
-export interface Tool3State {
+export interface Tool3State extends SessionSyncStore {
   // Data for each archetype
   archetypes: Record<ArchetypeId, ArchetypeData>;
   // Server session ID for sync (if authenticated)
   sessionId: string | null;
   // Track if data needs server sync
   isDirty: boolean;
+  // Track if currently syncing to server
+  isSyncing: boolean;
   // Completion tracking
   completion: Tool3CompletionData | null;
 
@@ -45,6 +49,10 @@ export interface Tool3State {
   resetTool3: () => void;
   setSessionId: (id: string | null) => void;
   markComplete: () => void;
+
+  // Session sync methods (implements SessionSyncStore)
+  syncToServer: () => Promise<void>;
+  loadFromServer: (sessionId: string) => Promise<boolean>;
 
   // Computed helpers
   getSampleCount: (archetypeId: ArchetypeId) => number;
@@ -73,6 +81,7 @@ export const useTool3Store = create<Tool3State>()(
       archetypes: createInitialArchetypes(),
       sessionId: null,
       isDirty: false,
+      isSyncing: false,
       completion: null,
 
       // Add a new sample to an archetype
@@ -92,6 +101,11 @@ export const useTool3Store = create<Tool3State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
         return id;
       },
 
@@ -110,6 +124,11 @@ export const useTool3Store = create<Tool3State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Remove a sample from an archetype
@@ -127,6 +146,11 @@ export const useTool3Store = create<Tool3State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Toggle skip status for an archetype
@@ -142,6 +166,11 @@ export const useTool3Store = create<Tool3State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Set budget threshold for budget archetype
@@ -157,6 +186,11 @@ export const useTool3Store = create<Tool3State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Reset all Tool 3 data
@@ -164,6 +198,7 @@ export const useTool3Store = create<Tool3State>()(
         set({
           archetypes: createInitialArchetypes(),
           isDirty: false,
+          isSyncing: false,
           completion: null,
         });
       },
@@ -181,6 +216,85 @@ export const useTool3Store = create<Tool3State>()(
           },
           isDirty: true,
         });
+        // Auto-sync completion to server
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+      },
+
+      /**
+       * Sync current state to server session
+       */
+      syncToServer: async () => {
+        const state = get();
+        if (!state.sessionId || state.isSyncing) return;
+
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${state.sessionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                tool3: {
+                  decisions: Object.values(state.archetypes).flatMap((a) => a.samples),
+                  archetypes: state.archetypes,
+                  completedAt: state.completion?.completedAt,
+                },
+              },
+            }),
+          });
+
+          if (response.ok) {
+            set({ isDirty: false });
+          }
+        } catch (error) {
+          console.error('[tool3-store] Failed to sync to server:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+
+      /**
+       * Load session data from server
+       */
+      loadFromServer: async (sessionId: string) => {
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${sessionId}`);
+          const data = await response.json();
+
+          if (data.success && data.data?.session) {
+            const session = data.data.session;
+            const tool3Data = session.data?.tool3;
+
+            if (tool3Data) {
+              set({
+                sessionId,
+                archetypes: tool3Data.archetypes || createInitialArchetypes(),
+                completion: tool3Data.completedAt
+                  ? { completedAt: tool3Data.completedAt }
+                  : null,
+                isDirty: false,
+              });
+              return true;
+            }
+
+            // Session exists but no tool3 data
+            set({ sessionId, isDirty: false });
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error('[tool3-store] Failed to load from server:', error);
+          return false;
+        } finally {
+          set({ isSyncing: false });
+        }
       },
 
       // Get sample count for an archetype
