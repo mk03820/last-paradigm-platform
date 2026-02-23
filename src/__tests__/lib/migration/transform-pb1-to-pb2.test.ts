@@ -254,9 +254,9 @@ describe('transform-pb1-to-pb2', () => {
     it('identifies key players (high power & interest)', () => {
       const tool4: DiagnosticSessionData['tool4'] = {
         stakeholders: [
-          { name: 'Key Player', power: 5, interest: 5 },
-          { name: 'Low Interest', power: 5, interest: 1 },
-          { name: 'Low Power', power: 1, interest: 5 },
+          { name: 'Key Player', role: 'Executive', power: 5, interest: 5 },
+          { name: 'Low Interest', role: 'Manager', power: 5, interest: 1 },
+          { name: 'Low Power', role: 'Analyst', power: 1, interest: 5 },
         ],
       };
 
@@ -269,9 +269,9 @@ describe('transform-pb1-to-pb2', () => {
     it('identifies risky stakeholders', () => {
       const tool4: DiagnosticSessionData['tool4'] = {
         stakeholders: [
-          { name: 'Blocker', power: 5, interest: 1 },
-          { name: 'Hostile', power: 3, interest: 3, sentiment: 'hostile' },
-          { name: 'Safe', power: 2, interest: 2, sentiment: 'positive' },
+          { name: 'Blocker', role: 'VP', power: 5, interest: 1 },
+          { name: 'Hostile', role: 'Director', power: 3, interest: 3, sentiment: 'hostile' },
+          { name: 'Safe', role: 'Analyst', power: 2, interest: 2, sentiment: 'positive' },
         ],
       };
 
@@ -340,7 +340,7 @@ describe('transform-pb1-to-pb2', () => {
           meetings: { infoCascadeMeetingsPerWeek: 3 },
         },
         antiPatterns: [
-          { name: 'info-hoarding', severity: 'high' },
+          { pattern: 'info-hoarding', severity: 'high' },
         ],
       };
 
@@ -485,7 +485,7 @@ describe('transform-pb1-to-pb2', () => {
           metrics: null,
         },
         tool4: {
-          stakeholders: [{ name: 'CEO', power: 5, interest: 4 }],
+          stakeholders: [{ name: 'CEO', role: 'CEO', power: 5, interest: 4 }],
         },
         tool5: {
           journeys: [{ id: '1', name: 'Process', stages: [] }],
@@ -527,7 +527,7 @@ describe('transform-pb1-to-pb2', () => {
         },
         tool3: null,
         tool4: {
-          stakeholders: [{ name: 'CEO', power: 5, interest: 4 }],
+          stakeholders: [{ name: 'CEO', role: 'CEO', power: 5, interest: 4 }],
         },
         tool5: null,
         tool6: null,

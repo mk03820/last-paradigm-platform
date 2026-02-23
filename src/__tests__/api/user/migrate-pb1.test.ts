@@ -78,6 +78,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-123',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });
@@ -100,6 +101,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-123',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });
@@ -131,6 +133,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-789',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });
@@ -158,6 +161,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-123',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });
@@ -183,6 +187,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-123',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });
@@ -207,6 +212,7 @@ describe('POST /api/user/migrate-pb1', () => {
       vi.mocked(verifyAccessToken).mockResolvedValue({
         sub: 'user-123',
         email: 'test@example.com',
+        purchaseStatus: 'completed',
         exp: Math.floor(Date.now() / 1000) + 3600,
         iat: Math.floor(Date.now() / 1000),
       });

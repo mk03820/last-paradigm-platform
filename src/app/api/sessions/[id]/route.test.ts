@@ -10,18 +10,37 @@ vi.mock('@/auth', () => ({
 // Mock db
 vi.mock('@/lib/db', () => ({
   db: {
-    select: vi.fn().mockReturnThis(),
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn(),
-    update: vi.fn().mockReturnThis(),
-    set: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    returning: vi.fn(),
+    select: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+// Mock drizzle-orm
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn(),
+  and: vi.fn(),
+}));
+
+// Mock schema
+vi.mock('@/lib/db/schema', () => ({
+  diagnosticSessions: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    status: 'status',
   },
 }));
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
+
+// Type assertion for mocked db
+const mockDb = db as unknown as {
+  select: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  delete: ReturnType<typeof vi.fn>;
+};
 
 describe('/api/sessions/[id]', () => {
   beforeEach(() => {
@@ -51,7 +70,7 @@ describe('/api/sessions/[id]', () => {
     };
 
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const response = await GET(createRequest(), createParams('session-123'));
       const data = await response.json();
@@ -65,7 +84,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
 
       const response = await GET(createRequest(), createParams('nonexistent'));
       const data = await response.json();
@@ -79,7 +102,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([mockSession] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockSession]),
+        }),
+      });
 
       const response = await GET(createRequest(), createParams('session-123'));
       const data = await response.json();
@@ -93,7 +120,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockRejectedValue(new Error('DB error'));
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockRejectedValue(new Error('DB error')),
+        }),
+      });
 
       const response = await GET(createRequest(), createParams('session-123'));
       const data = await response.json();
@@ -114,7 +145,7 @@ describe('/api/sessions/[id]', () => {
     };
 
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const response = await PUT(createRequest({ name: 'Updated' }), createParams('session-123'));
       const data = await response.json();
@@ -128,7 +159,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
 
       const response = await PUT(createRequest({ name: 'Updated' }), createParams('nonexistent'));
       const data = await response.json();
@@ -142,14 +177,18 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([mockSession] as never);
-      vi.mocked(db.update).mockReturnValue({
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockSession]),
+        }),
+      });
+      mockDb.update.mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([{ ...mockSession, name: 'Updated Session' }]),
           }),
         }),
-      } as never);
+      });
 
       const response = await PUT(createRequest({ name: 'Updated Session' }), createParams('session-123'));
       const data = await response.json();
@@ -163,8 +202,12 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([mockSession] as never);
-      
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockSession]),
+        }),
+      });
+
       const updatedSession = {
         ...mockSession,
         toolsCompleted: 2,
@@ -173,14 +216,14 @@ describe('/api/sessions/[id]', () => {
           tool2: { inputs: { test: 1 }, completedAt: '2024-01-02' },
         },
       };
-      
-      vi.mocked(db.update).mockReturnValue({
+
+      mockDb.update.mockReturnValue({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
             returning: vi.fn().mockResolvedValue([updatedSession]),
           }),
         }),
-      } as never);
+      });
 
       const response = await PUT(
         createRequest({
@@ -199,7 +242,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockRejectedValue(new Error('DB error'));
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockRejectedValue(new Error('DB error')),
+        }),
+      });
 
       const response = await PUT(createRequest({ name: 'Updated' }), createParams('session-123'));
       const data = await response.json();
@@ -218,7 +265,7 @@ describe('/api/sessions/[id]', () => {
     };
 
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const response = await DELETE(createRequest(), createParams('session-123'));
       const data = await response.json();
@@ -232,11 +279,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.delete).mockReturnValue({
+      mockDb.delete.mockReturnValue({
         where: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([]),
         }),
-      } as never);
+      });
 
       const response = await DELETE(createRequest(), createParams('nonexistent'));
       const data = await response.json();
@@ -250,11 +297,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.delete).mockReturnValue({
+      mockDb.delete.mockReturnValue({
         where: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([mockSession]),
         }),
-      } as never);
+      });
 
       const response = await DELETE(createRequest(), createParams('session-123'));
       const data = await response.json();
@@ -267,11 +314,11 @@ describe('/api/sessions/[id]', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.delete).mockReturnValue({
+      mockDb.delete.mockReturnValue({
         where: vi.fn().mockReturnValue({
           returning: vi.fn().mockRejectedValue(new Error('DB error')),
         }),
-      } as never);
+      });
 
       const response = await DELETE(createRequest(), createParams('session-123'));
       const data = await response.json();

@@ -103,6 +103,7 @@ describe('ExcelImportButton', () => {
     vi.mocked(parseExcelTemplate).mockResolvedValue({
       success: false,
       error: {
+        code: 'PARSE_ERROR',
         message: 'Invalid data',
         details: ['Meeting count is required'],
       },

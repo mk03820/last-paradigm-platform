@@ -21,7 +21,7 @@ const sessionCallback = async ({
   session,
   token,
 }: {
-  session: { user?: { id?: string } };
+  session: { user?: { id?: string; email?: string } };
   token: { id?: string };
 }) => {
   if (token && session.user) {

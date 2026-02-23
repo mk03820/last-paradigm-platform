@@ -25,7 +25,16 @@ vi.mock('../../../lib/inngest/client', () => ({
 }));
 
 import { cleanupExpiredMagicLinks } from '@/lib/auth/magic-link';
-import { magicLinkCleanup } from '@/lib/inngest/functions/magic-link-cleanup';
+import { magicLinkCleanup as _magicLinkCleanup } from '@/lib/inngest/functions/magic-link-cleanup';
+
+// Type for the mocked Inngest function
+interface MockedInngestFunction {
+  config: { id: string; name: string; retries: number };
+  trigger: { cron: string };
+  handler: (ctx: { step: unknown }) => Promise<{ success: boolean; deletedCount: number; timestamp: string }>;
+}
+
+const magicLinkCleanup = _magicLinkCleanup as unknown as MockedInngestFunction;
 
 describe('Magic Link Cleanup Function', () => {
   const mockCleanup = cleanupExpiredMagicLinks as ReturnType<typeof vi.fn>;

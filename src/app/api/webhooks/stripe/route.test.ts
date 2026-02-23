@@ -61,14 +61,14 @@ describe('POST /api/webhooks/stripe', () => {
   ): Stripe.Event => ({
     id: mockEventId,
     object: 'event',
-    api_version: '2024-06-20',
+    api_version: '2024-06-20' as Stripe.LatestApiVersion,
     created: Math.floor(Date.now() / 1000),
     type,
     data: { object: data },
     livemode: false,
     pending_webhooks: 0,
     request: null,
-  } as Stripe.Event);
+  }) as unknown as Stripe.Event;
 
   const createRequest = (body: string = '{}') => {
     return new NextRequest('http://localhost/api/webhooks/stripe', {
@@ -484,10 +484,10 @@ describe('POST /api/webhooks/stripe', () => {
 
       // Find the call that marked it as processed
       const processedCall = updateSetMock.mock.calls.find(
-        (call: [Record<string, unknown>]) => call[0].status === 'processed'
+        (call) => (call[0] as Record<string, unknown>).status === 'processed'
       );
       expect(processedCall).toBeDefined();
-      expect(processedCall[0].processedAt).toBeInstanceOf(Date);
+      expect((processedCall![0] as Record<string, unknown>).processedAt).toBeInstanceOf(Date);
     });
   });
 });

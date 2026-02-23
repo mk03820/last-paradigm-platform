@@ -93,7 +93,7 @@ describe('useTool5Store', () => {
         result.current.addJourney({
           name: 'Test Journey',
           stages: [
-            { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+            { id: 'placeholder', type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
           ],
         });
       });
@@ -121,8 +121,8 @@ describe('useTool5Store', () => {
         result.current.addJourney({
           name: 'Test',
           stages: [
-            { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
-            { type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
+            { id: 'placeholder1', type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+            { id: 'placeholder2', type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
           ],
         });
         result.current.markComplete();
@@ -420,7 +420,7 @@ describe('useTool5Store', () => {
     it('creates journey from template', () => {
       const { result } = renderHook(() => useTool5Store());
 
-      let journeyId: string | null;
+      let journeyId: string | null = null;
       act(() => {
         journeyId = result.current.applyTemplate('customer-360');
       });
@@ -444,7 +444,7 @@ describe('useTool5Store', () => {
     it('returns null for unknown template', () => {
       const { result } = renderHook(() => useTool5Store());
 
-      let journeyId: string | null;
+      let journeyId: string | null = null;
       act(() => {
         journeyId = result.current.applyTemplate('unknown');
       });
@@ -456,7 +456,7 @@ describe('useTool5Store', () => {
     it('sets active journey', () => {
       const { result } = renderHook(() => useTool5Store());
 
-      let journeyId: string | null;
+      let journeyId: string | null = null;
       act(() => {
         journeyId = result.current.applyTemplate('customer-360');
       });
@@ -473,8 +473,8 @@ describe('useTool5Store', () => {
         result.current.addJourney({
           name: 'Test',
           stages: [
-            { type: 'source', systemName: 'A', owner: '', latency: 2, latencyUnit: 'hours', order: 0 },
-            { type: 'storage', systemName: 'B', owner: '', latency: 1, latencyUnit: 'days', order: 1 },
+            { id: 'placeholder1', type: 'source', systemName: 'A', owner: '', latency: 2, latencyUnit: 'hours', order: 0 },
+            { id: 'placeholder2', type: 'storage', systemName: 'B', owner: '', latency: 1, latencyUnit: 'days', order: 1 },
           ],
         });
         result.current.markComplete();
@@ -547,13 +547,13 @@ describe('useTool5Store', () => {
         result.current.addJourney({
           name: 'Test 1',
           stages: [
-            { type: 'source', systemName: 'A', owner: '', latency: 5, latencyUnit: 'hours', order: 0 },
+            { id: 'placeholder1', type: 'source', systemName: 'A', owner: '', latency: 5, latencyUnit: 'hours', order: 0 },
           ],
         });
         result.current.addJourney({
           name: 'Test 2',
           stages: [
-            { type: 'source', systemName: 'B', owner: '', latency: 1, latencyUnit: 'days', order: 0 },
+            { id: 'placeholder2', type: 'source', systemName: 'B', owner: '', latency: 1, latencyUnit: 'days', order: 0 },
           ],
         });
       });
@@ -631,8 +631,8 @@ describe('useTool5Store', () => {
           result.current.addJourney({
             name: 'Test',
             stages: [
-              { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
-              { type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
+              { id: 'placeholder1', type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+              { id: 'placeholder2', type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
             ],
           });
           result.current.markComplete();
@@ -766,7 +766,7 @@ describe('useTool5Store', () => {
           journeyId = result.current.addJourney({
             name: 'Test Journey',
             stages: [
-              { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+              { id: 'placeholder', type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
             ],
           });
           result.current.addFrictionPoint({
@@ -1142,8 +1142,8 @@ describe('useTool5Store', () => {
           result.current.addJourney({
             name: 'Test',
             stages: [
-              { type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
-              { type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
+              { id: 'placeholder1', type: 'source', systemName: 'A', owner: '', latency: 0, latencyUnit: 'hours', order: 0 },
+              { id: 'placeholder2', type: 'storage', systemName: 'B', owner: '', latency: 0, latencyUnit: 'hours', order: 1 },
             ],
           });
           frictionId = result.current.addFrictionPoint({

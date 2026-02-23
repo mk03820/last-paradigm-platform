@@ -411,7 +411,7 @@ describe('PurchaseCTA', () => {
 
   describe('Ref forwarding', () => {
     it('forwards ref to section element', () => {
-      const ref = { current: null } as React.RefObject<HTMLElement>;
+      const ref = { current: null } as React.RefObject<HTMLElement | null>;
       render(<PurchaseCTA ref={ref} />);
 
       expect(ref.current).toBeInstanceOf(HTMLElement);

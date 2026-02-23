@@ -61,8 +61,8 @@ function createMockDiagnosticData(overrides: Partial<DiagnosticSessionData> = {}
     },
     tool4: {
       stakeholders: [
-        { name: 'CEO', power: 90, interest: 80, sentiment: 'champion' },
-        { name: 'CFO', power: 80, interest: 70, sentiment: 'neutral' },
+        { name: 'CEO', role: 'Chief Executive Officer', power: 90, interest: 80, sentiment: 'champion' },
+        { name: 'CFO', role: 'Chief Financial Officer', power: 80, interest: 70, sentiment: 'neutral' },
       ],
       completedAt: '2024-01-15T13:00:00Z',
     },
@@ -79,7 +79,11 @@ function createMockDiagnosticData(overrides: Partial<DiagnosticSessionData> = {}
         healthScore: 65,
         antiPatternCount: 3,
       },
-      antiPatterns: ['Meeting Overload', 'Email Chaos', 'After-Hours Communication'],
+      antiPatterns: [
+        { pattern: 'Meeting Overload', severity: 'high', recommendation: 'Reduce meeting frequency' },
+        { pattern: 'Email Chaos', severity: 'medium', recommendation: 'Implement email guidelines' },
+        { pattern: 'After-Hours Communication', severity: 'high', recommendation: 'Set boundaries' },
+      ],
       completedAt: '2024-01-15T15:00:00Z',
     },
     tool7: {
@@ -92,9 +96,11 @@ function createMockDiagnosticData(overrides: Partial<DiagnosticSessionData> = {}
 }
 
 // Helper to parse Excel buffer
-async function parseExcelBuffer(buffer: Buffer): Promise<ExcelJS.Workbook> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function parseExcelBuffer(buffer: Uint8Array): Promise<ExcelJS.Workbook> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer);
+  // Type cast to work around Buffer<ArrayBufferLike> vs Buffer type mismatch
+  await workbook.xlsx.load(buffer as any);
   return workbook;
 }
 

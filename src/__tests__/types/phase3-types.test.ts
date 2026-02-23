@@ -124,6 +124,8 @@ describe('User types', () => {
         purchaseStatus: 'completed',
         purchasedAt: new Date(),
         stripeCustomerId: 'cus_123',
+        hasPb2Access: false,
+        pb2PurchasedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -147,6 +149,8 @@ describe('User types', () => {
         purchaseStatus: null,
         purchasedAt: null,
         stripeCustomerId: null,
+        hasPb2Access: false,
+        pb2PurchasedAt: null,
         createdAt: null,
         updatedAt: null,
       };
@@ -166,6 +170,8 @@ describe('User types', () => {
         purchaseStatus: null,
         purchasedAt: null,
         stripeCustomerId: null,
+        hasPb2Access: false,
+        pb2PurchasedAt: null,
         createdAt: null,
         updatedAt: null,
       };

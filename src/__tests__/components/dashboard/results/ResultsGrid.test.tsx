@@ -46,8 +46,8 @@ const mockToolResults = {
   },
   tool4: {
     stakeholders: [
-      { name: 'CEO', power: 9, interest: 8, sentiment: 'champion' },
-      { name: 'CFO', power: 8, interest: 5, sentiment: 'neutral' },
+      { name: 'CEO', power: 9, interest: 8, sentiment: 'champion' as const },
+      { name: 'CFO', power: 8, interest: 5, sentiment: 'neutral' as const },
     ],
     completedAt: '2026-02-14T10:15:00Z',
   },

@@ -44,7 +44,7 @@ describe('getNextToolRoute', () => {
       toolsCompleted: 1,
       data: {
         tool1: {
-          scores: { strategic: 5, governance: 4, cultural: 3, operational: 4, informational: 3 },
+          scores: { strategic: 5, governance: 4, execution: 3, technology: 4, people: 3 },
           compositeScore: 3.8,
           completedAt: new Date().toISOString(),
         },

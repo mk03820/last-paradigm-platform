@@ -49,7 +49,7 @@ describe('POST /api/auth/refresh', () => {
   const mockCookies = cookies as ReturnType<typeof vi.fn>;
   const mockVerifyRefreshToken = verifyRefreshToken as ReturnType<typeof vi.fn>;
   const mockCreateAccessToken = createAccessToken as ReturnType<typeof vi.fn>;
-  const mockDb = db as { select: ReturnType<typeof vi.fn> };
+  const mockDb = db as unknown as { select: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.clearAllMocks();

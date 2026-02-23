@@ -25,7 +25,7 @@ describe('useReducedMotion', () => {
       removeEventListener: removeEventListenerMock,
     }));
 
-    window.matchMedia = matchMediaMock;
+    window.matchMedia = matchMediaMock as unknown as typeof window.matchMedia;
   });
 
   afterEach(() => {

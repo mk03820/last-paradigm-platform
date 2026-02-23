@@ -27,11 +27,18 @@ vi.mock('@/lib/db/schema', () => ({
     id: 'id',
     email: 'email',
   },
+  abandonedRegistrations: {
+    email: 'email',
+    completedAt: 'completed_at',
+    emailSentAt: 'email_sent_at',
+  },
 }));
 
 // Mock drizzle-orm
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((col, val) => ({ col, val })),
+  and: vi.fn((...conditions) => conditions),
+  isNull: vi.fn((col) => ({ isNull: col })),
 }));
 
 // Mock Resend - use class syntax for proper constructor
@@ -56,7 +63,16 @@ vi.mock('../../../lib/inngest/client', () => ({
   },
 }));
 
-import { registrationAbandonmentCheck } from '@/lib/inngest/functions/registration-abandonment';
+import { registrationAbandonmentCheck as _registrationAbandonmentCheck } from '@/lib/inngest/functions/registration-abandonment';
+
+// Type for the mocked Inngest function
+interface MockedInngestFunction {
+  config: { id: string; name: string; retries: number };
+  trigger: { event: string };
+  handler: (ctx: { event: unknown; step: unknown }) => Promise<{ success: boolean; action: string; reason?: string; email?: string; emailId?: string }>;
+}
+
+const registrationAbandonmentCheck = _registrationAbandonmentCheck as unknown as MockedInngestFunction;
 
 describe('Registration Abandonment Check Function', () => {
   beforeEach(() => {
@@ -106,17 +122,21 @@ describe('Registration Abandonment Check Function', () => {
     it('should skip email when user has completed registration', async () => {
       const mockStep = {
         sleep: vi.fn().mockResolvedValue(undefined),
-        run: vi.fn().mockImplementation(async (name: string, fn: () => Promise<any>) => {
+        run: vi.fn().mockImplementation(async (name: string) => {
           if (name === 'check-user-registered') {
             return true; // User exists
           }
-          return fn();
+          if (name === 'mark-completed') {
+            return undefined; // Mark completed step
+          }
+          return undefined;
         }),
       };
 
       const mockEvent = {
         data: {
           email: 'completed@example.com',
+          token: 'test-token',
           abandonedAt: new Date().toISOString(),
         },
       };
@@ -142,7 +162,9 @@ describe('Registration Abandonment Check Function', () => {
     it('should send reminder email when user has not registered', async () => {
       const runResults: Record<string, any> = {
         'check-user-registered': false, // User does not exist
-        'send-reminder-email': undefined,
+        'check-and-send': { shouldSend: true, record: { id: 'test-id' } },
+        'send-reminder-email': { success: true, id: 'email-123' },
+        'mark-email-sent': undefined,
       };
 
       const mockStep = {
@@ -153,12 +175,13 @@ describe('Registration Abandonment Check Function', () => {
       };
 
       const testEmail = 'abandoned@example.com';
-      const testAbandonedAt = new Date().toISOString();
+      const testToken = 'test-token';
 
       const mockEvent = {
         data: {
           email: testEmail,
-          abandonedAt: testAbandonedAt,
+          token: testToken,
+          abandonedAt: new Date().toISOString(),
         },
       };
 
@@ -171,7 +194,7 @@ describe('Registration Abandonment Check Function', () => {
         success: true,
         action: 'email_sent',
         email: testEmail,
-        abandonedAt: testAbandonedAt,
+        emailId: 'email-123',
       });
 
       // Should call send-reminder-email

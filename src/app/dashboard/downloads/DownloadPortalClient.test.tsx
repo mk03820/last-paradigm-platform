@@ -32,6 +32,7 @@ describe('DownloadPortalClient', () => {
       status: 'completed' as const,
       fileSizeBytes: 102400,
       errorMessage: null,
+      generatedAt: new Date('2024-01-15T10:00:00Z'),
     },
     {
       id: 'doc-2',
@@ -40,6 +41,7 @@ describe('DownloadPortalClient', () => {
       status: 'completed' as const,
       fileSizeBytes: 51200,
       errorMessage: null,
+      generatedAt: new Date('2024-01-15T10:05:00Z'),
     },
     {
       id: 'doc-3',
@@ -48,6 +50,7 @@ describe('DownloadPortalClient', () => {
       status: 'completed' as const,
       fileSizeBytes: 204800,
       errorMessage: null,
+      generatedAt: new Date('2024-01-15T10:10:00Z'),
     },
   ];
 
@@ -59,6 +62,7 @@ describe('DownloadPortalClient', () => {
       status: 'completed' as const,
       fileSizeBytes: 102400,
       errorMessage: null,
+      generatedAt: new Date('2024-01-15T10:00:00Z'),
     },
     {
       id: 'doc-2',
@@ -67,6 +71,7 @@ describe('DownloadPortalClient', () => {
       status: 'generating' as const,
       fileSizeBytes: null,
       errorMessage: null,
+      generatedAt: null,
     },
     {
       id: 'doc-3',
@@ -75,6 +80,7 @@ describe('DownloadPortalClient', () => {
       status: 'pending' as const,
       fileSizeBytes: null,
       errorMessage: null,
+      generatedAt: null,
     },
   ];
 
@@ -86,6 +92,7 @@ describe('DownloadPortalClient', () => {
       status: 'completed' as const,
       fileSizeBytes: 102400,
       errorMessage: null,
+      generatedAt: new Date('2024-01-15T10:00:00Z'),
     },
     {
       id: 'doc-2',
@@ -94,6 +101,7 @@ describe('DownloadPortalClient', () => {
       status: 'failed' as const,
       fileSizeBytes: null,
       errorMessage: 'Generation failed',
+      generatedAt: null,
     },
   ];
 

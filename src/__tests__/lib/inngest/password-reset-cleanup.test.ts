@@ -25,7 +25,16 @@ vi.mock('../../../lib/inngest/client', () => ({
 }));
 
 import { cleanupExpiredResets } from '@/lib/auth/password-reset';
-import { passwordResetCleanup } from '@/lib/inngest/functions/password-reset-cleanup';
+import { passwordResetCleanup as _passwordResetCleanup } from '@/lib/inngest/functions/password-reset-cleanup';
+
+// Type for the mocked Inngest function
+interface MockedInngestFunction {
+  config: { id: string; name: string; retries: number };
+  trigger: { cron: string };
+  handler: (ctx: { step: unknown }) => Promise<{ success: boolean; deletedCount: number; timestamp: string }>;
+}
+
+const passwordResetCleanup = _passwordResetCleanup as unknown as MockedInngestFunction;
 
 describe('Password Reset Cleanup Function', () => {
   const mockCleanup = cleanupExpiredResets as ReturnType<typeof vi.fn>;

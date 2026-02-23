@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToolGrid } from './ToolGrid';
-import { DIAGNOSTIC_TOOLS } from './diagnostic-constants';
+import { DIAGNOSTIC_TOOLS, type ToolStatus } from './diagnostic-constants';
 
 // Mock useToolsWithStatus hook
 vi.mock('./useToolStatus', () => ({
@@ -44,8 +44,8 @@ const mockUseToolAccess = vi.mocked(useToolAccess);
 // Create mock tools with status info
 const mockToolsWithStatus = DIAGNOSTIC_TOOLS.map((tool) => ({
   ...tool,
-  status: 'not_started' as const,
-  resultSummary: null,
+  status: 'not_started' as ToolStatus,
+  resultSummary: null as string | null,
 }));
 
 describe('ToolGrid', () => {
@@ -247,7 +247,7 @@ describe('ToolGrid', () => {
       const toolsWithCompleted = [...mockToolsWithStatus];
       toolsWithCompleted[1] = {
         ...toolsWithCompleted[1],
-        status: 'completed',
+        status: 'completed' as ToolStatus,
         resultSummary: 'Meeting Waste: $2.4M/year',
       };
 

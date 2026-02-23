@@ -177,7 +177,7 @@ describe('Generate Document Function (Story 18.1)', () => {
 
   describe('Error handling', () => {
     it('should capture error message on failure', () => {
-      const error = new Error('Template generation failed');
+      const error: unknown = new Error('Template generation failed');
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 
@@ -185,7 +185,7 @@ describe('Generate Document Function (Story 18.1)', () => {
     });
 
     it('should handle non-Error objects', () => {
-      const error = 'String error';
+      const error: unknown = 'String error';
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 

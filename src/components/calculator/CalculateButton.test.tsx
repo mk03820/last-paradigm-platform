@@ -28,7 +28,7 @@ describe('CalculateButton', () => {
 
     it('should show loading state during calculation', async () => {
       const mockOnClick = vi.fn(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+        (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
       render(<CalculateButton onClick={mockOnClick} />);
@@ -70,7 +70,7 @@ describe('CalculateButton', () => {
 
     it('should have aria-busy when loading', async () => {
       const mockOnClick = vi.fn(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+        (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
       render(<CalculateButton onClick={mockOnClick} />);

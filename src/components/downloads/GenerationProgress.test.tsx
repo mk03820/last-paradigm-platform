@@ -28,6 +28,7 @@ describe('GenerationProgress', () => {
       status: 'completed' as const,
       fileSizeBytes: 102400,
       errorMessage: null,
+      generatedAt: null,
     },
     {
       id: 'doc-2',
@@ -36,6 +37,7 @@ describe('GenerationProgress', () => {
       status: 'generating' as const,
       fileSizeBytes: null,
       errorMessage: null,
+      generatedAt: null,
     },
     {
       id: 'doc-3',
@@ -44,6 +46,7 @@ describe('GenerationProgress', () => {
       status: 'pending' as const,
       fileSizeBytes: null,
       errorMessage: null,
+      generatedAt: null,
     },
   ];
 

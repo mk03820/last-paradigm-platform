@@ -50,7 +50,7 @@ describe('POST /api/auth/login', () => {
   const mockCookies = cookies as ReturnType<typeof vi.fn>;
   const mockVerifyPassword = verifyPassword as ReturnType<typeof vi.fn>;
   const mockCreateTokenPair = createTokenPair as ReturnType<typeof vi.fn>;
-  const mockDb = db as { select: ReturnType<typeof vi.fn> };
+  const mockDb = db as unknown as { select: ReturnType<typeof vi.fn> };
 
   // Use unique IP per test to avoid rate limit issues
   let testIpCounter = 0;

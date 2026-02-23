@@ -74,7 +74,7 @@ describe('POST /api/checkout/session', () => {
 
   describe('Authentication (AC8)', () => {
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const request = createRequest({});
       const response = await POST(request);
@@ -193,8 +193,8 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.userId).toBe('user-123');
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.userId).toBe('user-123');
     });
 
     it('should include userEmail in metadata', async () => {
@@ -207,8 +207,8 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.userEmail).toBe('test@example.com');
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.userEmail).toBe('test@example.com');
     });
 
     it('should include createdAt timestamp in metadata', async () => {
@@ -221,11 +221,11 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.createdAt).toBeDefined();
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.createdAt).toBeDefined();
       // Verify it's a valid ISO timestamp
-      const date = new Date(createCall.metadata?.createdAt as string);
-      expect(date.toISOString()).toBe(createCall.metadata?.createdAt);
+      const date = new Date(createCall?.metadata?.createdAt as string);
+      expect(date.toISOString()).toBe(createCall?.metadata?.createdAt);
     });
 
     it('should include sessionSource in metadata', async () => {
@@ -238,8 +238,8 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.sessionSource).toBe('tool_unlock');
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.sessionSource).toBe('tool_unlock');
     });
 
     it('should default sessionSource to preview_page', async () => {
@@ -252,8 +252,8 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.sessionSource).toBe('preview_page');
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.sessionSource).toBe('preview_page');
     });
 
     it('should include optional diagnosticResultId when provided', async () => {
@@ -266,8 +266,8 @@ describe('POST /api/checkout/session', () => {
       await POST(request);
 
       const createCall = vi.mocked(stripe.checkout.sessions.create).mock
-        .calls[0][0];
-      expect(createCall.metadata?.diagnosticResultId).toBe('diag-789');
+        .calls[0]?.[0] as Stripe.Checkout.SessionCreateParams | undefined;
+      expect(createCall?.metadata?.diagnosticResultId).toBe('diag-789');
     });
   });
 

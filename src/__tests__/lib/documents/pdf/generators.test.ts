@@ -58,8 +58,8 @@ function createMockDiagnosticData(overrides: Partial<DiagnosticSessionData> = {}
     },
     tool4: {
       stakeholders: [
-        { name: 'CEO', power: 90, interest: 80, sentiment: 'champion' },
-        { name: 'CFO', power: 80, interest: 70, sentiment: 'neutral' },
+        { name: 'CEO', role: 'Chief Executive Officer', power: 90, interest: 80, sentiment: 'champion' },
+        { name: 'CFO', role: 'Chief Financial Officer', power: 80, interest: 70, sentiment: 'neutral' },
       ],
       completedAt: '2024-01-15T13:00:00Z',
     },
@@ -76,7 +76,11 @@ function createMockDiagnosticData(overrides: Partial<DiagnosticSessionData> = {}
         healthScore: 65,
         antiPatternCount: 3,
       },
-      antiPatterns: ['Meeting Overload', 'Email Chaos', 'After-Hours Communication'],
+      antiPatterns: [
+        { pattern: 'Meeting Overload', severity: 'high', recommendation: 'Reduce meeting frequency' },
+        { pattern: 'Email Chaos', severity: 'medium', recommendation: 'Implement email guidelines' },
+        { pattern: 'After-Hours Communication', severity: 'high', recommendation: 'Set boundaries' },
+      ],
       completedAt: '2024-01-15T15:00:00Z',
     },
     tool7: {

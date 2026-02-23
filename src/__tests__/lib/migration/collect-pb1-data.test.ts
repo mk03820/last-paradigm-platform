@@ -114,7 +114,7 @@ describe('collect-pb1-data', () => {
       completion: null,
       sessionId: null,
       isDirty: false,
-    } as ReturnType<typeof useTool4Store.getState>);
+    } as unknown as ReturnType<typeof useTool4Store.getState>);
 
     vi.mocked(useTool5Store.getState).mockReturnValue({
       journeys: [],

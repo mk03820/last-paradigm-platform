@@ -66,7 +66,7 @@ describe('AuthForm', () => {
 
     it('should not show error for valid email', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -83,7 +83,7 @@ describe('AuthForm', () => {
   describe('submission', () => {
     it('should call signIn with correct parameters on valid submit', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm callbackUrl="/dashboard" />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -133,7 +133,7 @@ describe('AuthForm', () => {
   describe('success state', () => {
     it('should show success message after successful submission', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -147,7 +147,7 @@ describe('AuthForm', () => {
 
     it('should show the submitted email in success message', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -161,7 +161,7 @@ describe('AuthForm', () => {
 
     it('should mention 15-minute expiry in success message', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -175,7 +175,7 @@ describe('AuthForm', () => {
 
     it('should allow trying different email after success', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: null, ok: true, status: 200, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: undefined, code: undefined, ok: true, status: 200, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);
@@ -197,7 +197,7 @@ describe('AuthForm', () => {
   describe('error state', () => {
     it('should show error message when signIn fails', async () => {
       const user = userEvent.setup();
-      vi.mocked(signIn).mockResolvedValue({ error: 'Error', ok: false, status: 500, url: '' });
+      vi.mocked(signIn).mockResolvedValue({ error: 'Error', code: undefined, ok: false, status: 500, url: '' });
       render(<AuthForm />);
 
       const input = screen.getByLabelText(/email address/i);

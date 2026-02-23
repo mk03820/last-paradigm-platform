@@ -83,7 +83,7 @@ import {
 } from '@/lib/auth/magic-link';
 
 describe('Magic Link Integration Flow', () => {
-  const mockDb = db as {
+  const mockDb = db as unknown as {
     insert: ReturnType<typeof vi.fn>;
     select: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;

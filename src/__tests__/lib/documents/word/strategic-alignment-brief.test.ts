@@ -86,14 +86,9 @@ describe('generateStrategicAlignmentBrief', () => {
         responseTimeMinutes: 45,
       },
       antiPatterns: [
-        { pattern: 'Meeting Overload', severity: 'high', description: 'Too many meetings', recommendation: 'Reduce meetings' },
+        { pattern: 'Meeting Overload', severity: 'high', recommendation: 'Reduce meetings' },
       ],
       healthScore: 60,
-      healthIndicators: {
-        emailHealth: 55,
-        chatHealth: 70,
-        meetingHealth: 50,
-      },
     },
     tool7: {
       totalCost: 1500000,

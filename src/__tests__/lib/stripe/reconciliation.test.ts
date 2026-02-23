@@ -47,6 +47,19 @@ vi.mock('drizzle-orm', () => ({
 import { stripe } from '@/lib/stripe/client';
 import { db } from '@/lib/db';
 
+// Helper to create mock Stripe API list response with required lastResponse
+const mockApiList = <T>(data: T[]) => ({
+  data,
+  object: 'list' as const,
+  has_more: false,
+  url: '/v1/checkout/sessions',
+  lastResponse: {
+    headers: {} as Record<string, string>,
+    requestId: 'req_test',
+    statusCode: 200,
+  },
+} as Stripe.ApiList<T> & { lastResponse: Stripe.Response<Stripe.ApiList<T>>['lastResponse'] });
+
 describe('reconcileStripePayments', () => {
   const mockSession = (overrides: Partial<Stripe.Checkout.Session> = {}): Stripe.Checkout.Session => ({
     id: 'cs_test_123',
@@ -77,12 +90,7 @@ describe('reconcileStripePayments', () => {
 
   describe('Session Fetching', () => {
     it('should fetch completed sessions from Stripe', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList<Stripe.Checkout.Session>([]));
 
       await reconcileStripePayments();
 
@@ -95,12 +103,7 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should use default 7-day lookback', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList<Stripe.Checkout.Session>([]));
 
       const beforeCall = Date.now();
       await reconcileStripePayments();
@@ -114,7 +117,7 @@ describe('reconcileStripePayments', () => {
         })
       );
 
-      const calledWith = vi.mocked(stripe.checkout.sessions.list).mock.calls[0][0];
+      const calledWith = vi.mocked(stripe.checkout.sessions.list).mock.calls[0][0] as Stripe.Checkout.SessionListParams;
       const createdGte = calledWith?.created as { gte: number };
       const expectedMin = Math.floor((beforeCall - 7 * 24 * 60 * 60 * 1000) / 1000);
       const expectedMax = Math.floor((afterCall - 7 * 24 * 60 * 60 * 1000) / 1000);
@@ -124,12 +127,7 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should use custom start date when provided', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList<Stripe.Checkout.Session>([]));
 
       const customDate = new Date('2026-01-15');
       await reconcileStripePayments(customDate);
@@ -146,12 +144,7 @@ describe('reconcileStripePayments', () => {
 
   describe('Matching Logic', () => {
     it('should count matched sessions correctly', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [mockSession({ id: 'cs_test_1' }), mockSession({ id: 'cs_test_2' })],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession({ id: 'cs_test_1' }), mockSession({ id: 'cs_test_2' })]));
 
       // Both sessions exist in database
       vi.mocked(db.select).mockReturnValue({
@@ -170,12 +163,7 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should count missing sessions correctly', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [mockSession({ id: 'cs_test_1' }), mockSession({ id: 'cs_test_2' })],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession({ id: 'cs_test_1' }), mockSession({ id: 'cs_test_2' })]));
 
       // No sessions exist in database
       vi.mocked(db.select).mockReturnValue({
@@ -194,16 +182,11 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should handle mixed matched and missing', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([
           mockSession({ id: 'cs_test_1' }),
           mockSession({ id: 'cs_test_2' }),
           mockSession({ id: 'cs_test_3' }),
-        ],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+        ]));
 
       // First exists, second and third don't
       vi.mocked(db.select)
@@ -238,12 +221,7 @@ describe('reconcileStripePayments', () => {
 
   describe('Auto Processing', () => {
     it('should not process when autoProcess is false', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [mockSession()],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession()]));
 
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
@@ -261,12 +239,7 @@ describe('reconcileStripePayments', () => {
 
     it('should process missing sessions when autoProcess is true', async () => {
       const session = mockSession({ metadata: { userId: 'user_123' } });
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       // Session not in database, then user exists
       vi.mocked(db.select)
@@ -311,12 +284,7 @@ describe('reconcileStripePayments', () => {
         metadata: { userId: 'user_abc' },
       });
 
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -361,12 +329,7 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should update user access after creating purchase', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [mockSession()],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession()]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -409,12 +372,7 @@ describe('reconcileStripePayments', () => {
   describe('User Resolution', () => {
     it('should use userId from metadata when available', async () => {
       const session = mockSession({ metadata: { userId: 'user_from_metadata' } });
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -452,12 +410,7 @@ describe('reconcileStripePayments', () => {
         metadata: {},
         customer_email: 'test@example.com',
       });
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -496,12 +449,7 @@ describe('reconcileStripePayments', () => {
         metadata: {},
         customer_email: 'unknown@example.com',
       });
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -538,12 +486,7 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should handle database errors during processing', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [mockSession()],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession()]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -572,15 +515,10 @@ describe('reconcileStripePayments', () => {
     });
 
     it('should continue processing after individual session errors', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([
           mockSession({ id: 'cs_fail', metadata: {} }),
           mockSession({ id: 'cs_success', metadata: { userId: 'user_123' } }),
-        ],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+        ]));
 
       // First session can't find user, second session succeeds
       vi.mocked(db.select)
@@ -633,16 +571,11 @@ describe('reconcileStripePayments', () => {
 
   describe('Result Summary', () => {
     it('should return correct totals', async () => {
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([
           mockSession({ id: 'cs_1' }),
           mockSession({ id: 'cs_2' }),
           mockSession({ id: 'cs_3' }),
-        ],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+        ]));
 
       // First matched, second and third missing
       vi.mocked(db.select)
@@ -682,12 +615,7 @@ describe('reconcileStripePayments', () => {
         amount_total: 300000,
         metadata: { userId: 'user_xyz' },
       });
-      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-        data: [session],
-        object: 'list',
-        has_more: false,
-        url: '/v1/checkout/sessions',
-      } as Stripe.ApiList<Stripe.Checkout.Session>);
+      vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
       vi.mocked(db.select)
         .mockReturnValueOnce({
@@ -749,12 +677,7 @@ describe('findMissingPurchases', () => {
   });
 
   it('should return empty array when all sessions are matched', async () => {
-    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-      data: [mockSession()],
-      object: 'list',
-      has_more: false,
-      url: '/v1/checkout/sessions',
-    } as Stripe.ApiList<Stripe.Checkout.Session>);
+    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([mockSession()]));
 
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -779,12 +702,7 @@ describe('findMissingPurchases', () => {
       metadata: { userId: 'user_missing' },
     });
 
-    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-      data: [session],
-      object: 'list',
-      has_more: false,
-      url: '/v1/checkout/sessions',
-    } as Stripe.ApiList<Stripe.Checkout.Session>);
+    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([session]));
 
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -809,15 +727,10 @@ describe('findMissingPurchases', () => {
   });
 
   it('should handle multiple missing purchases', async () => {
-    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-      data: [
+    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList([
         mockSession({ id: 'cs_1' }),
         mockSession({ id: 'cs_2' }),
-      ],
-      object: 'list',
-      has_more: false,
-      url: '/v1/checkout/sessions',
-    } as Stripe.ApiList<Stripe.Checkout.Session>);
+      ]));
 
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
@@ -843,12 +756,7 @@ describe('findMissingPurchases', () => {
   });
 
   it('should use custom start date', async () => {
-    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue({
-      data: [],
-      object: 'list',
-      has_more: false,
-      url: '/v1/checkout/sessions',
-    } as Stripe.ApiList<Stripe.Checkout.Session>);
+    vi.mocked(stripe.checkout.sessions.list).mockResolvedValue(mockApiList<Stripe.Checkout.Session>([]));
 
     const customDate = new Date('2026-01-01');
     await findMissingPurchases(customDate);

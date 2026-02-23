@@ -50,7 +50,7 @@ describe('ToolGuidance', () => {
       name: 'Organizational Alignment Assessment',
       shortName: 'Alignment',
       description: 'Score your organization across 5 alignment dimensions',
-      icon: () => null,
+      icon: Object.assign(() => null, { $$typeof: Symbol.for('react.forward_ref') }) as never,
       route: '/tool/alignment',
       storeKey: 'tool1',
       anonymousAccess: false,

@@ -10,18 +10,41 @@ vi.mock('@/auth', () => ({
 // Mock db
 vi.mock('@/lib/db', () => ({
   db: {
-    select: vi.fn().mockReturnThis(),
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    orderBy: vi.fn(),
-    insert: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
-    returning: vi.fn(),
+    select: vi.fn(),
+    insert: vi.fn(),
   },
+}));
+
+// Mock drizzle-orm
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn(),
+  desc: vi.fn(),
+}));
+
+// Mock schema
+vi.mock('@/lib/db/schema', () => ({
+  diagnosticSessions: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    status: 'status',
+    updatedAt: 'updatedAt',
+  },
+}));
+
+// Mock session types
+vi.mock('@/types/session.types', () => ({
+  toSessionSummary: vi.fn((session) => session),
 }));
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
+
+// Type assertion for mocked db
+const mockDb = db as unknown as {
+  select: ReturnType<typeof vi.fn>;
+  insert: ReturnType<typeof vi.fn>;
+};
 
 describe('/api/sessions', () => {
   beforeEach(() => {
@@ -41,7 +64,7 @@ describe('/api/sessions', () => {
 
   describe('GET /api/sessions', () => {
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const response = await GET();
       const data = await response.json();
@@ -65,7 +88,13 @@ describe('/api/sessions', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.orderBy).mockResolvedValue([mockSession] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([mockSession]),
+          }),
+        }),
+      });
 
       const response = await GET();
       const data = await response.json();
@@ -80,7 +109,13 @@ describe('/api/sessions', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.orderBy).mockResolvedValue([] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
 
       const response = await GET();
       const data = await response.json();
@@ -94,7 +129,13 @@ describe('/api/sessions', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.orderBy).mockRejectedValue(new Error('DB error'));
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockRejectedValue(new Error('DB error')),
+          }),
+        }),
+      });
 
       const response = await GET();
       const data = await response.json();
@@ -115,7 +156,7 @@ describe('/api/sessions', () => {
     };
 
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const request = createRequest({});
       const response = await POST(request);
@@ -131,16 +172,20 @@ describe('/api/sessions', () => {
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
       // Mock select for session count
-      vi.mocked(db.where).mockResolvedValue([mockSession] as never);
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([mockSession]),
+        }),
+      });
       // Mock insert
-      vi.mocked(db.insert).mockReturnValue({
+      mockDb.insert.mockReturnValue({
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([{
             ...mockSession,
             name: 'Diagnostic Session 2',
           }]),
         }),
-      } as never);
+      });
 
       const request = createRequest({});
       const response = await POST(request);
@@ -155,15 +200,19 @@ describe('/api/sessions', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockResolvedValue([] as never);
-      vi.mocked(db.insert).mockReturnValue({
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([]),
+        }),
+      });
+      mockDb.insert.mockReturnValue({
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([{
             ...mockSession,
             name: 'My Custom Session',
           }]),
         }),
-      } as never);
+      });
 
       const request = createRequest({ name: 'My Custom Session' });
       const response = await POST(request);
@@ -178,7 +227,11 @@ describe('/api/sessions', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'user-123', email: 'test@example.com' },
       } as never);
-      vi.mocked(db.where).mockRejectedValue(new Error('DB error'));
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockRejectedValue(new Error('DB error')),
+        }),
+      });
 
       const request = createRequest({});
       const response = await POST(request);

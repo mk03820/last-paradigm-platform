@@ -198,10 +198,10 @@ describe('DecisionVelocityResultCard (Tool 3)', () => {
 describe('StakeholderMapResultCard (Tool 4)', () => {
   const mockData = {
     stakeholders: [
-      { name: 'CEO', power: 9, interest: 8, sentiment: 'champion' },
-      { name: 'CFO', power: 8, interest: 5, sentiment: 'neutral' },
-      { name: 'CTO', power: 7, interest: 9, sentiment: 'champion' },
-      { name: 'Manager', power: 4, interest: 3, sentiment: 'blocker' },
+      { name: 'CEO', power: 9, interest: 8, sentiment: 'champion' as const },
+      { name: 'CFO', power: 8, interest: 5, sentiment: 'neutral' as const },
+      { name: 'CTO', power: 7, interest: 9, sentiment: 'champion' as const },
+      { name: 'Manager', power: 4, interest: 3, sentiment: 'blocker' as const },
     ],
     completedAt: '2026-02-14T10:00:00Z',
   };

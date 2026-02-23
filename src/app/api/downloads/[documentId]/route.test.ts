@@ -53,7 +53,7 @@ describe('GET /api/downloads/[documentId]', () => {
 
   describe('Authentication', () => {
     it('should return 401 when not authenticated', async () => {
-      vi.mocked(auth).mockResolvedValue(null);
+      vi.mocked(auth).mockResolvedValue(null as never);
 
       const request = createRequest();
       const response = await GET(request, {

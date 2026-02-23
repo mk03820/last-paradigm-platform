@@ -441,6 +441,9 @@ describe('Phase 3 Schema: invoice_requests table', () => {
       contactEmail: 'billing@acme.com',
       status: 'pending',
       adminNotes: null,
+      invoiceNumber: null,
+      cancellationReason: null,
+      processedBy: null,
       createdAt: new Date(),
       processedAt: null,
     };
@@ -563,6 +566,8 @@ describe('Phase 3 Schema: webhook_logs table', () => {
       status: 'processed',
       attempts: 1,
       errorMessage: null,
+      acknowledgedAt: null,
+      acknowledgedBy: null,
       createdAt: new Date(),
       processedAt: new Date(),
     };

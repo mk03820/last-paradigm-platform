@@ -63,7 +63,16 @@ vi.mock('../client', () => ({
   },
 }));
 
-import { registrationAbandonmentCheck } from './registration-abandonment';
+import { registrationAbandonmentCheck as _registrationAbandonmentCheck } from './registration-abandonment';
+
+// Type for the mocked Inngest function
+interface MockedInngestFunction {
+  config: { id: string; name: string; retries: number };
+  trigger: { event: string };
+  handler: (ctx: { event: unknown; step: unknown }) => Promise<{ success: boolean; action: string; reason?: string; email?: string; emailId?: string; error?: string }>;
+}
+
+const registrationAbandonmentCheck = _registrationAbandonmentCheck as unknown as MockedInngestFunction;
 
 describe('Registration Abandonment Check Function', () => {
   beforeEach(() => {
