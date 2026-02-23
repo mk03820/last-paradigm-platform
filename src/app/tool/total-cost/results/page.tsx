@@ -28,6 +28,7 @@ import {
   CostSourceBreakdown,
   CostCategoryMiniChart,
   calculateTotalAlignmentTax,
+  DiagnosticPDFExport,
 } from '@/components/tools/total-cost';
 import type { AggregatedToolData, AdditionalCosts } from '@/components/tools/total-cost/cost-constants';
 
@@ -268,9 +269,13 @@ export default function TotalCostResultsPage() {
             </div>
           )}
 
-          {/* Save Results - Story 15.8 */}
-          <div className="flex justify-center pt-4">
+          {/* Save Results & Export - Story 15.8, C7 Fix */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <SaveResultsButton variant="default" size="lg" />
+            <DiagnosticPDFExport
+              result={result}
+              aggregatedData={aggregatedData}
+            />
           </div>
 
           {/* Actions */}
