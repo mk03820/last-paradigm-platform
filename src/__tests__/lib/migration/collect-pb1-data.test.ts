@@ -332,7 +332,7 @@ describe('collect-pb1-data', () => {
         email: { avgResponseTimeHours: 4, avgCcCount: 3 },
         chat: { afterHoursPercent: 15 },
         meetings: { infoCascadeMeetingsPerWeek: 3 },
-        analysisResults: { patterns: [{ name: 'info-hoarding', severity: 'high' }] },
+        analysisResults: { results: [{ pattern: 'info-hoarding', severity: 'high' }] },
         completion: { completedAt: '2024-01-15T10:00:00Z' },
         sessionId: null,
         isDirty: false,
