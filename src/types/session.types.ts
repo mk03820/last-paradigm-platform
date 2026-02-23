@@ -22,6 +22,8 @@ export interface SessionSummary {
   // Computed fields for display
   progressPercent: number;
   lastToolCompleted: string | null;
+  /** Smart routing: next tool to resume at (C3-S9) */
+  nextToolRoute: string;
 }
 
 /**
@@ -116,5 +118,37 @@ export function toSessionSummary(session: DiagnosticSession): SessionSummary {
     updatedAt: session.updatedAt,
     progressPercent: Math.round((session.toolsCompleted / 7) * 100),
     lastToolCompleted: getLastToolCompleted(session.data),
+    nextToolRoute: getNextToolRoute(session.data),
   };
+}
+
+/**
+ * Get the route to the next incomplete tool (C3-S9)
+ */
+function getNextToolRoute(data: DiagnosticSessionData | null): string {
+  if (!data) return '/tool/meeting-audit';
+
+  // Tool routes in order
+  const TOOL_ROUTES: Record<number, string> = {
+    1: '/tool/alignment',
+    2: '/tool/meeting-audit',
+    3: '/tool/decision-velocity',
+    4: '/tool/stakeholder-map',
+    5: '/tool/data-flow',
+    6: '/tool/communication',
+    7: '/tool/total-cost',
+  };
+
+  // Find first incomplete tool
+  for (let i = 1; i <= 7; i++) {
+    const toolKey = `tool${i}` as keyof DiagnosticSessionData;
+    const toolData = data[toolKey];
+
+    if (!toolData || !('completedAt' in toolData) || !toolData.completedAt) {
+      return TOOL_ROUTES[i];
+    }
+  }
+
+  // All complete, go to results
+  return '/tool/total-cost/results';
 }

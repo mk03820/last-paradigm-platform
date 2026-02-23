@@ -5,6 +5,7 @@
  *
  * Displays a diagnostic session summary with progress and actions.
  * Covers: AC1, AC2 (Display sessions with metadata)
+ * C3-S9: Smart routing to resume at appropriate tool
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,7 @@ import type { SessionSummary } from '@/types/session.types';
 
 interface SessionCardProps {
   session: SessionSummary;
-  onContinue: (sessionId: string) => void;
+  onContinue: (sessionId: string, nextToolRoute: string) => void;
   onDelete: (sessionId: string) => void;
 }
 
@@ -81,7 +82,7 @@ export function SessionCard({ session, onContinue, onDelete }: SessionCardProps)
             Delete
           </Button>
           <Button
-            onClick={() => onContinue(session.id)}
+            onClick={() => onContinue(session.id, session.nextToolRoute)}
             className="gap-1"
           >
             {isCompleted ? 'View Results' : 'Continue'}

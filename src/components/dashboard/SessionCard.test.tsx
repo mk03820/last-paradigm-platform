@@ -13,6 +13,7 @@ describe('SessionCard', () => {
     lastToolCompleted: 'Meeting Audit Calculator',
     createdAt: new Date(),
     updatedAt: new Date(),
+    nextToolRoute: '/tool/stakeholder-map',
   };
 
   const mockOnContinue = vi.fn();
@@ -107,7 +108,7 @@ describe('SessionCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }));
 
-    expect(mockOnContinue).toHaveBeenCalledWith('session-123');
+    expect(mockOnContinue).toHaveBeenCalledWith('session-123', '/tool/stakeholder-map');
   });
 
   it('calls onDelete when Delete button clicked', async () => {

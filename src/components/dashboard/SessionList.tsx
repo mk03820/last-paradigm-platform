@@ -5,6 +5,7 @@
  *
  * Displays a list of diagnostic sessions with loading and empty states.
  * Covers: AC1 (List of saved sessions)
+ * C3-S9: Smart routing to resume at appropriate tool
  */
 
 import { useState, useEffect } from 'react';
@@ -52,10 +53,9 @@ export function SessionList({ initialSessions }: SessionListProps) {
     }
   }
 
-  function handleContinue(sessionId: string) {
-    // Route to the diagnostic hub with session ID
-    // TODO: C3-S9 will add smart routing to resume at the appropriate tool
-    router.push(`/diagnostic?session=${sessionId}`);
+  function handleContinue(sessionId: string, nextToolRoute: string) {
+    // Smart routing: navigate directly to the next incomplete tool
+    router.push(`${nextToolRoute}?session=${sessionId}`);
   }
 
   function handleDeleteClick(sessionId: string) {

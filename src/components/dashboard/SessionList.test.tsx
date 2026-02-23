@@ -22,6 +22,7 @@ describe('SessionList', () => {
       lastToolCompleted: 'Meeting Audit',
       createdAt: new Date(),
       updatedAt: new Date(),
+      nextToolRoute: '/tool/stakeholder-map',
     },
     {
       id: 'session-2',
@@ -32,6 +33,7 @@ describe('SessionList', () => {
       lastToolCompleted: 'Total Cost Calculator',
       createdAt: new Date(),
       updatedAt: new Date(),
+      nextToolRoute: '/tool/total-cost/results',
     },
   ];
 
@@ -99,7 +101,7 @@ describe('SessionList', () => {
     const continueButtons = screen.getAllByRole('button', { name: /continue/i });
     fireEvent.click(continueButtons[0]);
 
-    expect(mockPush).toHaveBeenCalledWith('/diagnostic?session=session-1');
+    expect(mockPush).toHaveBeenCalledWith('/tool/stakeholder-map?session=session-1');
   });
 
   it('has delete button for each session', () => {

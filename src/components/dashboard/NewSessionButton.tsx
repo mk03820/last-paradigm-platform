@@ -5,6 +5,7 @@
  *
  * Creates a new diagnostic session and redirects to begin.
  * Covers: AC4 (Start new diagnostic)
+ * C3-S9: Smart routing to start at Tool 1
  */
 
 import { useState } from 'react';
@@ -33,9 +34,8 @@ export function NewSessionButton() {
       const data = await res.json();
 
       if (data.success) {
-        // Redirect to diagnostic hub with new session
-        // TODO: C3-S9 will add smart routing to start at Tool 1
-        router.push(`/diagnostic?session=${data.data.session.id}`);
+        // Smart routing: start new session at Tool 1 (Alignment Assessment)
+        router.push(`/tool/alignment?session=${data.data.session.id}`);
       } else {
         setError(data.error?.message || 'Failed to create session');
       }
