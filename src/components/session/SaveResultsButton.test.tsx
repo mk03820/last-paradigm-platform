@@ -36,11 +36,11 @@ vi.mock('@/lib/store/tool1-store', () => ({
 vi.mock('@/lib/store/tool3-store', () => ({
   useTool3Store: Object.assign(
     (selector?: (state: unknown) => unknown) => {
-      const state = { decisions: [], metrics: null, completion: null };
+      const state = { archetypes: {}, completion: null };
       return selector ? selector(state) : state;
     },
     {
-      getState: () => ({ decisions: [], metrics: null, completion: null }),
+      getState: () => ({ archetypes: {}, completion: null }),
     }
   ),
 }));
@@ -72,11 +72,11 @@ vi.mock('@/lib/store/tool5-store', () => ({
 vi.mock('@/lib/store/tool6-store', () => ({
   useTool6Store: Object.assign(
     (selector?: (state: unknown) => unknown) => {
-      const state = { metrics: null, antiPatterns: [], completion: null };
+      const state = { email: null, chat: null, meetings: null, antiPatterns: [], completion: null };
       return selector ? selector(state) : state;
     },
     {
-      getState: () => ({ metrics: null, antiPatterns: [], completion: null }),
+      getState: () => ({ email: null, chat: null, meetings: null, antiPatterns: [], completion: null }),
     }
   ),
 }));

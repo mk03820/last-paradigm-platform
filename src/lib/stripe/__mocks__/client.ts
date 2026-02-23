@@ -108,6 +108,6 @@ export function mockStripeError(
   errorType: 'card_declined' | 'api_error' | 'invalid_request'
 ): void {
   const error = new Error(`Stripe ${errorType}`);
-  (error as { type: string }).type = errorType;
+  (error as unknown as { type: string }).type = errorType;
   stripe.checkout.sessions[method].mockRejectedValueOnce(error);
 }
