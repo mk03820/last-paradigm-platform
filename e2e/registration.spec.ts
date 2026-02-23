@@ -217,7 +217,7 @@ test.describe('Registration Flow', () => {
   test.describe('Form UX', () => {
     test('should have proper input heights (48px)', async ({ page }) => {
       const emailInput = page.locator('[id="email"]');
-      const height = await emailInput.evaluate((el) => el.offsetHeight);
+      const height = await emailInput.evaluate((el) => (el as HTMLElement).offsetHeight);
 
       expect(height).toBeGreaterThanOrEqual(48);
     });
