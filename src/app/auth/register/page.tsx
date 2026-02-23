@@ -7,6 +7,7 @@
  * Follows Executive Clarity design system.
  *
  * Covers: Story 15.2 Task 5, FR38 (Account creation)
+ * C4 Fix: Integrates PB1 migration on registration success
  */
 
 import { Suspense } from 'react';
@@ -14,17 +15,32 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { RegisterForm } from '@/components/auth/RegisterForm';
+import { usePB1Migration } from '@/lib/migration';
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
-  const handleSuccess = () => {
-    // Redirect after a brief delay to show success state
-    setTimeout(() => {
-      router.push(callbackUrl);
-    }, 1500);
+  // PB1 Migration hook - migrates session data to DB after registration
+  const { migrate, checkHasData } = usePB1Migration({
+    redirectTo: '/preview',
+    skipRedirect: false,
+  });
+
+  const handleSuccess = async (data: { accessToken: string }) => {
+    // Check if user has PB1 data in session to migrate
+    const hasPB1Data = checkHasData();
+
+    if (hasPB1Data && data.accessToken) {
+      // Migrate PB1 data to database - hook handles redirect to /preview
+      await migrate(data.accessToken);
+    } else {
+      // No PB1 data to migrate, redirect after brief delay
+      setTimeout(() => {
+        router.push(callbackUrl);
+      }, 1500);
+    }
   };
 
   return (
