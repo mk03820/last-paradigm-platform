@@ -53,9 +53,9 @@ export function SessionList({ initialSessions }: SessionListProps) {
   }
 
   function handleContinue(sessionId: string) {
-    // For now, route to the calculator with the session ID
-    // In future, this will route to the appropriate tool based on progress
-    router.push(`/calculator?session=${sessionId}`);
+    // Route to the diagnostic hub with session ID
+    // TODO: C3-S9 will add smart routing to resume at the appropriate tool
+    router.push(`/diagnostic?session=${sessionId}`);
   }
 
   function handleDeleteClick(sessionId: string) {

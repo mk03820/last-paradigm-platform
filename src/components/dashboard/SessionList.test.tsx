@@ -93,13 +93,13 @@ describe('SessionList', () => {
     expect(screen.getByText('Try again')).toBeInTheDocument();
   });
 
-  it('navigates to calculator when Continue is clicked', async () => {
+  it('navigates to diagnostic hub when Continue is clicked', async () => {
     render(<SessionList initialSessions={mockSessions} />);
 
     const continueButtons = screen.getAllByRole('button', { name: /continue/i });
     fireEvent.click(continueButtons[0]);
 
-    expect(mockPush).toHaveBeenCalledWith('/calculator?session=session-1');
+    expect(mockPush).toHaveBeenCalledWith('/diagnostic?session=session-1');
   });
 
   it('has delete button for each session', () => {

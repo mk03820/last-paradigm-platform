@@ -33,8 +33,9 @@ export function NewSessionButton() {
       const data = await res.json();
 
       if (data.success) {
-        // Redirect to calculator with new session
-        router.push(`/calculator?session=${data.data.session.id}`);
+        // Redirect to diagnostic hub with new session
+        // TODO: C3-S9 will add smart routing to start at Tool 1
+        router.push(`/diagnostic?session=${data.data.session.id}`);
       } else {
         setError(data.error?.message || 'Failed to create session');
       }

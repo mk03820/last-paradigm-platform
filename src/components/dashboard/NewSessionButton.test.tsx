@@ -69,7 +69,7 @@ describe('NewSessionButton', () => {
     });
   });
 
-  it('navigates to calculator on successful creation', async () => {
+  it('navigates to diagnostic hub on successful creation', async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -87,7 +87,7 @@ describe('NewSessionButton', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/calculator?session=new-session-123');
+      expect(mockPush).toHaveBeenCalledWith('/diagnostic?session=new-session-123');
     });
   });
 
