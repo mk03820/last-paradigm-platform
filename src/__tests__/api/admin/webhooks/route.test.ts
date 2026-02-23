@@ -81,7 +81,7 @@ describe('GET /api/admin/webhooks', () => {
   ];
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     process.env.ADMIN_EMAILS = 'admin@example.com,admin2@example.com';
   });
 
@@ -133,14 +133,18 @@ describe('GET /api/admin/webhooks', () => {
         user: { id: 'user_123', email: 'admin@example.com' },
       } as never);
 
+      // Mock handles both the main query (from → orderBy → limit → offset)
+      // and the count query (from → where or just from, returns array)
       vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
+        from: vi.fn().mockImplementation(() => ({
           orderBy: vi.fn().mockReturnValue({
             limit: vi.fn().mockReturnValue({
               offset: vi.fn().mockResolvedValue([]),
             }),
           }),
-        }),
+          where: vi.fn().mockResolvedValue([{ count: 0 }]),
+          then: (resolve: (value: { count: number }[]) => void) => resolve([{ count: 0 }]),
+        })),
       } as never);
 
       const request = createRequest();
@@ -155,13 +159,15 @@ describe('GET /api/admin/webhooks', () => {
       } as never);
 
       vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
+        from: vi.fn().mockImplementation(() => ({
           orderBy: vi.fn().mockReturnValue({
             limit: vi.fn().mockReturnValue({
               offset: vi.fn().mockResolvedValue([]),
             }),
           }),
-        }),
+          where: vi.fn().mockResolvedValue([{ count: 0 }]),
+          then: (resolve: (value: { count: number }[]) => void) => resolve([{ count: 0 }]),
+        })),
       } as never);
 
       const request = createRequest();
@@ -179,21 +185,31 @@ describe('GET /api/admin/webhooks', () => {
     });
 
     it('should return webhook events with correct structure', async () => {
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: vi.fn().mockResolvedValue(mockWebhookEvents),
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(mockWebhookEvents),
+              }),
             }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: mockWebhookEvents.length }]),
+        } as never);
 
       const request = createRequest();
       const response = await GET(request);
       const data = await response.json();
 
-      expect(data.events).toEqual(mockWebhookEvents);
+      // JSON serialization converts Date objects to ISO strings
+      const expectedEvents = mockWebhookEvents.map((event) => ({
+        ...event,
+        createdAt: event.createdAt.toISOString(),
+        processedAt: event.processedAt ? event.processedAt.toISOString() : null,
+      }));
+      expect(data.events).toEqual(expectedEvents);
       expect(data.events[0]).toHaveProperty('id');
       expect(data.events[0]).toHaveProperty('source');
       expect(data.events[0]).toHaveProperty('eventType');
@@ -260,25 +276,26 @@ describe('GET /api/admin/webhooks', () => {
     });
 
     it('should filter by status when provided', async () => {
-      const whereMock = vi.fn().mockReturnValue({
-        orderBy: vi.fn().mockReturnValue({
-          limit: vi.fn().mockReturnValue({
-            offset: vi.fn().mockResolvedValue([mockWebhookEvents[1]]),
-          }),
-        }),
-      });
-
-      vi.mocked(db.select).mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: vi.fn().mockResolvedValue([mockWebhookEvents[1]]),
-              where: whereMock,
+      // When status is provided, the main query chain is:
+      // db.select().from().orderBy().limit().offset() -> returns query
+      // then query.where() is called and awaited
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockReturnValue({
+                  where: vi.fn().mockResolvedValue([mockWebhookEvents[1]]),
+                }),
+              }),
             }),
           }),
-          where: whereMock,
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 1 }]),
+          }),
+        } as never);
 
       const request = createRequest({ status: 'failed' });
       const response = await GET(request);
@@ -289,15 +306,19 @@ describe('GET /api/admin/webhooks', () => {
     });
 
     it('should return all events when status is not provided', async () => {
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: vi.fn().mockResolvedValue(mockWebhookEvents),
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(mockWebhookEvents),
+              }),
             }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 2 }]),
+        } as never);
 
       const request = createRequest();
       const response = await GET(request);
@@ -319,13 +340,17 @@ describe('GET /api/admin/webhooks', () => {
         offset: vi.fn().mockResolvedValue([]),
       });
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: limitMock,
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: limitMock,
+            }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest();
       const response = await GET(request);
@@ -340,13 +365,17 @@ describe('GET /api/admin/webhooks', () => {
         offset: vi.fn().mockResolvedValue([]),
       });
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: limitMock,
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: limitMock,
+            }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest({ limit: '25' });
       const response = await GET(request);
@@ -361,13 +390,17 @@ describe('GET /api/admin/webhooks', () => {
         offset: vi.fn().mockResolvedValue([]),
       });
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: limitMock,
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: limitMock,
+            }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest({ limit: '500' });
       const response = await GET(request);
@@ -380,15 +413,19 @@ describe('GET /api/admin/webhooks', () => {
     it('should use default offset of 0', async () => {
       const offsetMock = vi.fn().mockResolvedValue([]);
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: offsetMock,
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: offsetMock,
+              }),
             }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest();
       const response = await GET(request);
@@ -401,15 +438,19 @@ describe('GET /api/admin/webhooks', () => {
     it('should use provided offset', async () => {
       const offsetMock = vi.fn().mockResolvedValue([]);
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: offsetMock,
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: offsetMock,
+              }),
             }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest({ offset: '50' });
       const response = await GET(request);
@@ -434,11 +475,15 @@ describe('GET /api/admin/webhooks', () => {
         }),
       });
 
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: orderByMock,
-        }),
-      } as never);
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: orderByMock,
+          }),
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest();
       await GET(request);
@@ -455,15 +500,19 @@ describe('GET /api/admin/webhooks', () => {
     });
 
     it('should return 500 on database error', async () => {
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              offset: vi.fn().mockRejectedValue(new Error('Database error')),
+      vi.mocked(db.select)
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockRejectedValue(new Error('Database error')),
+              }),
             }),
           }),
-        }),
-      } as never);
+        } as never)
+        .mockReturnValueOnce({
+          from: vi.fn().mockResolvedValue([{ count: 0 }]),
+        } as never);
 
       const request = createRequest();
       const response = await GET(request);

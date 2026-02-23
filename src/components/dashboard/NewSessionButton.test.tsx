@@ -69,7 +69,7 @@ describe('NewSessionButton', () => {
     });
   });
 
-  it('navigates to diagnostic hub on successful creation', async () => {
+  it('navigates to Tool 1 (Alignment) on successful creation', async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -87,7 +87,8 @@ describe('NewSessionButton', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/diagnostic?session=new-session-123');
+      // C3-S9: Smart routing starts new sessions at Tool 1
+      expect(mockPush).toHaveBeenCalledWith('/tool/alignment?session=new-session-123');
     });
   });
 
