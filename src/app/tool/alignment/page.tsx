@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout';
 import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
 import { AlignmentScorer } from '@/components/tools/alignment';
+import { Tool1SessionLoader } from '@/components/tools/alignment/Tool1SessionLoader';
 
 /**
  * Tool 1: Organizational Alignment Assessment Page
@@ -11,6 +13,7 @@ import { AlignmentScorer } from '@/components/tools/alignment';
  * Story 9.1: Alignment Dimension Scoring Interface
  * Story 8.6: Progress Stepper Navigation
  * Story 8.7: Guided Diagnostic Flow
+ * C3-S3: Session persistence integration
  * Covers: FR2-6 (Score 5 alignment dimensions), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function AlignmentAssessmentPage() {
@@ -37,6 +40,11 @@ export default function AlignmentAssessmentPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="alignment" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool1SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">
