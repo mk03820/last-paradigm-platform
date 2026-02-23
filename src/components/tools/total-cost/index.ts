@@ -313,3 +313,6 @@ export type {
   DiagnosticPDFDocumentProps,
   DiagnosticPDFExportProps,
 } from './pdf';
+
+// C3-S8: Session Persistence
+export { Tool7SessionLoader } from './Tool7SessionLoader';

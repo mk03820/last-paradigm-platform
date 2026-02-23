@@ -4,12 +4,14 @@
  * Entry point for entering communication metrics across email, chat, and meetings.
  *
  * Story 13.1: Communication Metrics Input
+ * C3-S7: Session persistence integration
  * Task 7: Create Tool 6 main page (AC: all)
  */
 
 'use client';
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
@@ -21,6 +23,7 @@ import {
   ChatMetricsForm,
   MeetingMetricsForm,
   MetricsSection,
+  Tool6SessionLoader,
   getSectionStatus,
 } from '@/components/tools/communication';
 import {
@@ -97,6 +100,11 @@ export default function CommunicationPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="communication" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool6SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">

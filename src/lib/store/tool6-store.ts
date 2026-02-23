@@ -19,6 +19,7 @@ import {
 } from '@/components/tools/communication/comm-constants';
 import { analyzePatterns } from '@/components/tools/communication/detection-engine';
 import { useCalculatorStore } from './calculator-store';
+import type { SessionSyncStore } from '@/components/session';
 
 /**
  * Tool 6 Communication Pattern Diagnostic Store
@@ -27,6 +28,7 @@ import { useCalculatorStore } from './calculator-store';
  * Uses sessionStorage for persistence (clears on tab close).
  *
  * Story 13.1: Communication Metrics Input
+ * C3-S7: Server sync for session persistence
  * Covers: FR2-26 (Input communication pattern metrics)
  */
 
@@ -37,7 +39,7 @@ export interface Tool6CompletionData {
   meetingsComplete: boolean;
 }
 
-export interface Tool6State {
+export interface Tool6State extends SessionSyncStore {
   // Metrics data
   email: EmailMetrics | null;
   chat: ChatMetrics | null;
@@ -52,6 +54,9 @@ export interface Tool6State {
   // Track if data needs server sync
   isDirty: boolean;
 
+  // Track if currently syncing to server
+  isSyncing: boolean;
+
   // Completion tracking
   completion: Tool6CompletionData | null;
 
@@ -65,6 +70,10 @@ export interface Tool6State {
 
   // Session
   setSessionId: (id: string | null) => void;
+
+  // Session sync methods (implements SessionSyncStore)
+  syncToServer: () => Promise<void>;
+  loadFromServer: (sessionId: string) => Promise<boolean>;
 
   // Completion
   markComplete: () => void;
@@ -97,6 +106,7 @@ export const useTool6Store = create<Tool6State>()(
       analysisResults: null,
       sessionId: null,
       isDirty: false,
+      isSyncing: false,
       completion: null,
 
       // Set full email metrics
@@ -106,6 +116,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Set full chat metrics
@@ -115,6 +130,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Set full meeting metrics
@@ -124,6 +144,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Update individual email field
@@ -135,6 +160,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Update individual chat field
@@ -146,6 +176,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Update individual meeting field
@@ -157,6 +192,11 @@ export const useTool6Store = create<Tool6State>()(
           isDirty: true,
           completion: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Set server session ID
@@ -176,6 +216,105 @@ export const useTool6Store = create<Tool6State>()(
           },
           isDirty: true,
         });
+        // Auto-sync completion to server
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+      },
+
+      /**
+       * Sync current state to server session
+       */
+      syncToServer: async () => {
+        const state = get();
+        if (!state.sessionId || state.isSyncing) return;
+
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${state.sessionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                tool6: {
+                  metrics: {
+                    email: state.email,
+                    chat: state.chat,
+                    meetings: state.meetings,
+                  },
+                  antiPatterns: state.analysisResults?.results || [],
+                  healthScore: state.analysisResults?.overallHealth || 'healthy',
+                  completedAt: state.completion?.completedAt,
+                },
+              },
+            }),
+          });
+
+          if (response.ok) {
+            set({ isDirty: false });
+          }
+        } catch (error) {
+          console.error('[tool6-store] Failed to sync to server:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+
+      /**
+       * Load session data from server
+       */
+      loadFromServer: async (sessionId: string) => {
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${sessionId}`);
+          const data = await response.json();
+
+          if (data.success && data.data?.session) {
+            const session = data.data.session;
+            const tool6Data = session.data?.tool6;
+
+            if (tool6Data) {
+              set({
+                sessionId,
+                email: tool6Data.metrics?.email || null,
+                chat: tool6Data.metrics?.chat || null,
+                meetings: tool6Data.metrics?.meetings || null,
+                analysisResults: tool6Data.antiPatterns
+                  ? {
+                      results: tool6Data.antiPatterns,
+                      detectedCount: tool6Data.antiPatterns?.length || 0,
+                      overallHealth: tool6Data.healthScore || 'healthy',
+                      analyzedAt: tool6Data.completedAt || new Date().toISOString(),
+                    }
+                  : null,
+                completion: tool6Data.completedAt
+                  ? {
+                      completedAt: tool6Data.completedAt,
+                      emailComplete: isEmailMetricsComplete(tool6Data.metrics?.email),
+                      chatComplete: isChatMetricsComplete(tool6Data.metrics?.chat),
+                      meetingsComplete: isMeetingMetricsComplete(tool6Data.metrics?.meetings),
+                    }
+                  : null,
+                isDirty: false,
+              });
+              return true;
+            }
+
+            // Session exists but no tool6 data
+            set({ sessionId, isDirty: false });
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error('[tool6-store] Failed to load from server:', error);
+          return false;
+        } finally {
+          set({ isSyncing: false });
+        }
       },
 
       // Reset all Tool 6 data
@@ -186,6 +325,7 @@ export const useTool6Store = create<Tool6State>()(
           meetings: null,
           analysisResults: null,
           isDirty: false,
+          isSyncing: false,
           completion: null,
         });
       },
@@ -280,6 +420,12 @@ export const useTool6Store = create<Tool6State>()(
           analysisResults: results,
           isDirty: true,
         });
+
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
 
         return results;
       },

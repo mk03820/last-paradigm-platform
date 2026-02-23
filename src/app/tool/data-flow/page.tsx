@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
@@ -15,6 +16,7 @@ import {
 import {
   JourneyList,
   JourneyForm,
+  Tool5SessionLoader,
   canProceedToFriction,
   STAGE_TYPES,
   generateStageId,
@@ -27,6 +29,7 @@ import { useTool5Store } from '@/lib/store/tool5-store';
  * Entry point for mapping data journeys before identifying friction points.
  *
  * Story 12.1: Data Journey Mapping Interface
+ * C3-S6: Session persistence integration
  * Covers: FR2-21 (Map data journeys with friction points)
  */
 export default function DataFlowPage() {
@@ -114,6 +117,11 @@ export default function DataFlowPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="data-flow" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool5SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">

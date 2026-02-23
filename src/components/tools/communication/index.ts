@@ -29,6 +29,9 @@ export { InterventionCard, InterventionListItem } from './InterventionCard';
 export { PrioritizedActionList } from './PrioritizedActionList';
 export { Tool6Summary, Tool6CompleteBadge } from './Tool6Summary';
 
+// C3-S7: Session Persistence
+export { Tool6SessionLoader } from './Tool6SessionLoader';
+
 // Story 13.2 Detection Engine
 export {
   detectBroadcastOverload,

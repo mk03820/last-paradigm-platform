@@ -31,3 +31,6 @@ export { CategoryChart } from './CategoryChart';
 export { FrictionInterpretation } from './FrictionInterpretation';
 export { CriticalFriction } from './CriticalFriction';
 export { ResultsSummary } from './ResultsSummary';
+
+// C3-S6: Session Persistence
+export { Tool5SessionLoader } from './Tool5SessionLoader';

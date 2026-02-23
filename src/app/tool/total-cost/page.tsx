@@ -5,12 +5,14 @@
  * by aggregating data from all 6 diagnostic tools.
  *
  * Story 14.1: Cross-Tool Data Aggregation
+ * C3-S8: Session persistence integration
  * Task 5: Create Tool 7 main page (AC: all)
  */
 
 'use client';
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
@@ -19,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ToolCompletionStatus } from '@/components/tools/total-cost/ToolCompletionStatus';
 import { AggregatedDataPreview } from '@/components/tools/total-cost/AggregatedDataPreview';
+import { Tool7SessionLoader } from '@/components/tools/total-cost';
 import { aggregateAllTools } from '@/components/tools/total-cost/aggregation-engine';
 import { useTool7Store } from '@/lib/store/tool7-store';
 import { useCalculatorStore } from '@/lib/store/calculator-store';
@@ -109,6 +112,11 @@ export default function TotalCostPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="total-cost" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool7SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">

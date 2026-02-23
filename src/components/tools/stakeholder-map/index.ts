@@ -32,3 +32,6 @@ export { QuadrantStrategy } from './QuadrantStrategy';
 export type { QuadrantStrategyProps } from './QuadrantStrategy';
 export { EngagementActionTable } from './EngagementActionTable';
 export type { EngagementActionTableProps } from './EngagementActionTable';
+
+// C3-S5: Session Persistence
+export { Tool4SessionLoader } from './Tool4SessionLoader';

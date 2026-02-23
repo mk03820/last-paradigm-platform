@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout';
 import { ProgressStepper, ToolGuidance } from '@/components/diagnostic';
-import { StakeholderInput } from '@/components/tools/stakeholder-map';
+import { StakeholderInput, Tool4SessionLoader } from '@/components/tools/stakeholder-map';
 
 /**
  * Tool 4: Stakeholder Power/Interest Mapping Page
@@ -15,6 +16,7 @@ import { StakeholderInput } from '@/components/tools/stakeholder-map';
  * Story 11.1: Stakeholder Input Interface
  * Story 8.6: Progress Stepper Navigation
  * Story 8.7: Guided Diagnostic Flow
+ * C3-S5: Session persistence integration
  * Covers: FR2-16 (Add stakeholders with power and interest scores), FR2-38 (Progress stepper), FR2-40 (Contextual guidance)
  */
 export default function StakeholderMapPage() {
@@ -47,6 +49,11 @@ export default function StakeholderMapPage() {
 
           {/* Tool Guidance */}
           <ToolGuidance toolId="stakeholder-map" className="mb-6" />
+
+          {/* Session Loader for authenticated users */}
+          <Suspense fallback={null}>
+            <Tool4SessionLoader />
+          </Suspense>
 
           {/* Page Header */}
           <header className="mb-8">

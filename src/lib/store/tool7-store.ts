@@ -19,6 +19,7 @@ import {
   calculateOpportunityCostTotal,
   calculateTotalAdditionalCostsInput,
 } from '@/components/tools/total-cost/cost-constants';
+import type { SessionSyncStore } from '@/components/session';
 
 /**
  * Tool 7 Total Cost of Misalignment Store
@@ -27,6 +28,7 @@ import {
  * Uses sessionStorage for persistence (clears on tab close).
  *
  * Story 14.1: Cross-Tool Data Aggregation
+ * C3-S8: Server sync for session persistence
  * Covers: FR2-31 (Cross-tool aggregation)
  *
  * NOTE: This store is designed to be extended by Stories 14.2 and 14.3
@@ -74,7 +76,7 @@ export interface Tool7CompletionData {
 // Main Store State Interface
 // ============================================================================
 
-export interface Tool7State {
+export interface Tool7State extends SessionSyncStore {
   // Aggregated data from Tools 1-6
   aggregatedData: AggregatedToolData | null;
 
@@ -99,6 +101,9 @@ export interface Tool7State {
 
   // Track if data needs server sync
   isDirty: boolean;
+
+  // Track if currently syncing to server
+  isSyncing: boolean;
 
   // Completion tracking
   completion: Tool7CompletionData | null;
@@ -171,6 +176,10 @@ export interface Tool7State {
   // Set server session ID
   setSessionId: (id: string | null) => void;
 
+  // Session sync methods (implements SessionSyncStore)
+  syncToServer: () => Promise<void>;
+  loadFromServer: (sessionId: string) => Promise<boolean>;
+
   // Mark tool as complete
   markComplete: (totalCost: number, toolsIncluded: number) => void;
 
@@ -225,6 +234,7 @@ export const useTool7Store = create<Tool7State>()(
       calculationResults: null,
       sessionId: null,
       isDirty: false,
+      isSyncing: false,
       completion: null,
 
       // ============================================================================
@@ -242,6 +252,11 @@ export const useTool7Store = create<Tool7State>()(
           // Clear previous calculation results when re-aggregating
           calculationResults: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       setAggregationStatus: (status) => {
@@ -284,6 +299,12 @@ export const useTool7Store = create<Tool7State>()(
           calculationResults: null,
         }));
 
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+
         return id;
       },
 
@@ -296,6 +317,11 @@ export const useTool7Store = create<Tool7State>()(
           completion: null,
           calculationResults: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       removeAdditionalCost: (id) => {
@@ -305,6 +331,11 @@ export const useTool7Store = create<Tool7State>()(
           completion: null,
           calculationResults: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       clearAdditionalCosts: () => {
@@ -314,6 +345,11 @@ export const useTool7Store = create<Tool7State>()(
           completion: null,
           calculationResults: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // ============================================================================
@@ -338,6 +374,11 @@ export const useTool7Store = create<Tool7State>()(
             calculationResults: null,
           };
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       updateReworkCost: (data) => {
@@ -358,6 +399,11 @@ export const useTool7Store = create<Tool7State>()(
             calculationResults: null,
           };
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       updateTurnoverCost: (data) => {
@@ -378,6 +424,11 @@ export const useTool7Store = create<Tool7State>()(
             calculationResults: null,
           };
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       updateOpportunityCost: (data) => {
@@ -398,6 +449,11 @@ export const useTool7Store = create<Tool7State>()(
             calculationResults: null,
           };
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       setRevenue: (revenue) => {
@@ -407,6 +463,11 @@ export const useTool7Store = create<Tool7State>()(
           completion: null,
           calculationResults: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       resetAdditionalCostsInput: () => {
@@ -417,6 +478,11 @@ export const useTool7Store = create<Tool7State>()(
           completion: null,
           calculationResults: null,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // ============================================================================
@@ -428,6 +494,11 @@ export const useTool7Store = create<Tool7State>()(
           calculationResults: results,
           isDirty: true,
         });
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // ============================================================================
@@ -447,6 +518,94 @@ export const useTool7Store = create<Tool7State>()(
           },
           isDirty: true,
         });
+        // Auto-sync completion to server
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+      },
+
+      /**
+       * Sync current state to server session
+       */
+      syncToServer: async () => {
+        const state = get();
+        if (!state.sessionId || state.isSyncing) return;
+
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${state.sessionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                tool7: {
+                  aggregatedData: state.aggregatedData,
+                  additionalCostsInput: state.additionalCostsInput,
+                  revenue: state.revenue,
+                  calculationResults: state.calculationResults,
+                  completedAt: state.completion?.completedAt,
+                },
+              },
+            }),
+          });
+
+          if (response.ok) {
+            set({ isDirty: false });
+          }
+        } catch (error) {
+          console.error('[tool7-store] Failed to sync to server:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+
+      /**
+       * Load session data from server
+       */
+      loadFromServer: async (sessionId: string) => {
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${sessionId}`);
+          const data = await response.json();
+
+          if (data.success && data.data?.session) {
+            const session = data.data.session;
+            const tool7Data = session.data?.tool7;
+
+            if (tool7Data) {
+              set({
+                sessionId,
+                aggregatedData: tool7Data.aggregatedData || null,
+                additionalCostsInput: tool7Data.additionalCostsInput || createDefaultAdditionalCostsInput(),
+                revenue: tool7Data.revenue || 0,
+                calculationResults: tool7Data.calculationResults || null,
+                completion: tool7Data.completedAt
+                  ? {
+                      completedAt: tool7Data.completedAt,
+                      totalCost: tool7Data.calculationResults?.totalAnnualCost || 0,
+                      toolsIncluded: tool7Data.aggregatedData?.completedToolsCount || 0,
+                    }
+                  : null,
+                isDirty: false,
+              });
+              return true;
+            }
+
+            // Session exists but no tool7 data
+            set({ sessionId, isDirty: false });
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error('[tool7-store] Failed to load from server:', error);
+          return false;
+        } finally {
+          set({ isSyncing: false });
+        }
       },
 
       resetTool7: () => {
@@ -459,6 +618,7 @@ export const useTool7Store = create<Tool7State>()(
           revenue: 0,
           calculationResults: null,
           isDirty: false,
+          isSyncing: false,
           completion: null,
         });
       },

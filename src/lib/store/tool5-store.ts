@@ -24,6 +24,7 @@ import {
   calculateCostByCategory,
   calculateCostBreakdown,
 } from '@/components/tools/data-flow/cost-constants';
+import type { SessionSyncStore } from '@/components/session';
 
 /**
  * Tool 5 Data Flow Friction Analysis Store
@@ -32,6 +33,7 @@ import {
  * Uses sessionStorage for persistence (clears on tab close).
  *
  * Story 12.1: Data Journey Mapping Interface
+ * C3-S6: Server sync for session persistence
  * Covers: AC1-AC5 (journey CRUD, stages, templates)
  *
  * Story 12.2: Friction Point Identification
@@ -48,7 +50,7 @@ export interface Tool5CompletionData {
   totalLatencyHours: number;
 }
 
-export interface Tool5State {
+export interface Tool5State extends SessionSyncStore {
   // Journey list
   journeys: DataJourney[];
   // Currently selected journey for editing
@@ -57,6 +59,8 @@ export interface Tool5State {
   sessionId: string | null;
   // Track if data needs server sync
   isDirty: boolean;
+  // Track if currently syncing to server
+  isSyncing: boolean;
   // Completion tracking
   completion: Tool5CompletionData | null;
   // Friction points for all journeys (with optional cost data)
@@ -88,6 +92,10 @@ export interface Tool5State {
   // Session
   setSessionId: (id: string | null) => void;
 
+  // Session sync methods (implements SessionSyncStore)
+  syncToServer: () => Promise<void>;
+  loadFromServer: (sessionId: string) => Promise<boolean>;
+
   // Completion
   markComplete: () => void;
   resetTool5: () => void;
@@ -116,6 +124,7 @@ export const useTool5Store = create<Tool5State>()(
       activeJourneyId: null,
       sessionId: null,
       isDirty: false,
+      isSyncing: false,
       completion: null,
       frictionPoints: [],
 
@@ -144,6 +153,12 @@ export const useTool5Store = create<Tool5State>()(
           completion: null,
         }));
 
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+
         return id;
       },
 
@@ -158,6 +173,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Remove a journey (also removes associated friction points)
@@ -170,6 +190,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Set the active journey for editing
@@ -195,6 +220,12 @@ export const useTool5Store = create<Tool5State>()(
           completion: null,
         }));
 
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+
         return stageId;
       },
 
@@ -215,6 +246,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Remove a stage (also removes associated friction points)
@@ -233,6 +269,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Reorder stages within a journey
@@ -258,6 +299,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Add a friction point
@@ -279,6 +325,12 @@ export const useTool5Store = create<Tool5State>()(
           completion: null,
         }));
 
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+
         return id;
       },
 
@@ -293,6 +345,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Remove a friction point
@@ -302,6 +359,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Update cost data for a friction point
@@ -315,6 +377,11 @@ export const useTool5Store = create<Tool5State>()(
           isDirty: true,
           completion: null,
         }));
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
       },
 
       // Apply a template to create a new journey
@@ -346,6 +413,12 @@ export const useTool5Store = create<Tool5State>()(
           completion: null,
         }));
 
+        // Auto-sync if we have a session ID
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+
         return id;
       },
 
@@ -372,6 +445,98 @@ export const useTool5Store = create<Tool5State>()(
           },
           isDirty: true,
         });
+        // Auto-sync completion to server
+        const state = get();
+        if (state.sessionId) {
+          state.syncToServer();
+        }
+      },
+
+      /**
+       * Sync current state to server session
+       */
+      syncToServer: async () => {
+        const state = get();
+        if (!state.sessionId || state.isSyncing) return;
+
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${state.sessionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                tool5: {
+                  journeys: state.journeys,
+                  frictionCost: state.frictionPoints,
+                  totalFrictionCost: calculateEnterpriseTotalCost(state.frictionPoints),
+                  completedAt: state.completion?.completedAt,
+                },
+              },
+            }),
+          });
+
+          if (response.ok) {
+            set({ isDirty: false });
+          }
+        } catch (error) {
+          console.error('[tool5-store] Failed to sync to server:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+
+      /**
+       * Load session data from server
+       */
+      loadFromServer: async (sessionId: string) => {
+        set({ isSyncing: true });
+
+        try {
+          const response = await fetch(`/api/sessions/${sessionId}`);
+          const data = await response.json();
+
+          if (data.success && data.data?.session) {
+            const session = data.data.session;
+            const tool5Data = session.data?.tool5;
+
+            if (tool5Data) {
+              set({
+                sessionId,
+                journeys: tool5Data.journeys || [],
+                frictionPoints: tool5Data.frictionCost || [],
+                completion: tool5Data.completedAt
+                  ? {
+                      completedAt: tool5Data.completedAt,
+                      journeyCount: tool5Data.journeys?.length || 0,
+                      totalStages: (tool5Data.journeys || []).reduce(
+                        (sum: number, j: DataJourney) => sum + j.stages.length,
+                        0
+                      ),
+                      totalLatencyHours: (tool5Data.journeys || []).reduce(
+                        (sum: number, j: DataJourney) => sum + calculateTotalLatency(j.stages),
+                        0
+                      ),
+                    }
+                  : null,
+                isDirty: false,
+              });
+              return true;
+            }
+
+            // Session exists but no tool5 data
+            set({ sessionId, isDirty: false });
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error('[tool5-store] Failed to load from server:', error);
+          return false;
+        } finally {
+          set({ isSyncing: false });
+        }
       },
 
       // Reset all Tool 5 data
@@ -381,6 +546,7 @@ export const useTool5Store = create<Tool5State>()(
           activeJourneyId: null,
           frictionPoints: [],
           isDirty: false,
+          isSyncing: false,
           completion: null,
         });
       },
