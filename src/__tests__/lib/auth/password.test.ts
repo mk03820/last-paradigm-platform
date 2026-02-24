@@ -6,7 +6,10 @@
  * Covers: Story 15.2 Task 1
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock server-only to allow importing password module in tests
+vi.mock('server-only', () => ({}));
 import {
   hashPassword,
   verifyPassword,
