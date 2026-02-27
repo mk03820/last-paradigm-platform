@@ -29,13 +29,23 @@ const loginSchema = z.object({
 /**
  * Rate limiter for admin login - stricter than user login
  * 5 attempts per 15 minutes per IP
+ *
+ * Lazy-initialized to avoid errors during Next.js build when
+ * environment variables may not be available.
  */
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, '15 m'),
-  analytics: true,
-  prefix: 'admin_login',
-});
+let _ratelimit: Ratelimit | null = null;
+
+function getRatelimit(): Ratelimit {
+  if (!_ratelimit) {
+    _ratelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(5, '15 m'),
+      analytics: true,
+      prefix: 'admin_login',
+    });
+  }
+  return _ratelimit;
+}
 
 /**
  * POST /api/admin/auth/login
@@ -46,7 +56,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const { success: rateLimitSuccess } = await ratelimit.limit(ip);
+    const { success: rateLimitSuccess } = await getRatelimit().limit(ip);
 
     if (!rateLimitSuccess) {
       return NextResponse.json(

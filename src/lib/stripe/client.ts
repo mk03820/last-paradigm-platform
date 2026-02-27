@@ -12,29 +12,61 @@
 import Stripe from 'stripe';
 
 /**
- * Validate required environment variables at module load
+ * Lazy-initialized Stripe client singleton
+ *
+ * We use lazy initialization to avoid throwing errors during Next.js build
+ * when environment variables may not be available. The client is only
+ * instantiated when first accessed at runtime.
  */
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error(
-    'STRIPE_SECRET_KEY is not set. Add it to your .env.local file.'
-  );
-}
+let _stripe: Stripe | null = null;
 
-if (!process.env.STRIPE_PRICE_ID) {
-  throw new Error(
-    'STRIPE_PRICE_ID is not set. Add it to your .env.local file.'
-  );
+/**
+ * Get the Stripe client instance
+ *
+ * Validates environment variables and creates the client on first access.
+ * Throws at runtime if required env vars are missing.
+ */
+export function getStripe(): Stripe {
+  if (_stripe) {
+    return _stripe;
+  }
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error(
+      'STRIPE_SECRET_KEY is not set. Add it to your .env.local file.'
+    );
+  }
+
+  _stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2026-01-28.clover',
+    typescript: true,
+  });
+
+  return _stripe;
 }
 
 /**
- * Singleton Stripe client instance
+ * Stripe client instance (legacy export for backward compatibility)
  *
- * Uses the latest stable API version with TypeScript support enabled.
+ * @deprecated Use getStripe() instead for lazy initialization
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2026-01-28.clover',
-  typescript: true,
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return getStripe()[prop as keyof Stripe];
+  },
 });
+
+/**
+ * Get the Stripe Price ID with validation
+ */
+export function getStripePriceId(): string {
+  if (!process.env.STRIPE_PRICE_ID) {
+    throw new Error(
+      'STRIPE_PRICE_ID is not set. Add it to your .env.local file.'
+    );
+  }
+  return process.env.STRIPE_PRICE_ID;
+}
 
 /**
  * Stripe configuration constants
@@ -45,8 +77,11 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export const STRIPE_CONFIG = {
   /**
    * Stripe Price ID for Playbook 2 ($2,500 one-time payment)
+   * Use getStripePriceId() for runtime access with validation
    */
-  priceId: process.env.STRIPE_PRICE_ID!,
+  get priceId(): string {
+    return getStripePriceId();
+  },
 
   /**
    * Currency for all transactions
