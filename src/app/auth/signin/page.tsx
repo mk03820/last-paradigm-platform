@@ -27,8 +27,15 @@ interface SignInPageProps {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const session = await auth();
+  let session = null;
   const params = await searchParams;
+
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('[SignIn] Auth error:', error);
+    // Continue rendering the page even if auth fails
+  }
 
   // Redirect if already signed in
   if (session?.user) {
