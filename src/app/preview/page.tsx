@@ -51,7 +51,13 @@ export const metadata: Metadata = {
  */
 export default async function PreviewPage() {
   // Check authentication (AC8)
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('[Preview] Auth error:', error);
+    redirect('/auth/signin?callbackUrl=/preview');
+  }
 
   if (!session?.user?.id) {
     // Redirect to sign-in with callback URL
@@ -59,14 +65,19 @@ export default async function PreviewPage() {
   }
 
   // Fetch user's most recent diagnostic result
-  const results = await db
-    .select()
-    .from(diagnosticResults)
-    .where(eq(diagnosticResults.userId, session.user.id))
-    .orderBy(desc(diagnosticResults.completedAt))
-    .limit(1);
-
-  const diagnosticResult = results[0];
+  let diagnosticResult = null;
+  try {
+    const results = await db
+      .select()
+      .from(diagnosticResults)
+      .where(eq(diagnosticResults.userId, session.user.id))
+      .orderBy(desc(diagnosticResults.completedAt))
+      .limit(1);
+    diagnosticResult = results[0];
+  } catch (error) {
+    console.error('[Preview] Database error:', error);
+    // Show no diagnostic message if DB fails
+  }
 
   // Handle missing diagnostic data
   if (!diagnosticResult) {
