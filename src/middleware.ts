@@ -10,10 +10,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth/jwt';
 
-// Routes that require authentication
+// Routes that require authentication via middleware
+// Note: /preview and /dashboard handle their own auth via NextAuth
+// to avoid conflicts between Phase 3 JWT and NextAuth sessions
 const PROTECTED_ROUTES = [
-  '/dashboard',
-  '/preview',
   '/purchase',
 ];
 
