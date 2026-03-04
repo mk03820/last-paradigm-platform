@@ -14,6 +14,7 @@
 
 import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { eq } from 'drizzle-orm';
 import * as schema from '../src/lib/db/schema';
 import bcrypt from 'bcrypt';
 
@@ -193,7 +194,7 @@ async function seedToolkitDocuments() {
   const completedPurchases = await db
     .select({ id: schema.purchases.id, userId: schema.purchases.userId })
     .from(schema.purchases)
-    .where(sql`status = 'completed'`);
+    .where(eq(schema.purchases.status, 'completed'));
 
   const docTemplates = [
     { type: 'word' as const, name: 'Strategic Alignment Assessment Report' },
