@@ -3,9 +3,6 @@
  *
  * Hit GET /api/seed-reporting?key=seed2026 to populate.
  * DELETE THIS ROUTE after seeding — not for production use.
- *
- * Seeds: analytics events, toolkit docs, email sequences,
- * funnel users with temporal spread, and email preferences.
  */
 
 import { NextResponse } from 'next/server';
@@ -21,10 +18,9 @@ import {
   diagnosticResults,
 } from '@/lib/db/schema';
 import type { DiagnosticSessionData } from '@/lib/db/schema';
-import { sql, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
-// Simple auth gate — don't leave this route exposed
 const SEED_KEY = 'seed2026';
 
 function daysAgo(n: number): Date {
@@ -33,14 +29,6 @@ function daysAgo(n: number): Date {
 
 function rand(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/** Check if error is a duplicate/unique constraint violation (Drizzle wraps in .cause) */
-function isDuplicateError(e: unknown): boolean {
-  const msg = String(e);
-  const cause = (e as any)?.cause?.message || (e as any)?.cause?.toString() || '';
-  const full = `${msg} ${cause}`;
-  return /unique|duplicate|23505/i.test(full);
 }
 
 export async function GET(request: Request) {
@@ -52,7 +40,7 @@ export async function GET(request: Request) {
   const log: string[] = [];
 
   try {
-    // ── 1. Funnel Users ─────────────────────────────────────────────
+    // ── 1. Funnel Users (onConflictDoNothing handles dupes at SQL level) ──
     const funnelUsers = Array.from({ length: 20 }, (_, i) => ({
       id: `funnel-user-${String(i + 1).padStart(3, '0')}`,
       name: `Test User ${i + 1}`,
@@ -65,28 +53,25 @@ export async function GET(request: Request) {
 
     let usersCreated = 0;
     for (const u of funnelUsers) {
-      try {
-        const hash = await bcrypt.hash('Password123', 10);
-        await db.insert(users).values({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          emailVerified: daysAgo(u.createdDaysAgo),
-          passwordHash: hash,
-          hasPb2Access: u.reachedPurchase,
-          pb2PurchasedAt: u.reachedPurchase ? daysAgo(u.createdDaysAgo - 1) : null,
-          purchaseStatus: u.reachedPurchase ? 'completed' : 'none',
-          purchasedAt: u.reachedPurchase ? daysAgo(u.createdDaysAgo - 1) : null,
-          createdAt: daysAgo(u.createdDaysAgo),
-        });
-        usersCreated++;
-      } catch (e: unknown) {
-        if (!isDuplicateError(e)) throw e;
-      }
+      const hash = await bcrypt.hash('Password123', 10);
+      const result = await db.insert(users).values({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        emailVerified: daysAgo(u.createdDaysAgo),
+        passwordHash: hash,
+        hasPb2Access: u.reachedPurchase,
+        pb2PurchasedAt: u.reachedPurchase ? daysAgo(u.createdDaysAgo - 1) : null,
+        purchaseStatus: u.reachedPurchase ? 'completed' : 'none',
+        purchasedAt: u.reachedPurchase ? daysAgo(u.createdDaysAgo - 1) : null,
+        createdAt: daysAgo(u.createdDaysAgo),
+      }).onConflictDoNothing();
+      // rowCount > 0 means a row was actually inserted
+      if ((result as any)?.rowCount > 0) usersCreated++;
     }
-    log.push(`Users: ${usersCreated} created`);
+    log.push(`Users: ${usersCreated} created (20 attempted)`);
 
-    // ── 2. Analytics Events ────────────────────────────────────────
+    // ── 2. Analytics Events (no unique constraints, always inserts) ──────
     const events: Array<{
       eventName: string;
       eventData: Record<string, unknown>;
@@ -149,31 +134,27 @@ export async function GET(request: Request) {
     }
     log.push(`Analytics events: ${events.length} created`);
 
-    // ── 3. Purchases with temporal spread ──────────────────────────
+    // ── 3. Purchases with temporal spread ──────────────────────────────
     let purchasesCreated = 0;
     for (const u of funnelUsers.filter(x => x.reachedPurchase)) {
       const purchaseDate = daysAgo(Math.max(u.createdDaysAgo - 2, 0));
-      try {
-        await db.insert(purchases).values({
-          userId: u.id,
-          stripeSessionId: `cs_test_fnl_${u.id}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          stripePaymentIntentId: `pi_test_fnl_${u.id}`,
-          stripeCustomerId: `cus_test_fnl_${u.id}`,
-          amount: 250000,
-          currency: 'usd',
-          status: 'completed',
-          metadata: { source: 'seed_reporting' },
-          createdAt: purchaseDate,
-          completedAt: purchaseDate,
-        });
-        purchasesCreated++;
-      } catch (e: unknown) {
-        if (!isDuplicateError(e)) throw e;
-      }
+      const result = await db.insert(purchases).values({
+        userId: u.id,
+        stripeSessionId: `cs_test_fnl_${u.id}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        stripePaymentIntentId: `pi_test_fnl_${u.id}`,
+        stripeCustomerId: `cus_test_fnl_${u.id}`,
+        amount: 250000,
+        currency: 'usd',
+        status: 'completed',
+        metadata: { source: 'seed_reporting' },
+        createdAt: purchaseDate,
+        completedAt: purchaseDate,
+      }).onConflictDoNothing();
+      if ((result as any)?.rowCount > 0) purchasesCreated++;
     }
     log.push(`Purchases: ${purchasesCreated} created`);
 
-    // ── 4. Toolkit Documents ───────────────────────────────────────
+    // ── 4. Toolkit Documents ───────────────────────────────────────────
     const allPurchases = await db
       .select({ id: purchases.id, userId: purchases.userId })
       .from(purchases)
@@ -196,25 +177,23 @@ export async function GET(request: Request) {
     for (const p of allPurchases) {
       for (const doc of docTemplates.slice(0, rand(5, 10))) {
         const isComplete = Math.random() < 0.8;
-        try {
-          await db.insert(toolkitDocuments).values({
-            purchaseId: p.id,
-            userId: p.userId,
-            documentType: doc.type,
-            documentName: doc.name,
-            status: isComplete ? 'completed' : (Math.random() < 0.5 ? 'generating' : 'pending'),
-            s3Key: isComplete ? `toolkits/${p.userId}/${doc.name.toLowerCase().replace(/\s+/g, '-')}` : null,
-            fileSizeBytes: isComplete ? rand(50000, 500000) : null,
-            attempts: isComplete ? 1 : 0,
-            generatedAt: isComplete ? daysAgo(rand(0, 5)) : null,
-          });
-          docsCreated++;
-        } catch { /* skip dups */ }
+        await db.insert(toolkitDocuments).values({
+          purchaseId: p.id,
+          userId: p.userId,
+          documentType: doc.type,
+          documentName: doc.name,
+          status: isComplete ? 'completed' : (Math.random() < 0.5 ? 'generating' : 'pending'),
+          s3Key: isComplete ? `toolkits/${p.userId}/${doc.name.toLowerCase().replace(/\s+/g, '-')}` : null,
+          fileSizeBytes: isComplete ? rand(50000, 500000) : null,
+          attempts: isComplete ? 1 : 0,
+          generatedAt: isComplete ? daysAgo(rand(0, 5)) : null,
+        }).onConflictDoNothing();
+        docsCreated++;
       }
     }
     log.push(`Toolkit docs: ${docsCreated} created across ${allPurchases.length} purchases`);
 
-    // ── 5. Email Sequences & Nurture Emails ────────────────────────
+    // ── 5. Email Sequences & Nurture Emails ────────────────────────────
     const purchasedUserIds = [
       ...funnelUsers.filter(u => u.reachedPurchase).map(u => u.id),
       'user-001',
@@ -232,49 +211,47 @@ export async function GET(request: Request) {
     ];
 
     for (const userId of purchasedUserIds) {
-      try {
-        const seqId = crypto.randomUUID();
-        const startDate = daysAgo(rand(1, 14));
-        const currentStep = rand(1, 5);
+      const seqId = crypto.randomUUID();
+      const startDate = daysAgo(rand(1, 14));
+      const currentStep = rand(1, 5);
 
-        await db.insert(emailSequences).values({
-          id: seqId,
+      await db.insert(emailSequences).values({
+        id: seqId,
+        userId,
+        sequenceType: 'post_purchase',
+        currentStep,
+        totalSteps: 5,
+        status: currentStep >= 5 ? 'completed' : 'active',
+        lastSentAt: daysAgo(rand(0, 3)),
+        nextSendAt: currentStep < 5 ? daysAgo(-rand(1, 4)) : null,
+        completedAt: currentStep >= 5 ? new Date() : null,
+        createdAt: startDate,
+      }).onConflictDoNothing();
+      seqCount++;
+
+      for (let step = 0; step < currentStep; step++) {
+        const sentDate = new Date(startDate.getTime() + emailDays[step] * 86400000);
+        const opened = Math.random() < 0.6;
+        const clicked = opened && Math.random() < 0.3;
+
+        await db.insert(nurtureEmails).values({
+          sequenceId: seqId,
           userId,
-          sequenceType: 'post_purchase',
-          currentStep,
-          totalSteps: 5,
-          status: currentStep >= 5 ? 'completed' : 'active',
-          lastSentAt: daysAgo(rand(0, 3)),
-          nextSendAt: currentStep < 5 ? daysAgo(-rand(1, 4)) : null,
-          completedAt: currentStep >= 5 ? new Date() : null,
-          createdAt: startDate,
-        });
-        seqCount++;
-
-        for (let step = 0; step < currentStep; step++) {
-          const sentDate = new Date(startDate.getTime() + emailDays[step] * 86400000);
-          const opened = Math.random() < 0.6;
-          const clicked = opened && Math.random() < 0.3;
-
-          await db.insert(nurtureEmails).values({
-            sequenceId: seqId,
-            userId,
-            emailDay: emailDays[step],
-            subject: subjects[step],
-            sentAt: sentDate,
-            deliveredAt: sentDate,
-            openedAt: opened ? new Date(sentDate.getTime() + rand(1, 48) * 3600000) : null,
-            clickedAt: clicked ? new Date(sentDate.getTime() + rand(2, 72) * 3600000) : null,
-            status: clicked ? 'clicked' : opened ? 'opened' : 'delivered',
-            resendMessageId: `msg_test_${userId}_${step}`,
-          });
-          emailCount++;
-        }
-      } catch { /* skip dups */ }
+          emailDay: emailDays[step],
+          subject: subjects[step],
+          sentAt: sentDate,
+          deliveredAt: sentDate,
+          openedAt: opened ? new Date(sentDate.getTime() + rand(1, 48) * 3600000) : null,
+          clickedAt: clicked ? new Date(sentDate.getTime() + rand(2, 72) * 3600000) : null,
+          status: clicked ? 'clicked' : opened ? 'opened' : 'delivered',
+          resendMessageId: `msg_test_${userId}_${step}`,
+        }).onConflictDoNothing();
+        emailCount++;
+      }
     }
     log.push(`Email sequences: ${seqCount}, nurture emails: ${emailCount}`);
 
-    // ── 6. Email Preferences ───────────────────────────────────────
+    // ── 6. Email Preferences ───────────────────────────────────────────
     const allUserEmails = [
       ...funnelUsers.map(u => ({ id: u.id, email: u.email })),
       { id: 'user-001', email: 'john@example.com' },
@@ -285,81 +262,77 @@ export async function GET(request: Request) {
 
     let prefsCreated = 0;
     for (const u of allUserEmails) {
-      try {
-        await db.insert(emailPreferences).values({
-          email: u.email,
-          userId: u.id,
-          unsubscribeToken: `unsub_${crypto.randomUUID()}`,
-          marketingOptOut: Math.random() < 0.1,
-          nurturOptOut: Math.random() < 0.05,
-          transactionalOnly: false,
-        });
-        prefsCreated++;
-      } catch { /* skip dups */ }
+      await db.insert(emailPreferences).values({
+        email: u.email,
+        userId: u.id,
+        unsubscribeToken: `unsub_${crypto.randomUUID()}`,
+        marketingOptOut: Math.random() < 0.1,
+        nurturOptOut: Math.random() < 0.05,
+        transactionalOnly: false,
+      }).onConflictDoNothing();
+      prefsCreated++;
     }
-    log.push(`Email preferences: ${prefsCreated}`);
+    log.push(`Email preferences: ${prefsCreated} attempted`);
 
-    // ── 7. Diagnostic Results for purchasers ───────────────────────
+    // ── 7. Diagnostic Results for purchasers ───────────────────────────
     let resultsCreated = 0;
     for (const u of funnelUsers.filter(x => x.reachedPurchase)) {
-      try {
-        const totalCost = rand(150000, 600000);
-        const data: DiagnosticSessionData = {
-          tool1: {
-            scores: { strategic: rand(60, 95), execution: rand(50, 90), technology: rand(55, 95), people: rand(45, 85), governance: rand(50, 90) },
-            dimensions: { strategic: rand(60, 90), structural: rand(55, 85), processAlignment: rand(50, 80), cultural: rand(45, 75), technological: rand(60, 90) },
-            compositeScore: rand(55, 85),
-            interpretation: 'moderate',
-            completedAt: new Date().toISOString(),
-          },
-          tool2: {
-            inputs: { meetingCount: rand(20, 70), averageAttendees: rand(4, 9), averageDuration: rand(30, 60), salaryDistribution: { executive: 15, senior: 25, midLevel: 40, entry: 20 } },
-            results: { totalMeetingHours: rand(200, 800), totalMeetingCost: rand(30000, 120000), wastedHours: rand(60, 300), wastedCost: rand(9000, 45000), effectiveHours: rand(140, 500), effectiveCost: rand(21000, 75000), totalMeetings: rand(20, 70), avgAttendees: rand(4, 9), inefficiencyPercent: rand(20, 50), avgDuration: rand(30, 60) },
-            completedAt: new Date().toISOString(),
-          },
-          tool3: {
-            decisions: [{ name: 'Budget Approval', daysToDecide: 14, complexity: 'high' }],
-            overallVelocityScore: rand(40, 80),
-            archetypes: { strategic: { median: 21, p90: 45, samples: 5 }, operational: { median: 7, p90: 14, samples: 12 } },
-            bottlenecks: [{ pattern: 'Executive Bottleneck', severity: 'high', description: 'Decisions stall at exec level' }],
-            completedAt: new Date().toISOString(),
-          },
-          tool4: {
-            stakeholders: [{ name: 'CEO', role: 'Sponsor', power: 95, interest: 80, sentiment: 'supportive', quadrant: 'manage_closely' }],
-            quadrantSummary: { manageClosely: 3, keepSatisfied: 1, keepInformed: 1, monitor: 0 },
-            riskCount: 1,
-            completedAt: new Date().toISOString(),
-          },
-          tool5: {
-            journeys: [{ name: 'Customer Onboarding', frictionScore: 7, bottlenecks: 3 }],
-            totalFrictionCost: rand(50000, 150000),
-            frictionByCategory: { manual_handoffs: 35, system_integrations: 25, approval_delays: 20, data_quality: 20 },
-            completedAt: new Date().toISOString(),
-          },
-          tool6: {
-            metrics: { email: { volume: 250, avgResponseTime: 4.5 }, chat: { volume: 150, avgResponseTime: 0.5 } },
-            antiPatterns: [{ pattern: 'Email Overload', severity: 'high', recommendation: 'Implement chat-first policy' }],
-            healthScore: rand(50, 80),
-            completedAt: new Date().toISOString(),
-          },
-          tool7: {
-            totalCost,
-            alignmentTaxPercent: rand(5, 20),
-            interpretation: totalCost > 400000 ? 'critical' : 'significant',
-            costBreakdown: { meetingWaste: rand(20000, 80000), decisionDelay: rand(25000, 75000), communicationOverhead: rand(20000, 60000), frictionCost: rand(40000, 120000), projectDelays: rand(50000, 150000), rework: rand(30000, 90000), turnover: rand(60000, 180000), opportunityCost: rand(75000, 225000) },
-            roiProjection: { conservative: totalCost * 0.3, moderate: totalCost * 0.5, aggressive: totalCost * 0.7, paybackMonths: 8 },
-            completedAt: new Date().toISOString(),
-          },
-        };
+      const totalCost = rand(150000, 600000);
+      const data: DiagnosticSessionData = {
+        tool1: {
+          scores: { strategic: rand(60, 95), execution: rand(50, 90), technology: rand(55, 95), people: rand(45, 85), governance: rand(50, 90) },
+          dimensions: { strategic: rand(60, 90), structural: rand(55, 85), processAlignment: rand(50, 80), cultural: rand(45, 75), technological: rand(60, 90) },
+          compositeScore: rand(55, 85),
+          interpretation: 'moderate',
+          completedAt: new Date().toISOString(),
+        },
+        tool2: {
+          inputs: { meetingCount: rand(20, 70), averageAttendees: rand(4, 9), averageDuration: rand(30, 60), salaryDistribution: { executive: 15, senior: 25, midLevel: 40, entry: 20 } },
+          results: { totalMeetingHours: rand(200, 800), totalMeetingCost: rand(30000, 120000), wastedHours: rand(60, 300), wastedCost: rand(9000, 45000), effectiveHours: rand(140, 500), effectiveCost: rand(21000, 75000), totalMeetings: rand(20, 70), avgAttendees: rand(4, 9), inefficiencyPercent: rand(20, 50), avgDuration: rand(30, 60) },
+          completedAt: new Date().toISOString(),
+        },
+        tool3: {
+          decisions: [{ name: 'Budget Approval', daysToDecide: 14, complexity: 'high' }],
+          overallVelocityScore: rand(40, 80),
+          archetypes: { strategic: { median: 21, p90: 45, samples: 5 }, operational: { median: 7, p90: 14, samples: 12 } },
+          bottlenecks: [{ pattern: 'Executive Bottleneck', severity: 'high', description: 'Decisions stall at exec level' }],
+          completedAt: new Date().toISOString(),
+        },
+        tool4: {
+          stakeholders: [{ name: 'CEO', role: 'Sponsor', power: 95, interest: 80, sentiment: 'supportive', quadrant: 'manage_closely' }],
+          quadrantSummary: { manageClosely: 3, keepSatisfied: 1, keepInformed: 1, monitor: 0 },
+          riskCount: 1,
+          completedAt: new Date().toISOString(),
+        },
+        tool5: {
+          journeys: [{ name: 'Customer Onboarding', frictionScore: 7, bottlenecks: 3 }],
+          totalFrictionCost: rand(50000, 150000),
+          frictionByCategory: { manual_handoffs: 35, system_integrations: 25, approval_delays: 20, data_quality: 20 },
+          completedAt: new Date().toISOString(),
+        },
+        tool6: {
+          metrics: { email: { volume: 250, avgResponseTime: 4.5 }, chat: { volume: 150, avgResponseTime: 0.5 } },
+          antiPatterns: [{ pattern: 'Email Overload', severity: 'high', recommendation: 'Implement chat-first policy' }],
+          healthScore: rand(50, 80),
+          completedAt: new Date().toISOString(),
+        },
+        tool7: {
+          totalCost,
+          alignmentTaxPercent: rand(5, 20),
+          interpretation: totalCost > 400000 ? 'critical' : 'significant',
+          costBreakdown: { meetingWaste: rand(20000, 80000), decisionDelay: rand(25000, 75000), communicationOverhead: rand(20000, 60000), frictionCost: rand(40000, 120000), projectDelays: rand(50000, 150000), rework: rand(30000, 90000), turnover: rand(60000, 180000), opportunityCost: rand(75000, 225000) },
+          roiProjection: { conservative: totalCost * 0.3, moderate: totalCost * 0.5, aggressive: totalCost * 0.7, paybackMonths: 8 },
+          completedAt: new Date().toISOString(),
+        },
+      };
 
-        await db.insert(diagnosticResults).values({
-          userId: u.id,
-          toolResults: data,
-          totalAlignmentTax: totalCost.toString(),
-          estimatedSavings: (totalCost * 0.5).toString(),
-        });
-        resultsCreated++;
-      } catch { /* skip dups */ }
+      await db.insert(diagnosticResults).values({
+        userId: u.id,
+        toolResults: data,
+        totalAlignmentTax: totalCost.toString(),
+        estimatedSavings: (totalCost * 0.5).toString(),
+      }).onConflictDoNothing();
+      resultsCreated++;
     }
     log.push(`Diagnostic results: ${resultsCreated}`);
 
@@ -370,9 +343,12 @@ export async function GET(request: Request) {
     });
 
   } catch (error: any) {
+    // Surface the full error chain for debugging
+    const causeMsg = error?.cause?.message || error?.cause?.toString() || 'no cause';
     return NextResponse.json({
       success: false,
       error: error.message,
+      cause: causeMsg,
       details: log,
     }, { status: 500 });
   }
