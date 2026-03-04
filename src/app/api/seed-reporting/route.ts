@@ -35,6 +35,14 @@ function rand(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/** Check if error is a duplicate/unique constraint violation (Drizzle wraps in .cause) */
+function isDuplicateError(e: unknown): boolean {
+  const msg = String(e);
+  const cause = (e as any)?.cause?.message || (e as any)?.cause?.toString() || '';
+  const full = `${msg} ${cause}`;
+  return /unique|duplicate|23505/i.test(full);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   if (searchParams.get('key') !== SEED_KEY) {
@@ -72,8 +80,8 @@ export async function GET(request: Request) {
           createdAt: daysAgo(u.createdDaysAgo),
         });
         usersCreated++;
-      } catch (e: any) {
-        if (!e.message?.includes('unique') && !e.message?.includes('duplicate')) throw e;
+      } catch (e: unknown) {
+        if (!isDuplicateError(e)) throw e;
       }
     }
     log.push(`Users: ${usersCreated} created`);
@@ -159,8 +167,8 @@ export async function GET(request: Request) {
           completedAt: purchaseDate,
         });
         purchasesCreated++;
-      } catch (e: any) {
-        if (!e.message?.includes('unique') && !e.message?.includes('duplicate')) throw e;
+      } catch (e: unknown) {
+        if (!isDuplicateError(e)) throw e;
       }
     }
     log.push(`Purchases: ${purchasesCreated} created`);
